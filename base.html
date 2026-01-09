@@ -4,21 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>{{ article.title if article else page_title if page_title else "Viral News" }}</title>
-  {% if article %}
-  <meta name="description" content="{{ article.meta_description }}">
-  <link rel="canonical" href="{{ article.canonical_url }}">
-  {% endif %}
+  <title>Viral News Alert – Breaking News Before Anyone Else</title>
+  <meta name="description" content="Viral News Alert delivers breaking news, world updates, celebrity stories, tech, finance, and trending headlines before anyone else.">
+  <link rel="canonical" href="https://viralnewsalert.com/">
 
   <!-- OpenGraph / Social -->
-  {% if article %}
-  <meta property="og:title" content="{{ article.title }}">
-  <meta property="og:description" content="{{ article.meta_description }}">
-  <meta property="og:image" content="{{ article.image_url }}">
-  <meta property="og:url" content="{{ article.canonical_url }}">
-  {% endif %}
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Viral News Alert – Breaking News Before Anyone Else">
+  <meta property="og:description" content="Get breaking and trending news faster than traditional media.">
+  <meta property="og:url" content="https://viralnewsalert.com/">
+  <meta property="og:image" content="https://viralnewsalert.com/images/social-preview.jpg">
 
-  <link rel="stylesheet" href="/static/css/style.css">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Viral News Alert – Breaking News Before Anyone Else">
+  <meta name="twitter:description" content="Get breaking and trending news faster than traditional media.">
+  <meta name="twitter:image" content="https://viralnewsalert.com/images/social-preview.jpg">
+
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header>
@@ -26,11 +28,11 @@
   </header>
 
   <main>
-    {% block content %}{% endblock %}
+    <!-- Static content goes here -->
   </main>
 
   <footer>
-    <p>&copy; {{ current_year if current_year else "2025" }} Viral News</p>
+    <p>&copy; 2026 Viral News</p>
   </footer>
 </body>
 </html>
