@@ -1,0 +1,27 @@
+@router.get("/sitemap.xml", include_in_schema=False)
+def sitemap(db: Session = Depends(get_db)):
+    service = ArticleService(db)
+
+    articles = service.get_all_published_articles(limit=50000)
+
+    urls = []
+    urls.append(("https://yourdomain.com/", datetime.utcnow().date()))
+
+    for a in articles:
+        urls.append((
+            f"https://yourdomain.com/news/{a.category}/{a.slug}",
+            a.published_at.date()
+        ))
+
+    xml = ["<?xml version='1.0' encoding='UTF-8'?>"]
+    xml.append("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>")
+
+    for loc, lastmod in urls:
+        xml.append("<url>")
+        xml.append(f"<loc>{loc}</loc>")
+        xml.append(f"<lastmod>{lastmod}</lastmod>")
+        xml.append("</url>")
+
+    xml.append("</urlset>")
+
+    return Response("\n".join(xml), media_type="application/xml")

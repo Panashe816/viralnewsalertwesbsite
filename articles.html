@@ -1,0 +1,29 @@
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": "{{ article.title | e }}",
+  "description": "{{ article.meta_description | e }}",
+  "image": [
+    "{{ article.image_url }}"
+  ],
+  "datePublished": "{{ article.published_at.isoformat() }}",
+  "dateModified": "{{ article.published_at.isoformat() }}",
+  "author": {
+    "@type": "Organization",
+    "name": "Viral News"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Viral News",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://yourdomain.com/static/images/logo.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ article.canonical_url }}"
+  }
+}
+</script>

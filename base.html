@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{{ article.title if article else page_title if page_title else "Viral News" }}</title>
+  {% if article %}
+  <meta name="description" content="{{ article.meta_description }}">
+  <link rel="canonical" href="{{ article.canonical_url }}">
+  {% endif %}
+
+  <!-- OpenGraph / Social -->
+  {% if article %}
+  <meta property="og:title" content="{{ article.title }}">
+  <meta property="og:description" content="{{ article.meta_description }}">
+  <meta property="og:image" content="{{ article.image_url }}">
+  <meta property="og:url" content="{{ article.canonical_url }}">
+  {% endif %}
+
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="/">Viral News</a></h1>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <p>&copy; {{ current_year if current_year else "2025" }} Viral News</p>
+  </footer>
+</body>
+</html>
