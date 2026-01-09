@@ -1,27 +1,36 @@
-@router.get("/sitemap.xml", include_in_schema=False)
-def sitemap(db: Session = Depends(get_db)):
-    service = ArticleService(db)
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-    articles = service.get_all_published_articles(limit=50000)
+  <!-- Homepage -->
+  <url>
+    <loc>https://viralnewsalert.com/</loc>
+    <lastmod>2026-01-09</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
 
-    urls = []
-    urls.append(("https://yourdomain.com/", datetime.utcnow().date()))
+  <!-- Articles page -->
+  <url>
+    <loc>https://viralnewsalert.com/articles.html</loc>
+    <lastmod>2026-01-09</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
 
-    for a in articles:
-        urls.append((
-            f"https://yourdomain.com/news/{a.category}/{a.slug}",
-            a.published_at.date()
-        ))
+  <!-- Categories page -->
+  <url>
+    <loc>https://viralnewsalert.com/categorie.html</loc>
+    <lastmod>2026-01-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
 
-    xml = ["<?xml version='1.0' encoding='UTF-8'?>"]
-    xml.append("<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>")
+  <!-- Add static URLs for top articles (example) -->
+  <url>
+    <loc>https://viralnewsalert.com/news/world/latest-news-example.html</loc>
+    <lastmod>2026-01-09</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
 
-    for loc, lastmod in urls:
-        xml.append("<url>")
-        xml.append(f"<loc>{loc}</loc>")
-        xml.append(f"<lastmod>{lastmod}</lastmod>")
-        xml.append("</url>")
-
-    xml.append("</urlset>")
-
-    return Response("\n".join(xml), media_type="application/xml")
+</urlset>
