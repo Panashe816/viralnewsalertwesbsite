@@ -1,27 +1,20 @@
-@router.get("/feed.xml", include_in_schema=False)
-def feed(db: Session = Depends(get_db)):
-    service = ArticleService(db)
-    articles = service.get_latest_articles(limit=100)
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Viral News Alert</title>
+    <link>https://viralnewsalert.com</link>
+    <description>Breaking and trending news delivered daily.</description>
+    <language>en</language>
 
-    xml = ["<?xml version='1.0' encoding='UTF-8'?>"]
-    xml.append("<rss version='2.0'>")
-    xml.append("<channel>")
-    xml.append("<title>Viral News</title>")
-    xml.append("<link>https://yourdomain.com</link>")
-    xml.append("<description>Breaking and trending news</description>")
-    xml.append("<language>en</language>")
+    <!-- Example article -->
+    <item>
+      <title>Breaking World News Example</title>
+      <link>https://viralnewsalert.com/news/world/latest-news-example.html</link>
+      <guid>https://viralnewsalert.com/news/world/latest-news-example.html</guid>
+      <pubDate>Fri, 09 Jan 2026 12:00:00 GMT</pubDate>
+      <description>Example meta description of the article goes here.</description>
+    </item>
 
-    for a in articles:
-        url = f"https://yourdomain.com/news/{a.category}/{a.slug}"
-        xml.append("<item>")
-        xml.append(f"<title><![CDATA[{a.title}]]></title>")
-        xml.append(f"<link>{url}</link>")
-        xml.append(f"<guid>{url}</guid>")
-        xml.append(f"<pubDate>{a.published_at.strftime('%a, %d %b %Y %H:%M:%S GMT')}</pubDate>")
-        xml.append(f"<description><![CDATA[{a.meta_description}]]></description>")
-        xml.append("</item>")
-
-    xml.append("</channel>")
-    xml.append("</rss>")
-
-    return Response("\n".join(xml), media_type="application/xml")
+    <!-- Add more <item> blocks for your top articles -->
+  </channel>
+</rss>
