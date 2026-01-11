@@ -4,49 +4,72 @@
   <meta charset="UTF-8">
   <title>Viral News – Latest News</title>
   <meta name="description" content="Latest breaking news from Viral News">
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    h2 { text-align: center; }
+    .headline-list {
+      max-width: 800px;
+      margin: 20px auto;
+      list-style: none;
+      padding: 0;
+    }
+    .headline-list li {
+      background: white;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .headline-list li:hover {
+      background: #eef;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
 </head>
 <body>
 
 <h2>Latest News</h2>
 
-<div id="articles-container">Loading articles...</div>
+<ul id="headlines" class="headline-list">
+  <li>Loading news...</li>
+</ul>
 
 <script>
-async function loadArticles() {
+async function loadHeadlines() {
+  const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
+  const headlinesContainer = document.getElementById("headlines");
+
   try {
-    const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
     const articles = await res.json();
-
-    const container = document.getElementById("articles-container");
-    container.innerHTML = "";
-
-    if (articles.length === 0) {
-      container.innerHTML = "<p>No articles yet.</p>";
-      return;
-    }
+    headlinesContainer.innerHTML = "";
 
     articles.forEach(article => {
-      const el = document.createElement("div");
-      el.className = "article-card";
-
-      el.innerHTML = `
-        <h3>${article.title}</h3>
-        <small>${article.category}</small>
-        <div>${article.content}</div>
-        <hr>
-      `;
-
-      container.appendChild(el);
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="article.html?id=${article.id}">${article.title}</a>`;
+      headlinesContainer.appendChild(li);
     });
+
+    if (articles.length === 0) {
+      headlinesContainer.innerHTML = "<li>No articles found.</li>";
+    }
+
   } catch (err) {
     console.error(err);
-    document.getElementById("articles-container").innerHTML =
-      "<p>Failed to load news.</p>";
+    headlinesContainer.innerHTML = "<li>Failed to load news.</li>";
   }
 }
 
-loadArticles();
+loadHeadlines();
 </script>
 
 </body>
