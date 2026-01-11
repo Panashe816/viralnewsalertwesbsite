@@ -1,16 +1,41 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Category – Viral News</title>
+</head>
+<body>
 
-{% block content %}
-<h2>{{ category }}</h2>
-<ul>
-  {% for article in articles %}
-  <li>
-    <a href="/news/{{ article.category }}/{{ article.slug }}">
-      <img src="{{ article.image_url }}" alt="{{ article.title }}" width="120">
-      <strong>{{ article.title }}</strong>
-    </a>
-    <p><small>{{ article.published_at }}</small></p>
-  </li>
-  {% endfor %}
-</ul>
-{% endblock %}
+<h2 id="category-title"></h2>
+
+<div id="category-articles"></div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const category = params.get("name");
+
+document.getElementById("category-title").innerText =
+  category.toUpperCase();
+
+async function loadCategory() {
+  const res = await fetch(
+    `https://viral-news-backend-3.onrender.com/articles/category/${category}`
+  );
+  const articles = await res.json();
+
+  const container = document.getElementById("category-articles");
+
+  articles.forEach(article => {
+    container.innerHTML += `
+      <h3>${article.title}</h3>
+      <a href="article.html?id=${article.id}">Read</a>
+      <hr>
+    `;
+  });
+}
+
+loadCategory();
+</script>
+
+</body>
+</html>
