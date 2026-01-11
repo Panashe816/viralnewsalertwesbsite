@@ -4,37 +4,46 @@
   <meta charset="UTF-8">
   <title>Viral News – Latest News</title>
   <meta name="description" content="Latest breaking news from Viral News">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <h2>Latest News</h2>
 
-<!-- 🔽 Articles will load here -->
-<div id="articles-container"></div>
+<div id="articles-container">Loading articles...</div>
 
 <script>
 async function loadArticles() {
-  const res = await fetch(
-    "https://viral-news-backend-3.onrender.com/articles/"
-  );
-  const articles = await res.json();
+  try {
+    const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
+    const articles = await res.json();
 
-  const container = document.getElementById("articles-container");
-  container.innerHTML = "";
+    const container = document.getElementById("articles-container");
+    container.innerHTML = "";
 
-  articles.forEach(article => {
-    const el = document.createElement("div");
-    el.className = "article-card";
+    if (articles.length === 0) {
+      container.innerHTML = "<p>No articles yet.</p>";
+      return;
+    }
 
-    el.innerHTML = `
-      <h3>${article.title}</h3>
-      <p>${article.content.slice(0, 180)}...</p>
-      <a href="article.html?id=${article.id}">Read more</a>
-      <hr>
-    `;
+    articles.forEach(article => {
+      const el = document.createElement("div");
+      el.className = "article-card";
 
-    container.appendChild(el);
-  });
+      el.innerHTML = `
+        <h3>${article.title}</h3>
+        <small>${article.category}</small>
+        <div>${article.content}</div>
+        <hr>
+      `;
+
+      container.appendChild(el);
+    });
+  } catch (err) {
+    console.error(err);
+    document.getElementById("articles-container").innerHTML =
+      "<p>Failed to load news.</p>";
+  }
 }
 
 loadArticles();
