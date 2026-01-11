@@ -1,71 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Viral News – Latest News</title>
-  <meta name="description" content="Latest breaking news from Viral News">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #f4f4f4;
-    }
-    h2 { text-align: center; }
-    .headline-list {
-      max-width: 800px;
-      margin: 20px auto;
-      list-style: none;
-      padding: 0;
-    }
-    .headline-list li {
-      background: white;
-      margin-bottom: 10px;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .headline-list li:hover {
-      background: #eef;
-    }
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>VIRAL NEWS</title>
+<meta name="description" content="Viral News – Latest headlines from all categories">
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f4f4f4;
+  }
+  h1 {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 30px;
+    color: #333;
+  }
+  h2.category-title {
+    margin-top: 40px;
+    color: #222;
+    font-size: 1.5em;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+  }
+  ul.headline-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 30px 0;
+  }
+  li.headline-item {
+    background: white;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  li.headline-item:hover {
+    background: #eef;
+  }
+  li.headline-item a {
+    text-decoration: none;
+    color: #000;
+    flex: 1;
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  li.headline-item img {
+    width: 100px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+</style>
 </head>
 <body>
 
-<h2>Latest News</h2>
+<h1>VIRAL NEWS</h1>
 
-<ul id="headlines" class="headline-list">
-  <li>Loading news...</li>
-</ul>
+<div id="news-container">
+  Loading headlines...
+</div>
 
 <script>
 async function loadHeadlines() {
-  const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
-  const headlinesContainer = document.getElementById("headlines");
+  const container = document.getElementById("news-container");
+  container.innerHTML = "";
 
   try {
+    const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
     const articles = await res.json();
-    headlinesContainer.innerHTML = "";
 
+    if (!articles || articles.length === 0) {
+      container.innerHTML = "<p>No articles found.</p>";
+      return;
+    }
+
+    // Group articles by category
+    const categories = {};
     articles.forEach(article => {
-      const li = document.createElement("li");
-      li.innerHTML = `<a href="article.html?id=${article.id}">${article.title}</a>`;
-      headlinesContainer.appendChild(li);
+      let title = article.title || "Untitled Article";
+      title = title.replace(/[\[\]\*\<\>\"\'\`]/g, ""); // Remove unwanted characters
+      title = title.trim();
+      if (!title) return; // skip empty titles
+      const category = article.category || "General";
+      if (!categories[category]) categories[category] = [];
+      categories[category].push({
+        id: article.id,
+        title,
+        thumbnail: article.thumbnail || "https://via.placeholder.com/100x60?text=No+Image"
+      });
     });
 
-    if (articles.length === 0) {
-      headlinesContainer.innerHTML = "<li>No articles found.</li>";
+    // Render categories
+    for (const [category, articlesList] of Object.entries(categories)) {
+      const catTitle = document.createElement("h2");
+      catTitle.className = "category-title";
+      catTitle.textContent = category;
+      container.appendChild(catTitle);
+
+      const ul = document.createElement("ul");
+      ul.className = "headline-list";
+
+      articlesList.forEach(a => {
+        const li = document.createElement("li");
+        li.className = "headline-item";
+        li.innerHTML = `
+          <a href="article.html?id=${a.id}">${a.title}</a>
+          <img src="${a.thumbnail}" alt="Thumbnail">
+        `;
+        ul.appendChild(li);
+      });
+
+      container.appendChild(ul);
     }
 
   } catch (err) {
     console.error(err);
-    headlinesContainer.innerHTML = "<li>Failed to load news.</li>";
+    container.innerHTML = "<p>Failed to load news.</p>";
   }
 }
 
