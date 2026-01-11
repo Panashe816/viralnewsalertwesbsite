@@ -1,29 +1,59 @@
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "NewsArticle",
-  "headline": "{{ article.title | e }}",
-  "description": "{{ article.meta_description | e }}",
-  "image": [
-    "{{ article.image_url }}"
-  ],
-  "datePublished": "{{ article.published_at.isoformat() }}",
-  "dateModified": "{{ article.published_at.isoformat() }}",
-  "author": {
-    "@type": "Organization",
-    "name": "Viral News"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "Viral News",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://yourdomain.com/static/images/logo.png"
-    }
-  },
-  "mainEntityOfPage": {
-    "@type": "WebPage",
-    "@id": "{{ article.canonical_url }}"
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Viral News</title>
+</head>
+<body>
+
+<div id="article"></div>
+
+<!-- SEO JSON-LD will be injected dynamically -->
+<script>
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+async function loadArticle() {
+  const res = await fetch(
+    `https://viral-news-backend-3.onrender.com/articles/${id}`
+  );
+  const article = await res.json();
+
+  document.title = article.title;
+
+  // Inject article
+  document.getElementById("article").innerHTML = `
+    <h1>${article.title}</h1>
+    <p><small>${article.published_at}</small></p>
+    <div>${article.content}</div>
+  `;
+
+  // 🔥 JSON-LD SEO
+  const ld = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": article.title,
+    "datePublished": article.published_at,
+    "dateModified": article.published_at,
+    "author": {
+      "@type": "Organization",
+      "name": "Viral News"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Viral News"
+    },
+    "mainEntityOfPage": window.location.href
+  };
+
+  const script = document.createElement("script");
+  script.type = "application/ld+json";
+  script.text = JSON.stringify(ld);
+  document.head.appendChild(script);
 }
+
+loadArticle();
 </script>
+
+</body>
+</html>
