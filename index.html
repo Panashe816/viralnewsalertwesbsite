@@ -1,16 +1,44 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Viral News – Latest News</title>
+  <meta name="description" content="Latest breaking news from Viral News">
+</head>
+<body>
 
-{% block content %}
 <h2>Latest News</h2>
-<ul>
-  {% for article in articles %}
-  <li>
-    <a href="/news/{{ article.category }}/{{ article.slug }}">
-      <img src="{{ article.image_url }}" alt="{{ article.title }}" width="150">
-      <strong>{{ article.title }}</strong>
-    </a>
-    <p><small>{{ article.published_at }}</small></p>
-  </li>
-  {% endfor %}
-</ul>
-{% endblock %}
+
+<!-- 🔽 Articles will load here -->
+<div id="articles-container"></div>
+
+<script>
+async function loadArticles() {
+  const res = await fetch(
+    "https://viral-news-backend-3.onrender.com/articles/"
+  );
+  const articles = await res.json();
+
+  const container = document.getElementById("articles-container");
+  container.innerHTML = "";
+
+  articles.forEach(article => {
+    const el = document.createElement("div");
+    el.className = "article-card";
+
+    el.innerHTML = `
+      <h3>${article.title}</h3>
+      <p>${article.content.slice(0, 180)}...</p>
+      <a href="article.html?id=${article.id}">Read more</a>
+      <hr>
+    `;
+
+    container.appendChild(el);
+  });
+}
+
+loadArticles();
+</script>
+
+</body>
+</html>
