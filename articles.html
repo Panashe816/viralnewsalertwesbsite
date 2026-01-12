@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Most Read Stories</title>
+<title>Article</title>
 
 <style>
 body {
@@ -13,9 +13,23 @@ body {
   line-height: 1.7;
   background: #f4f4f4;
 }
+img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 15px 0;
+}
 h1 {
-  text-align: center;
-  margin-bottom: 30px;
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+#most-read {
+  margin-top: 50px;
+}
+#most-read h2 {
+  font-size: 22px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 6px;
 }
 ul.headline-list {
   list-style: none;
@@ -38,22 +52,31 @@ li.headline-item a {
 
 <body>
 
-<h1>Most Read Stories</h1>
-<ul id="headline-feed" class="headline-list"></ul>
-<div id="loading" style="text-align:center; margin:20px;">Loading…</div>
+<div id="article">Loading article…</div>
+
+<div id="most-read">
+  <h2>Most Read Stories</h2>
+  <ul id="most-read-list" class="headline-list"></ul>
+  <div id="loading" style="text-align:center; margin:20px;">Loading…</div>
+</div>
 
 <script>
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+const articleContainer = document.getElementById("article");
+const mostReadList = document.getElementById("most-read-list");
+const loading = document.getElementById("loading");
+
 let allArticles = [];
 let displayedCount = 0;
-const batchSize = 5; // how many headlines load per scroll
-const feed = document.getElementById('headline-feed');
-const loading = document.getElementById('loading');
+const batchSize = 5;
 
-async function fetchAllArticles() {
+// Fetch all articles for "Most Read Stories"
+async function fetchMostRead() {
   try {
     const res = await fetch('https://viral-news-backend-3.onrender.com/articles/');
     allArticles = await res.json();
-    loadMoreHeadlines(); // initial load
+    loadMoreHeadlines();
   } catch (e) {
     loading.innerText = "Failed to load headlines.";
     console.error(e);
@@ -68,25 +91,51 @@ function loadMoreHeadlines() {
 
   const slice = allArticles.slice(displayedCount, displayedCount + batchSize);
   slice.forEach(a => {
-    if (!a.title) return;
+    if (!a.title || a.id == id) return; // skip the current article
     const li = document.createElement('li');
     li.className = 'headline-item';
     li.innerHTML = `<a href="?id=${a.id}">${a.title}</a>`;
-    feed.appendChild(li);
+    mostReadList.appendChild(li);
   });
 
   displayedCount += batchSize;
 }
 
-// Infinite scroll
-window.addEventListener('scroll', () => {
-  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 10) {
+// Infinite scroll for Most Read block
+document.addEventListener('scroll', () => {
+  const rect = mostReadList.getBoundingClientRect();
+  if (rect.bottom <= window.innerHeight + 50) {
     loadMoreHeadlines();
   }
 });
 
-// Initial fetch
-fetchAllArticles();
+// Load main article
+if (!id) {
+  articleContainer.innerHTML = "Article not found.";
+} else {
+  fetch(`https://viral-news-backend-3.onrender.com/articles/${id}`)
+    .then(res => res.json())
+    .then(a => {
+      if (!a || !a.title) {
+        articleContainer.innerHTML = "Article not found.";
+        return;
+      }
+
+      document.title = a.title;
+
+      articleContainer.innerHTML = `
+        <h1>${a.title}</h1>
+        ${a.image_url ? `<img src="${a.image_url}" style="width:100%;border-radius:10px;">` : ""}
+        ${a.content}
+      `;
+
+      // After main article is loaded, fetch Most Read
+      fetchMostRead();
+    })
+    .catch(() => {
+      articleContainer.innerHTML = "Failed to load article.";
+    });
+}
 </script>
 
 </body>
