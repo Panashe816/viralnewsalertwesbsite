@@ -4,114 +4,116 @@
 <meta charset="UTF-8">
 <title>VIRAL NEWS</title>
 <meta name="description" content="Viral News – Latest headlines from all categories">
-<link rel="icon" href="https://viralnewsalert.com/favicon.ico" type="image/x-icon">
+<link rel="icon" href="https://viralnewsalert.com/favicon.ico">
 
 <style>
-/* Reset & base styles */
+/* ===== BASE ===== */
 body, html {
   margin: 0;
   padding: 0;
-  font-family: 'Arial', sans-serif;
-  background: #f4f4f4;
-  color: #222;
+  font-family: Arial, sans-serif;
+  background: #1e1e1e;
+  color: #ffffff;
 }
 
-/* Header */
+/* ===== HEADER ===== */
 header {
   position: relative;
-  background: linear-gradient(135deg, #ff416c, #ff4b2b);
-  color: white;
-  padding: 40px 20px;
+  background: #0a1a33; /* navy blue */
+  padding: 25px 20px;
   text-align: center;
-  font-size: 2.8em;
+  font-size: 2.4em;
   font-weight: bold;
-  letter-spacing: 2px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  letter-spacing: 1.5px;
+  border-bottom: 1px solid #333;
 }
 
-/* 3-dot menu */
-.menu {
+/* ===== HAMBURGER MENU ===== */
+.menu-btn {
   position: absolute;
   top: 20px;
   left: 20px;
+  font-size: 28px;
   cursor: pointer;
-  font-size: 2em;
   user-select: none;
 }
-.menu:hover {
-  color: #ddd;
-}
 
-/* Dropdown categories */
+/* ===== MENU DROPDOWN ===== */
 .menu-dropdown {
   display: none;
   position: absolute;
-  top: 50px;
+  top: 60px;
   left: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  background: #2a2a2a;
+  border-radius: 6px;
   min-width: 200px;
   z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
 }
 .menu-dropdown a {
   display: block;
-  padding: 12px 16px;
-  color: #222;
+  padding: 10px 14px;
+  color: #fff;
   text-decoration: none;
-  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  border-bottom: 1px solid #3a3a3a;
+}
+.menu-dropdown a:hover {
+  background: #3a3a3a;
 }
 .menu-dropdown a:last-child {
   border-bottom: none;
 }
-.menu-dropdown a:hover {
-  background: #f4f4f4;
-}
 
-/* Main content */
+/* ===== MAIN CONTENT ===== */
 main {
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 0 20px;
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 0 15px;
 }
 
-/* Category blocks */
+/* ===== CATEGORY BLOCK ===== */
 .category-block {
-  margin-bottom: 50px;
-}
-.category-block h2 {
-  font-size: 1.6em;
-  margin-bottom: 15px;
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 6px;
+  margin-bottom: 35px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 20px;
 }
 
-/* Headlines list */
+.category-block h2 {
+  font-size: 14px; /* smaller than headlines */
+  font-weight: normal;
+  color: #bbbbbb;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ===== HEADLINES ===== */
 ul {
   list-style: none;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
-  gap: 20px;
+  margin: 0;
 }
+
 li {
-  background: #fff;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 10px 0;
+  border-bottom: 1px solid #2a2a2a;
 }
-li:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+
+li:last-child {
+  border-bottom: none;
 }
+
 a {
+  color: #ffffff;
   text-decoration: none;
-  color: #222;
+  font-size: 17px;
   font-weight: bold;
+  line-height: 1.4;
 }
+
 a:hover {
-  color: #ff4b2b;
+  text-decoration: underline;
 }
 </style>
 </head>
@@ -119,24 +121,22 @@ a:hover {
 <body>
 
 <header>
-  <div class="menu" onclick="toggleMenu()">&#x22EE;</div>
+  <div class="menu-btn" onclick="toggleMenu()">☰</div>
   VIRAL NEWS
   <div class="menu-dropdown" id="categoryMenu"></div>
 </header>
 
-<main id="news-container">
-  Loading…
-</main>
+<main id="news-container">Loading…</main>
 
 <script>
 const majorCategories = [
   "Breaking News",
   "World News",
   "Politics",
+  "Africa News",
+  "Business & Finance",
   "Technology",
-  "Finance",
   "Sports",
-  "Celebrity & Entertainment",
   "Health & Science"
 ];
 
@@ -145,13 +145,22 @@ function toggleMenu() {
   menu.style.display = menu.style.display === "block" ? "none" : "block";
 }
 
-// Load top-level category menu
-const categoryMenu = document.getElementById("categoryMenu");
+// Close menu when clicking outside
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("categoryMenu");
+  const btn = document.querySelector(".menu-btn");
+  if (!menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.style.display = "none";
+  }
+});
+
+// Build menu
+const menu = document.getElementById("categoryMenu");
 majorCategories.forEach(cat => {
   const a = document.createElement("a");
-  a.href = `#${cat}`; // Can later link to filtered front page
   a.textContent = cat;
-  categoryMenu.appendChild(a);
+  a.href = "#";
+  menu.appendChild(a);
 });
 
 async function loadHeadlines() {
@@ -166,51 +175,31 @@ async function loadHeadlines() {
   articles.forEach(a => {
     if (!a.title) return;
 
-    // Clean headline
     let title = a.title
-      .replace(/\[RESPONSE\]|\[OUTST\]/gi, "")
-      .replace(/[\[\]\*\<\>\"\'\`]/g, "")
+      .replace(/\[.*?\]/g, "")     // remove [RESPONSE], [OUTST], etc
+      .replace(/[\*\#\"']/g, "")   // remove ** # "
       .trim();
-    if (!title || title.toLowerCase().includes("untitled")) return;
 
-    const cat = a.category || "General News";
+    if (!title) return;
+
+    let cat = (a.category || "General News")
+      .replace(/\(ALT\)/gi, "")
+      .trim();
+
     if (!categories[cat]) categories[cat] = [];
     categories[cat].push({ id: a.id, title });
   });
 
-  // Ensure only major categories appear first in order
-  majorCategories.forEach(catName => {
-    if (!categories[catName]) return;
+  Object.keys(categories).forEach(cat => {
     const block = document.createElement("div");
     block.className = "category-block";
 
     const h2 = document.createElement("h2");
-    h2.textContent = catName;
+    h2.textContent = cat;
     block.appendChild(h2);
 
     const ul = document.createElement("ul");
-    categories[catName].forEach(a => {
-      const li = document.createElement("li");
-      li.innerHTML = `<a href="articles.html?id=${a.id}">${a.title}</a>`;
-      ul.appendChild(li);
-    });
-
-    block.appendChild(ul);
-    container.appendChild(block);
-  });
-
-  // Append any remaining categories
-  Object.keys(categories).forEach(catName => {
-    if (majorCategories.includes(catName)) return;
-    const block = document.createElement("div");
-    block.className = "category-block";
-
-    const h2 = document.createElement("h2");
-    h2.textContent = catName;
-    block.appendChild(h2);
-
-    const ul = document.createElement("ul");
-    categories[catName].forEach(a => {
+    categories[cat].forEach(a => {
       const li = document.createElement("li");
       li.innerHTML = `<a href="articles.html?id=${a.id}">${a.title}</a>`;
       ul.appendChild(li);
