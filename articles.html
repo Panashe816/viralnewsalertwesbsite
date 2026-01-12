@@ -17,148 +17,141 @@ img {
   border-radius: 8px;
   margin: 15px 0;
 }
-h2.section-title {
+.section-title {
   margin-top: 40px;
+  font-size: 1.3em;
+  font-weight: bold;
   border-bottom: 2px solid #ddd;
   padding-bottom: 6px;
-  color: #222;
 }
-ul.headline-list {
+ul.article-list {
   list-style: none;
   padding: 0;
-  margin: 15px 0 30px 0;
+  margin: 10px 0 30px 0;
 }
-li.headline-item {
-  background: #f9f9f9;
-  margin-bottom: 10px;
-  padding: 10px;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+li.article-item {
+  margin-bottom: 8px;
 }
-li.headline-item a {
+li.article-item a {
   text-decoration: none;
   color: #000;
-  font-weight: bold;
 }
 </style>
 </head>
 
 <body>
 
-<div id="article-container"></div>
+<div id="article">Loading article…</div>
+<div id="extra-articles"></div>
 
 <script>
-const apiBase = "https://viral-news-backend-3.onrender.com";
-let loadedArticleIds = [];
-let loadingNext = false;
-
-// Start by loading the first article from URL
 const params = new URLSearchParams(window.location.search);
-const firstId = params.get("id");
+let mainId = params.get("id");
+let loadedArticles = new Set(); // Track IDs we’ve displayed
 
 async function fetchArticle(id) {
-  try {
-    const res = await fetch(`${apiBase}/articles/${id}`);
-    const article = await res.json();
-    return article;
-  } catch {
-    return null;
-  }
+  const res = await fetch(`https://viral-news-backend-3.onrender.com/articles/${id}`);
+  return await res.json();
 }
 
-async function fetchArticlesList() {
-  try {
-    const res = await fetch(`${apiBase}/articles/`);
-    const list = await res.json();
-    return list.filter(a => !loadedArticleIds.includes(a.id));
-  } catch {
-    return [];
-  }
+async function fetchAllArticles() {
+  const res = await fetch(`https://viral-news-backend-3.onrender.com/articles/`);
+  return await res.json();
 }
 
-function renderMainArticle(article) {
-  loadedArticleIds.push(article.id);
-  const html = `
-    <div class="main-article">
-      <h1>${article.title}</h1>
-      ${article.image_url ? `<img src="${article.image_url}">` : ""}
-      ${article.content}
-    </div>
+function renderArticle(article) {
+  document.title = article.title;
+  loadedArticles.add(article.id);
+
+  return `
+    <h1>${article.title}</h1>
+    ${article.image_url ? `<img src="${article.image_url}">` : ""}
+    ${article.content}
   `;
-  const container = document.getElementById("article-container");
-  container.insertAdjacentHTML("beforeend", html);
 }
 
-function renderHeadlineBlock(title, articles) {
-  if (!articles || articles.length === 0) return;
-  let html = `<h2 class="section-title">${title}</h2><ul class="headline-list">`;
-  articles.forEach(a => {
-    html += `<li class="headline-item"><a href="?id=${a.id}">${a.title}</a></li>`;
-    loadedArticleIds.push(a.id);
-  });
-  html += "</ul>";
-  const container = document.getElementById("article-container");
-  container.insertAdjacentHTML("beforeend", html);
-}
+function pickArticles(list, category, excludeIds, count = 3) {
+  // First, get articles from the same category
+  let filtered = list.filter(a => a.category === category && !excludeIds.has(a.id));
+  let picked = filtered.slice(0, count);
 
-async function renderNextCycle() {
-  if (loadingNext) return;
-  loadingNext = true;
-
-  const list = await fetchArticlesList();
-  if (list.length === 0) return;
-
-  // Take first article as main
-  const mainArticle = list[0];
-  renderMainArticle(mainArticle);
-
-  // Prepare headline blocks
-  const related = list.filter(a => a.category === mainArticle.category && a.id !== mainArticle.id).slice(0, 3);
-  const mostRead = list.filter(a => a.id !== mainArticle.id && !related.includes(a)).slice(0, 3);
-  const opinion = list.filter(a => a.category.toLowerCase() === "opinion" && !loadedArticleIds.includes(a.id)).slice(0, 3);
-
-  renderHeadlineBlock("Related", related);
-  renderHeadlineBlock("Most Read", mostRead);
-  renderHeadlineBlock("Opinion", opinion);
-
-  loadingNext = false;
-}
-
-// Infinite scroll: trigger next cycle when reaching bottom
-window.addEventListener("scroll", async () => {
-  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
-    await renderNextCycle();
+  // If not enough, fill from other categories
+  if (picked.length < count) {
+    const remaining = list.filter(a => !excludeIds.has(a.id) && !picked.includes(a));
+    picked = picked.concat(remaining.slice(0, count - picked.length));
   }
-});
 
-// Initial load
-(async () => {
-  let initialArticle = null;
-  if (firstId) {
-    initialArticle = await fetchArticle(firstId);
+  return picked;
+}
+
+function renderArticleList(title, articles) {
+  if (!articles || articles.length === 0) return "";
+
+  const items = articles.map(a => `<li class="article-item"><a href="?id=${a.id}">${a.title}</a></li>`).join("\n");
+
+  return `
+    <div class="section-title">${title}</div>
+    <ul class="article-list">${items}</ul>
+  `;
+}
+
+async function loadMainAndExtras() {
+  const allArticles = await fetchAllArticles();
+  if (!mainId) {
+    document.getElementById("article").innerHTML = "Article not found.";
+    return;
   }
-  if (!initialArticle) {
-    const list = await fetchArticlesList();
-    if (list.length === 0) {
-      document.getElementById("article-container").innerHTML = "<p>No articles found.</p>";
-      return;
+
+  let mainArticle = await fetchArticle(mainId);
+  if (!mainArticle || !mainArticle.title) {
+    document.getElementById("article").innerHTML = "Article not found.";
+    return;
+  }
+
+  document.getElementById("article").innerHTML = renderArticle(mainArticle);
+
+  const relatedArticles = pickArticles(allArticles, mainArticle.category, loadedArticles, 3);
+  const mostReadArticles = pickArticles(allArticles, "Most Read", loadedArticles, 3);
+  const opinionArticles = pickArticles(allArticles, "Opinion", loadedArticles, 3);
+
+  const extraHTML = `
+    ${renderArticleList("Related", relatedArticles)}
+    ${renderArticleList("Most Read", mostReadArticles)}
+    ${renderArticleList("Opinion", opinionArticles)}
+  `;
+  document.getElementById("extra-articles").innerHTML = extraHTML;
+}
+
+// Infinite scroll: load next main article automatically
+async function setupInfiniteScroll() {
+  window.addEventListener('scroll', async () => {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 10) {
+      // Pick next article not loaded yet
+      const allArticles = await fetchAllArticles();
+      const nextArticle = allArticles.find(a => !loadedArticles.has(a.id));
+      if (nextArticle) {
+        mainId = nextArticle.id;
+        const container = document.getElementById("article");
+        container.insertAdjacentHTML('beforeend', '<hr>' + renderArticle(nextArticle));
+
+        const relatedArticles = pickArticles(allArticles, nextArticle.category, loadedArticles, 3);
+        const mostReadArticles = pickArticles(allArticles, "Most Read", loadedArticles, 3);
+        const opinionArticles = pickArticles(allArticles, "Opinion", loadedArticles, 3);
+
+        const extraHTML = `
+          ${renderArticleList("Related", relatedArticles)}
+          ${renderArticleList("Most Read", mostReadArticles)}
+          ${renderArticleList("Opinion", opinionArticles)}
+        `;
+        document.getElementById("extra-articles").insertAdjacentHTML('beforeend', extraHTML);
+      }
     }
-    initialArticle = list[0];
-  }
+  });
+}
 
-  renderMainArticle(initialArticle);
+loadMainAndExtras();
+setupInfiniteScroll();
 
-  const list = await fetchArticlesList();
-
-  const related = list.filter(a => a.category === initialArticle.category && a.id !== initialArticle.id).slice(0, 3);
-  const mostRead = list.filter(a => a.id !== initialArticle.id && !related.includes(a)).slice(0, 3);
-  const opinion = list.filter(a => a.category.toLowerCase() === "opinion" && !loadedArticleIds.includes(a.id)).slice(0, 3);
-
-  renderHeadlineBlock("Related", related);
-  renderHeadlineBlock("Most Read", mostRead);
-  renderHeadlineBlock("Opinion", opinion);
-})();
 </script>
-
 </body>
 </html>
