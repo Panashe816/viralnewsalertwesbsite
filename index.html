@@ -4,48 +4,156 @@
 <meta charset="UTF-8">
 <title>VIRAL NEWS</title>
 <meta name="description" content="Viral News – Latest headlines from all categories">
+<link rel="icon" href="https://viralnewsalert.com/favicon.ico" type="image/x-icon">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
+/* Reset & base styles */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
   background: #f4f4f4;
-  padding: 20px;
+  color: #222;
 }
-h1 {
+
+/* Header */
+header {
+  position: relative;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color: white;
+  padding: 40px 20px;
   text-align: center;
-  margin-bottom: 30px;
+  font-size: 2.8em;
+  font-weight: bold;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
-h2 {
-  margin-top: 40px;
+
+/* 3-dot menu */
+.menu {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  cursor: pointer;
+  font-size: 2em;
+  user-select: none;
+}
+.menu:hover {
+  color: #ddd;
+}
+
+/* Dropdown categories */
+.menu-dropdown {
+  display: none;
+  position: absolute;
+  top: 50px;
+  left: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  min-width: 200px;
+  z-index: 1000;
+}
+.menu-dropdown a {
+  display: block;
+  padding: 12px 16px;
+  color: #222;
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+}
+.menu-dropdown a:last-child {
+  border-bottom: none;
+}
+.menu-dropdown a:hover {
+  background: #f4f4f4;
+}
+
+/* Main content */
+main {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* Category blocks */
+.category-block {
+  margin-bottom: 50px;
+}
+.category-block h2 {
+  font-size: 1.6em;
+  margin-bottom: 15px;
   border-bottom: 2px solid #ddd;
+  padding-bottom: 6px;
 }
+
+/* Headlines list */
 ul {
   list-style: none;
   padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+  gap: 20px;
 }
 li {
   background: #fff;
-  margin-bottom: 10px;
-  padding: 12px;
-  border-radius: 8px;
-  display: flex;
-  gap: 12px;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+li:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 a {
   text-decoration: none;
-  color: #000;
+  color: #222;
   font-weight: bold;
-  flex: 1;
+}
+a:hover {
+  color: #ff4b2b;
 }
 </style>
 </head>
 
 <body>
 
-<h1>VIRAL NEWS</h1>
-<div id="news-container">Loading…</div>
+<header>
+  <div class="menu" onclick="toggleMenu()">&#x22EE;</div>
+  VIRAL NEWS
+  <div class="menu-dropdown" id="categoryMenu"></div>
+</header>
+
+<main id="news-container">
+  Loading…
+</main>
 
 <script>
+const majorCategories = [
+  "Breaking News",
+  "World News",
+  "Politics",
+  "Technology",
+  "Finance",
+  "Sports",
+  "Celebrity & Entertainment",
+  "Health & Science"
+];
+
+function toggleMenu() {
+  const menu = document.getElementById("categoryMenu");
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+// Load top-level category menu
+const categoryMenu = document.getElementById("categoryMenu");
+majorCategories.forEach(cat => {
+  const a = document.createElement("a");
+  a.href = `#${cat}`; // Can later link to filtered front page
+  a.textContent = cat;
+  categoryMenu.appendChild(a);
+});
+
 async function loadHeadlines() {
   const container = document.getElementById("news-container");
   container.innerHTML = "";
@@ -58,33 +166,59 @@ async function loadHeadlines() {
   articles.forEach(a => {
     if (!a.title) return;
 
-    let title = a.title.replace(/[\[\]\*\<\>\"\'\`]/g, "").trim();
+    // Clean headline
+    let title = a.title
+      .replace(/\[RESPONSE\]|\[OUTST\]/gi, "")
+      .replace(/[\[\]\*\<\>\"\'\`]/g, "")
+      .trim();
     if (!title || title.toLowerCase().includes("untitled")) return;
 
-    const cat = a.category || "General";
+    const cat = a.category || "General News";
     if (!categories[cat]) categories[cat] = [];
     categories[cat].push({ id: a.id, title });
   });
 
-  for (const cat in categories) {
+  // Ensure only major categories appear first in order
+  majorCategories.forEach(catName => {
+    if (!categories[catName]) return;
+    const block = document.createElement("div");
+    block.className = "category-block";
+
     const h2 = document.createElement("h2");
-    h2.textContent = cat;
-    container.appendChild(h2);
+    h2.textContent = catName;
+    block.appendChild(h2);
 
     const ul = document.createElement("ul");
-
-    categories[cat].forEach(a => {
+    categories[catName].forEach(a => {
       const li = document.createElement("li");
-      li.innerHTML = `
-        <a href="articles.html?id=${a.id}">
-          ${a.title}
-        </a>
-      `;
+      li.innerHTML = `<a href="articles.html?id=${a.id}">${a.title}</a>`;
       ul.appendChild(li);
     });
 
-    container.appendChild(ul);
-  }
+    block.appendChild(ul);
+    container.appendChild(block);
+  });
+
+  // Append any remaining categories
+  Object.keys(categories).forEach(catName => {
+    if (majorCategories.includes(catName)) return;
+    const block = document.createElement("div");
+    block.className = "category-block";
+
+    const h2 = document.createElement("h2");
+    h2.textContent = catName;
+    block.appendChild(h2);
+
+    const ul = document.createElement("ul");
+    categories[catName].forEach(a => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="articles.html?id=${a.id}">${a.title}</a>`;
+      ul.appendChild(li);
+    });
+
+    block.appendChild(ul);
+    container.appendChild(block);
+  });
 }
 
 loadHeadlines();
