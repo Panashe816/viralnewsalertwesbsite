@@ -17,40 +17,147 @@ img {
   border-radius: 8px;
   margin: 15px 0;
 }
+h2.section-title {
+  margin-top: 40px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 6px;
+  color: #222;
+}
+ul.headline-list {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0 30px 0;
+}
+li.headline-item {
+  background: #f9f9f9;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+li.headline-item a {
+  text-decoration: none;
+  color: #000;
+  font-weight: bold;
+}
 </style>
 </head>
 
 <body>
 
-<div id="article">Loading article…</div>
+<div id="article-container"></div>
 
 <script>
+const apiBase = "https://viral-news-backend-3.onrender.com";
+let loadedArticleIds = [];
+let loadingNext = false;
+
+// Start by loading the first article from URL
 const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
+const firstId = params.get("id");
 
-if (!id) {
-  document.getElementById("article").innerHTML = "Article not found.";
-} else {
-  fetch(`https://viral-news-backend-3.onrender.com/articles/${id}`)
-    .then(res => res.json())
-    .then(a => {
-      if (!a || !a.title) {
-        document.getElementById("article").innerHTML = "Article not found.";
-        return;
-      }
-
-      document.title = a.title;
-
-      document.getElementById("article").innerHTML = `
-        <h1>${a.title}</h1>
-        ${a.image_url ? `<img src="${a.image_url}">` : ""}
-        ${a.content}
-      `;
-    })
-    .catch(() => {
-      document.getElementById("article").innerHTML = "Failed to load article.";
-    });
+async function fetchArticle(id) {
+  try {
+    const res = await fetch(`${apiBase}/articles/${id}`);
+    const article = await res.json();
+    return article;
+  } catch {
+    return null;
+  }
 }
+
+async function fetchArticlesList() {
+  try {
+    const res = await fetch(`${apiBase}/articles/`);
+    const list = await res.json();
+    return list.filter(a => !loadedArticleIds.includes(a.id));
+  } catch {
+    return [];
+  }
+}
+
+function renderMainArticle(article) {
+  loadedArticleIds.push(article.id);
+  const html = `
+    <div class="main-article">
+      <h1>${article.title}</h1>
+      ${article.image_url ? `<img src="${article.image_url}">` : ""}
+      ${article.content}
+    </div>
+  `;
+  const container = document.getElementById("article-container");
+  container.insertAdjacentHTML("beforeend", html);
+}
+
+function renderHeadlineBlock(title, articles) {
+  if (!articles || articles.length === 0) return;
+  let html = `<h2 class="section-title">${title}</h2><ul class="headline-list">`;
+  articles.forEach(a => {
+    html += `<li class="headline-item"><a href="?id=${a.id}">${a.title}</a></li>`;
+    loadedArticleIds.push(a.id);
+  });
+  html += "</ul>";
+  const container = document.getElementById("article-container");
+  container.insertAdjacentHTML("beforeend", html);
+}
+
+async function renderNextCycle() {
+  if (loadingNext) return;
+  loadingNext = true;
+
+  const list = await fetchArticlesList();
+  if (list.length === 0) return;
+
+  // Take first article as main
+  const mainArticle = list[0];
+  renderMainArticle(mainArticle);
+
+  // Prepare headline blocks
+  const related = list.filter(a => a.category === mainArticle.category && a.id !== mainArticle.id).slice(0, 3);
+  const mostRead = list.filter(a => a.id !== mainArticle.id && !related.includes(a)).slice(0, 3);
+  const opinion = list.filter(a => a.category.toLowerCase() === "opinion" && !loadedArticleIds.includes(a.id)).slice(0, 3);
+
+  renderHeadlineBlock("Related", related);
+  renderHeadlineBlock("Most Read", mostRead);
+  renderHeadlineBlock("Opinion", opinion);
+
+  loadingNext = false;
+}
+
+// Infinite scroll: trigger next cycle when reaching bottom
+window.addEventListener("scroll", async () => {
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 50) {
+    await renderNextCycle();
+  }
+});
+
+// Initial load
+(async () => {
+  let initialArticle = null;
+  if (firstId) {
+    initialArticle = await fetchArticle(firstId);
+  }
+  if (!initialArticle) {
+    const list = await fetchArticlesList();
+    if (list.length === 0) {
+      document.getElementById("article-container").innerHTML = "<p>No articles found.</p>";
+      return;
+    }
+    initialArticle = list[0];
+  }
+
+  renderMainArticle(initialArticle);
+
+  const list = await fetchArticlesList();
+
+  const related = list.filter(a => a.category === initialArticle.category && a.id !== initialArticle.id).slice(0, 3);
+  const mostRead = list.filter(a => a.id !== initialArticle.id && !related.includes(a)).slice(0, 3);
+  const opinion = list.filter(a => a.category.toLowerCase() === "opinion" && !loadedArticleIds.includes(a.id)).slice(0, 3);
+
+  renderHeadlineBlock("Related", related);
+  renderHeadlineBlock("Most Read", mostRead);
+  renderHeadlineBlock("Opinion", opinion);
+})();
 </script>
 
 </body>
