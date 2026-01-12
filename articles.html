@@ -36,6 +36,10 @@ li.article-item a {
   text-decoration: none;
   color: #000;
 }
+hr {
+  margin: 50px 0;
+  border: 1px dashed #ccc;
+}
 </style>
 </head>
 
@@ -47,7 +51,8 @@ li.article-item a {
 <script>
 const params = new URLSearchParams(window.location.search);
 let mainId = params.get("id");
-let loadedArticles = new Set(); // Track IDs we’ve displayed
+let displayedMainArticles = new Set(); // Track full articles already shown as main
+let displayedRelatedArticles = new Set(); // Track articles already shown in blocks
 
 async function fetchArticle(id) {
   const res = await fetch(`https://viral-news-backend-3.onrender.com/articles/${id}`);
@@ -60,8 +65,7 @@ async function fetchAllArticles() {
 }
 
 function renderArticle(article) {
-  document.title = article.title;
-  loadedArticles.add(article.id);
+  displayedMainArticles.add(article.id);
 
   return `
     <h1>${article.title}</h1>
@@ -70,17 +74,19 @@ function renderArticle(article) {
   `;
 }
 
-function pickArticles(list, category, excludeIds, count = 3) {
-  // First, get articles from the same category
-  let filtered = list.filter(a => a.category === category && !excludeIds.has(a.id));
+// Pick articles for a section, excluding any main articles already shown
+function pickArticles(list, category, count = 3) {
+  let filtered = list.filter(a => !displayedMainArticles.has(a.id) && !displayedRelatedArticles.has(a.id) && a.category === category);
   let picked = filtered.slice(0, count);
 
-  // If not enough, fill from other categories
+  // Fill from other categories if fewer than count
   if (picked.length < count) {
-    const remaining = list.filter(a => !excludeIds.has(a.id) && !picked.includes(a));
+    const remaining = list.filter(a => !displayedMainArticles.has(a.id) && !displayedRelatedArticles.has(a.id) && !picked.includes(a));
     picked = picked.concat(remaining.slice(0, count - picked.length));
   }
 
+  // Mark picked articles as displayed in blocks
+  picked.forEach(a => displayedRelatedArticles.add(a.id));
   return picked;
 }
 
@@ -95,63 +101,48 @@ function renderArticleList(title, articles) {
   `;
 }
 
-async function loadMainAndExtras() {
+async function loadMainAndExtras(articleId) {
   const allArticles = await fetchAllArticles();
-  if (!mainId) {
-    document.getElementById("article").innerHTML = "Article not found.";
-    return;
-  }
-
-  let mainArticle = await fetchArticle(mainId);
+  let mainArticle = await fetchArticle(articleId);
   if (!mainArticle || !mainArticle.title) {
     document.getElementById("article").innerHTML = "Article not found.";
     return;
   }
 
-  document.getElementById("article").innerHTML = renderArticle(mainArticle);
+  document.getElementById("article").insertAdjacentHTML('beforeend', renderArticle(mainArticle));
 
-  const relatedArticles = pickArticles(allArticles, mainArticle.category, loadedArticles, 3);
-  const mostReadArticles = pickArticles(allArticles, "Most Read", loadedArticles, 3);
-  const opinionArticles = pickArticles(allArticles, "Opinion", loadedArticles, 3);
+  const relatedArticles = pickArticles(allArticles, mainArticle.category, 3);
+  const mostReadArticles = pickArticles(allArticles, "Most Read", 3);
+  const opinionArticles = pickArticles(allArticles, "Opinion", 3);
 
   const extraHTML = `
     ${renderArticleList("Related", relatedArticles)}
     ${renderArticleList("Most Read", mostReadArticles)}
     ${renderArticleList("Opinion", opinionArticles)}
   `;
-  document.getElementById("extra-articles").innerHTML = extraHTML;
+  document.getElementById("extra-articles").insertAdjacentHTML('beforeend', extraHTML);
 }
 
 // Infinite scroll: load next main article automatically
 async function setupInfiniteScroll() {
   window.addEventListener('scroll', async () => {
     if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 10) {
-      // Pick next article not loaded yet
       const allArticles = await fetchAllArticles();
-      const nextArticle = allArticles.find(a => !loadedArticles.has(a.id));
+      const nextArticle = allArticles.find(a => !displayedMainArticles.has(a.id));
       if (nextArticle) {
-        mainId = nextArticle.id;
-        const container = document.getElementById("article");
-        container.insertAdjacentHTML('beforeend', '<hr>' + renderArticle(nextArticle));
-
-        const relatedArticles = pickArticles(allArticles, nextArticle.category, loadedArticles, 3);
-        const mostReadArticles = pickArticles(allArticles, "Most Read", loadedArticles, 3);
-        const opinionArticles = pickArticles(allArticles, "Opinion", loadedArticles, 3);
-
-        const extraHTML = `
-          ${renderArticleList("Related", relatedArticles)}
-          ${renderArticleList("Most Read", mostReadArticles)}
-          ${renderArticleList("Opinion", opinionArticles)}
-        `;
-        document.getElementById("extra-articles").insertAdjacentHTML('beforeend', extraHTML);
+        await loadMainAndExtras(nextArticle.id);
       }
     }
   });
 }
 
-loadMainAndExtras();
-setupInfiniteScroll();
-
+// Initial load
+if (!mainId) {
+  document.getElementById("article").innerHTML = "Article not found.";
+} else {
+  loadMainAndExtras(mainId);
+  setupInfiniteScroll();
+}
 </script>
 </body>
 </html>
