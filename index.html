@@ -15,7 +15,7 @@ body {
 
 header {
   background: #0b1c2d;
-  padding: 20px;
+  padding: 16px;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -28,7 +28,7 @@ header {
 
 .logo {
   text-align: center;
-  font-size: 32px;
+  font-size: 30px;
   font-weight: bold;
   letter-spacing: 2px;
 }
@@ -46,8 +46,7 @@ header {
 }
 
 #menu h3 {
-  margin-top: 0;
-  font-size: 18px;
+  font-size: 16px;
   border-bottom: 1px solid #333;
   padding-bottom: 10px;
 }
@@ -57,7 +56,7 @@ header {
   color: #fff;
   padding: 10px 0;
   text-decoration: none;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -79,10 +78,21 @@ main {
   margin: auto;
 }
 
-.category-title {
+.top-bar {
+  display: none;
+  margin-bottom: 15px;
+}
+
+.back-btn {
+  cursor: pointer;
+  color: #4da3ff;
+  font-size: 14px;
+}
+
+.section-title {
   font-size: 14px;
   color: #aaa;
-  margin-top: 40px;
+  margin-top: 30px;
   border-bottom: 1px solid #333;
   padding-bottom: 6px;
 }
@@ -101,6 +111,12 @@ main {
 .article a:hover {
   color: #4da3ff;
 }
+
+.time {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
 </style>
 </head>
 
@@ -113,80 +129,115 @@ main {
 
 <div id="menu">
   <h3>Categories</h3>
-  <a onclick="filterCategory('Breaking')">Breaking News</a>
-  <a onclick="filterCategory('World')">World News</a>
-  <a onclick="filterCategory('Politics')">Politics & Law</a>
-  <a onclick="filterCategory('Finance')">Business & Finance</a>
-  <a onclick="filterCategory('Tech')">Technology</a>
-  <a onclick="filterCategory('Sports')">Sports</a>
-  <a onclick="filterCategory('Entertainment')">Entertainment</a>
-  <a onclick="filterCategory('Health')">Health & Science</a>
+  <a onclick="loadCategory('Breaking')">Breaking News</a>
+  <a onclick="loadCategory('World')">World News</a>
+  <a onclick="loadCategory('Politics')">Politics & Law</a>
+  <a onclick="loadCategory('Finance')">Business & Finance</a>
+  <a onclick="loadCategory('Tech')">Technology</a>
+  <a onclick="loadCategory('Sports')">Sports</a>
+  <a onclick="loadCategory('Entertainment')">Entertainment</a>
+  <a onclick="loadCategory('Health')">Health & Science</a>
 </div>
 
 <div id="overlay" onclick="closeMenu()"></div>
 
-<main id="news"></main>
+<main>
+  <div class="top-bar" id="topBar">
+    <span class="back-btn" onclick="goHome()">← Home</span>
+  </div>
+  <div id="news"></div>
+</main>
 
 <script>
 const CATEGORY_MAP = {
   Breaking: ["Breaking News"],
-  World: ["World News", "Africa News", "Asia News", "Europe News", "Middle East News", "South America News", "Local News"],
-  Politics: ["Politics", "Government & Policies", "Law & Crime", "Public Safety", "Opinion & Editorials"],
-  Finance: ["Stock Market", "Economy & Inflation", "Personal Finance", "Cryptocurrency", "Real Estate"],
-  Tech: ["Artificial Intelligence", "Software & Apps", "Gadgets & Reviews", "Cybersecurity"],
-  Sports: ["Sports", "Soccer", "Basketball", "Cricket", "Tennis", "Olympics"],
-  Entertainment: ["Celebrity", "Movies", "Music", "TV Shows", "Influencer"],
-  Health: ["Health", "Science", "Climate", "Environment", "Weather", "Education"]
+  World: ["World News","Africa","Asia","Europe","Middle East","South America","Local"],
+  Politics: ["Politics","Government","Law","Public Safety","Opinion"],
+  Finance: ["Stock","Economy","Finance","Crypto","Real Estate"],
+  Tech: ["Artificial","Software","Gadgets","Cyber"],
+  Sports: ["Sports","Soccer","Basketball","Cricket","Tennis","Olympics"],
+  Entertainment: ["Celebrity","Movies","Music","TV","Influencer"],
+  Health: ["Health","Science","Climate","Environment","Weather","Education"]
 };
 
 let allArticles = [];
+let currentList = [];
+let page = 0;
+const PAGE_SIZE = 20;
 
 function openMenu() {
   document.getElementById("menu").style.display = "block";
   document.getElementById("overlay").style.display = "block";
 }
-
 function closeMenu() {
   document.getElementById("menu").style.display = "none";
   document.getElementById("overlay").style.display = "none";
 }
 
-async function loadArticles() {
+function normalize(cat) {
+  return (cat || "").replace("(Alt)", "").trim();
+}
+
+function timeAgo(date) {
+  const diff = (Date.now() - new Date(date)) / 1000;
+  if (diff < 3600) return `${Math.floor(diff/60)}m`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+  return `${Math.floor(diff/86400)}d`;
+}
+
+async function loadHome() {
   const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
   allArticles = await res.json();
-  renderArticles(allArticles);
+  document.getElementById("topBar").style.display = "none";
+  renderNewList(allArticles, "Latest News");
 }
 
-function normalizeCategory(cat) {
-  return cat.replace("(Alt)", "").trim();
-}
-
-function filterCategory(key) {
+function loadCategory(key) {
   closeMenu();
-  const matches = CATEGORY_MAP[key];
-  const filtered = allArticles.filter(a => {
-    const c = normalizeCategory(a.category || "");
-    return matches.some(m => c.includes(m));
-  });
-  renderArticles(filtered, key);
+  document.getElementById("topBar").style.display = "block";
+  const terms = CATEGORY_MAP[key];
+  const filtered = allArticles.filter(a =>
+    terms.some(t => normalize(a.category).includes(t))
+  );
+  renderNewList(filtered, key);
 }
 
-function renderArticles(list, title = "Latest News") {
-  const container = document.getElementById("news");
-  container.innerHTML = `<div class="category-title">${title}</div>`;
+function goHome() {
+  renderNewList(allArticles, "Latest News");
+  document.getElementById("topBar").style.display = "none";
+}
 
-  list.forEach(a => {
+function renderNewList(list, title) {
+  currentList = list;
+  page = 0;
+  const news = document.getElementById("news");
+  news.innerHTML = `<div class="section-title">${title}</div>`;
+  loadMore();
+}
+
+function loadMore() {
+  const news = document.getElementById("news");
+  const slice = currentList.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  slice.forEach(a => {
     if (!a.title) return;
-    const cleanTitle = a.title.replace(/[\[\]\*\#\"\'\<\>]/g, "").trim();
-    container.innerHTML += `
+    const clean = a.title.replace(/[\[\]\*\#\"\'\<\>]/g,"").trim();
+    news.innerHTML += `
       <div class="article">
-        <a href="articles.html?id=${a.id}">${cleanTitle}</a>
+        <a href="articles.html?id=${a.id}">${clean}</a>
+        <div class="time">• ${timeAgo(a.created_at)}</div>
       </div>
     `;
   });
+  page++;
 }
 
-loadArticles();
+window.addEventListener("scroll", () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
+    loadMore();
+  }
+});
+
+loadHome();
 </script>
 
 </body>
