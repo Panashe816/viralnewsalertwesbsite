@@ -1,56 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Viral News – Article</title>
-  <meta name="description" content="Read full articles from Viral News">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      background: #f4f4f4;
-    }
-    h1 { font-size: 1.8em; margin-top: 20px; }
-    h2 { font-size: 1.4em; margin-top: 15px; }
-    p { line-height: 1.6em; margin-bottom: 10px; }
-    img { max-width: 100%; height: auto; border-radius: 8px; margin: 10px 0; }
-    a.back { display: inline-block; margin-bottom: 20px; color: #00f; }
-  </style>
+<meta charset="UTF-8">
+<title>Article</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  line-height: 1.7;
+}
+img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 15px 0;
+}
+</style>
 </head>
+
 <body>
 
-<a href="index.html" class="back">&larr; Back to Headlines</a>
-<div id="article-content">Loading article...</div>
+<div id="article">Loading article…</div>
 
 <script>
-function getQueryParam(name) {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(name);
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+if (!id) {
+  document.getElementById("article").innerHTML = "Article not found.";
+} else {
+  fetch(`https://viral-news-backend-3.onrender.com/articles/${id}`)
+    .then(res => res.json())
+    .then(a => {
+      if (!a || !a.title) {
+        document.getElementById("article").innerHTML = "Article not found.";
+        return;
+      }
+
+      document.title = a.title;
+
+      document.getElementById("article").innerHTML = `
+        <h1>${a.title}</h1>
+        ${a.image_url ? `<img src="${a.image_url}">` : ""}
+        ${a.content}
+      `;
+    })
+    .catch(() => {
+      document.getElementById("article").innerHTML = "Failed to load article.";
+    });
 }
-
-async function loadArticle() {
-  const articleId = getQueryParam("id");
-  const container = document.getElementById("article-content");
-
-  try {
-    const res = await fetch(`https://viral-news-backend-3.onrender.com/articles/${articleId}`);
-    const article = await res.json();
-
-    container.innerHTML = `
-      <h1>${article.title}</h1>
-      ${article.content}  <!-- full HTML from backend -->
-    `;
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = "Failed to load article.";
-  }
-}
-
-loadArticle();
 </script>
 
 </body>
