@@ -3,119 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <title>VIRAL NEWS</title>
-<meta name="description" content="Viral News – Latest headlines from around the world">
+<meta name="description" content="Viral News – Latest headlines from all categories">
 
 <style>
 body {
-  margin: 0;
   font-family: Arial, sans-serif;
-  background: #1f1f1f;
+  background: #0a1d3f; /* Navy-blue background */
   color: #fff;
+  margin: 0;
+  padding: 0;
 }
-
 header {
-  background: #0b1c2d;
-  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background: #081737; 
   position: sticky;
   top: 0;
   z-index: 1000;
 }
-
-.menu-btn {
+header h1 {
+  margin: 0;
   font-size: 26px;
+  color: #fff;
+}
+.menu-icon {
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 20px;
 }
-
-.logo {
-  text-align: center;
-  font-size: 30px;
-  font-weight: bold;
-  letter-spacing: 2px;
+.menu-icon div {
+  height: 3px;
+  background: #fff;
+  border-radius: 2px;
 }
-
-#menu {
-  display: none;
+#categories-menu {
   position: fixed;
   top: 0;
   left: 0;
-  background: #111;
-  width: 260px;
+  width: 250px;
   height: 100%;
+  background: #1a2c5b;
   padding: 20px;
-  z-index: 2000;
+  transform: translateX(-260px);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  z-index: 999;
 }
-
-#menu h3 {
-  font-size: 16px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 10px;
+#categories-menu.active {
+  transform: translateX(0);
 }
-
-#menu a {
-  display: block;
-  color: #fff;
-  padding: 10px 0;
-  text-decoration: none;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-#menu a:hover {
-  color: #4da3ff;
-}
-
-#overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 1500;
-}
-
-main {
-  padding: 20px;
-  max-width: 900px;
-  margin: auto;
-}
-
-.top-bar {
-  display: none;
+#categories-menu h2 {
+  font-size: 18px;
   margin-bottom: 15px;
 }
-
-.back-btn {
-  cursor: pointer;
-  color: #4da3ff;
-  font-size: 14px;
-}
-
-.section-title {
-  font-size: 14px;
-  color: #aaa;
-  margin-top: 30px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 6px;
-}
-
-.article {
-  padding: 12px 0;
-  border-bottom: 1px solid #2f2f2f;
-}
-
-.article a {
-  color: #fff;
-  font-size: 17px;
+#categories-menu a {
+  display: block;
   text-decoration: none;
+  color: #fff;
+  padding: 10px 0;
+  font-size: 14px;
 }
-
-.article a:hover {
-  color: #4da3ff;
+#categories-menu a:hover {
+  color: #ffcc00;
 }
-
-.time {
+#news-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+.category-section {
+  margin-bottom: 40px;
+}
+.category-section h2 {
+  font-size: 20px;
+  border-bottom: 2px solid #444;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+}
+.article-item {
+  background: #0f264f;
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 6px;
+}
+.article-item a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  display: block;
+}
+.article-item a:hover {
+  color: #ffcc00;
+}
+.article-time {
   font-size: 12px;
-  color: #999;
-  margin-top: 4px;
+  color: #ccc;
+  margin-top: 3px;
+}
+.back-home {
+  display: inline-block;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #ffcc00;
+  cursor: pointer;
 }
 </style>
 </head>
@@ -123,121 +118,126 @@ main {
 <body>
 
 <header>
-  <div class="menu-btn" onclick="openMenu()">☰</div>
-  <div class="logo">VIRAL NEWS</div>
+  <div class="menu-icon" id="menu-toggle">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <h1>VIRAL NEWS</h1>
 </header>
 
-<div id="menu">
-  <h3>Categories</h3>
-  <a onclick="loadCategory('Breaking')">Breaking News</a>
-  <a onclick="loadCategory('World')">World News</a>
-  <a onclick="loadCategory('Politics')">Politics & Law</a>
-  <a onclick="loadCategory('Finance')">Business & Finance</a>
-  <a onclick="loadCategory('Tech')">Technology</a>
-  <a onclick="loadCategory('Sports')">Sports</a>
-  <a onclick="loadCategory('Entertainment')">Entertainment</a>
-  <a onclick="loadCategory('Health')">Health & Science</a>
+<div id="categories-menu">
+  <h2>Categories</h2>
+  <a href="#" data-category="General News">General News</a>
+  <a href="#" data-category="Breaking News">Breaking News</a>
+  <a href="#" data-category="World News">World News</a>
+  <a href="#" data-category="Politics">Politics</a>
+  <a href="#" data-category="Technology">Technology</a>
+  <a href="#" data-category="Sports">Sports</a>
+  <a href="#" data-category="Health & Fitness">Health & Fitness</a>
+  <a href="#" data-category="Entertainment">Entertainment</a>
 </div>
 
-<div id="overlay" onclick="closeMenu()"></div>
-
-<main>
-  <div class="top-bar" id="topBar">
-    <span class="back-btn" onclick="goHome()">← Home</span>
-  </div>
-  <div id="news"></div>
-</main>
+<div id="news-container">Loading…</div>
 
 <script>
-const CATEGORY_MAP = {
-  Breaking: ["Breaking News"],
-  World: ["World News","Africa","Asia","Europe","Middle East","South America","Local"],
-  Politics: ["Politics","Government","Law","Public Safety","Opinion"],
-  Finance: ["Stock","Economy","Finance","Crypto","Real Estate"],
-  Tech: ["Artificial","Software","Gadgets","Cyber"],
-  Sports: ["Sports","Soccer","Basketball","Cricket","Tennis","Olympics"],
-  Entertainment: ["Celebrity","Movies","Music","TV","Influencer"],
-  Health: ["Health","Science","Climate","Environment","Weather","Education"]
-};
+const menuToggle = document.getElementById("menu-toggle");
+const categoriesMenu = document.getElementById("categories-menu");
+menuToggle.addEventListener("click", () => {
+  categoriesMenu.classList.toggle("active");
+});
 
-let allArticles = [];
-let currentList = [];
-let page = 0;
-const PAGE_SIZE = 20;
-
-function openMenu() {
-  document.getElementById("menu").style.display = "block";
-  document.getElementById("overlay").style.display = "block";
-}
-function closeMenu() {
-  document.getElementById("menu").style.display = "none";
-  document.getElementById("overlay").style.display = "none";
-}
-
-function normalize(cat) {
-  return (cat || "").replace("(Alt)", "").trim();
-}
-
-function timeAgo(date) {
-  const diff = (Date.now() - new Date(date)) / 1000;
-  if (diff < 3600) return `${Math.floor(diff/60)}m`;
-  if (diff < 86400) return `${Math.floor(diff/3600)}h`;
-  return `${Math.floor(diff/86400)}d`;
-}
-
-async function loadHome() {
-  const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
-  allArticles = await res.json();
-  document.getElementById("topBar").style.display = "none";
-  renderNewList(allArticles, "Latest News");
-}
-
-function loadCategory(key) {
-  closeMenu();
-  document.getElementById("topBar").style.display = "block";
-  const terms = CATEGORY_MAP[key];
-  const filtered = allArticles.filter(a =>
-    terms.some(t => normalize(a.category).includes(t))
-  );
-  renderNewList(filtered, key);
-}
-
-function goHome() {
-  renderNewList(allArticles, "Latest News");
-  document.getElementById("topBar").style.display = "none";
-}
-
-function renderNewList(list, title) {
-  currentList = list;
-  page = 0;
-  const news = document.getElementById("news");
-  news.innerHTML = `<div class="section-title">${title}</div>`;
-  loadMore();
-}
-
-function loadMore() {
-  const news = document.getElementById("news");
-  const slice = currentList.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-  slice.forEach(a => {
-    if (!a.title) return;
-    const clean = a.title.replace(/[\[\]\*\#\"\'\<\>]/g,"").trim();
-    news.innerHTML += `
-      <div class="article">
-        <a href="articles.html?id=${a.id}">${clean}</a>
-        <div class="time">• ${timeAgo(a.created_at)}</div>
-      </div>
-    `;
-  });
-  page++;
-}
-
-window.addEventListener("scroll", () => {
-  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
-    loadMore();
+// Close menu when clicking outside
+document.addEventListener("click", (e) => {
+  if (!categoriesMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+    categoriesMenu.classList.remove("active");
   }
 });
 
-loadHome();
+// Helper: format time (23 m, 5 h)
+function formatTime(published_at) {
+  const pubDate = new Date(published_at);
+  const diffMs = Date.now() - pubDate.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 60) return `${diffMins} m`;
+  const diffHrs = Math.floor(diffMins / 60);
+  if (diffHrs < 24) return `${diffHrs} h`;
+  const diffDays = Math.floor(diffHrs / 24);
+  return `${diffDays} d`;
+}
+
+let allArticles = [];
+let displayIndex = 0;
+let currentCategory = null;
+
+// Fetch articles from backend
+async function loadArticles(category = null) {
+  const container = document.getElementById("news-container");
+  container.innerHTML = "";
+  displayIndex = 0;
+  currentCategory = category;
+
+  try {
+    const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
+    const articles = await res.json();
+    allArticles = articles
+      .filter(a => a.title && (!category || a.category === category))
+      .map(a => ({
+        id: a.id,
+        title: a.title.replace(/[\[\]\*\<\>\"\'\`]/g, "").trim(),
+        category: a.category || "General",
+        published_at: a.published_at
+      }));
+    displayNextBatch();
+  } catch (err) {
+    container.innerHTML = "Failed to load articles. Please try again later.";
+    console.error(err);
+  }
+}
+
+// Infinite scroll: load 10 articles at a time
+function displayNextBatch() {
+  const container = document.getElementById("news-container");
+  const batch = allArticles.slice(displayIndex, displayIndex + 10);
+  batch.forEach(a => {
+    const div = document.createElement("div");
+    div.className = "article-item";
+    div.innerHTML = `
+      <a href="articles.html?id=${a.id}">${a.title}</a>
+      <div class="article-time">${formatTime(a.published_at)}</div>
+    `;
+    container.appendChild(div);
+  });
+  displayIndex += batch.length;
+}
+
+// Infinite scroll listener
+window.addEventListener("scroll", () => {
+  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+    displayNextBatch();
+  }
+});
+
+// Category menu click
+document.querySelectorAll("#categories-menu a").forEach(link => {
+  link.addEventListener("click", e => {
+    e.preventDefault();
+    const cat = e.target.dataset.category;
+    loadArticles(cat);
+    categoriesMenu.classList.remove("active");
+
+    // Add back button
+    const container = document.getElementById("news-container");
+    const backBtn = document.createElement("div");
+    backBtn.className = "back-home";
+    backBtn.textContent = "← Back to Home";
+    backBtn.onclick = () => loadArticles();
+    container.insertBefore(backBtn, container.firstChild);
+  });
+});
+
+// Initial load
+loadArticles();
 </script>
 
 </body>
