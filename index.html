@@ -128,8 +128,10 @@ header h1 {
 
 <div id="categories-menu">
   <h2>Categories</h2>
+  <a href="#" data-category="Trending">Trending</a>
+  <a href="#" data-category="Breaking">Breaking</a>
+  <a href="#" data-category="Top Headlines">Top Headlines</a>
   <a href="#" data-category="General News">General News</a>
-  <a href="#" data-category="Breaking News">Breaking News</a>
   <a href="#" data-category="World News">World News</a>
   <a href="#" data-category="Politics">Politics</a>
   <a href="#" data-category="Technology">Technology</a>
@@ -167,56 +169,114 @@ function formatTime(published_at) {
 }
 
 let allArticles = [];
-let displayIndex = 0;
-let currentCategory = null;
 
 // Fetch articles from backend
 async function loadArticles(category = null) {
   const container = document.getElementById("news-container");
   container.innerHTML = "";
-  displayIndex = 0;
   currentCategory = category;
 
   try {
     const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
     const articles = await res.json();
+
+    // Map articles to clean format
     allArticles = articles
-      .filter(a => a.title && (!category || a.category === category))
+      .filter(a => a.title)
       .map(a => ({
         id: a.id,
         title: a.title.replace(/[\[\]\*\<\>\"\'\`]/g, "").trim(),
         category: a.category || "General",
         published_at: a.published_at
       }));
-    displayNextBatch();
+
+    if (!category) {
+      displayFrontPage();
+    } else {
+      displayCategory(category);
+    }
   } catch (err) {
     container.innerHTML = "Failed to load articles. Please try again later.";
     console.error(err);
   }
 }
 
-// Infinite scroll: load 10 articles at a time
-function displayNextBatch() {
+// Display front page: Trending, Breaking, Top Headlines, Latest
+function displayFrontPage() {
   const container = document.getElementById("news-container");
-  const batch = allArticles.slice(displayIndex, displayIndex + 10);
-  batch.forEach(a => {
+  container.innerHTML = "";
+
+  const specialCats = ["Trending", "Breaking", "Top Headlines"];
+  let leftoverArticles = [];
+
+  specialCats.forEach(cat => {
+    const catArticles = allArticles.filter(a => a.category === cat);
+    const top5 = catArticles.slice(0, 5);
+    leftoverArticles.push(...catArticles.slice(5));
+
+    if (top5.length > 0) {
+      const section = document.createElement("div");
+      section.className = "category-section";
+      section.innerHTML = `<h2>${cat}</h2>`;
+      top5.forEach(a => {
+        const div = document.createElement("div");
+        div.className = "article-item";
+        div.innerHTML = `
+          <a href="articles.html?id=${a.id}">${a.title}</a>
+          <div class="article-time">${formatTime(a.published_at)}</div>
+        `;
+        section.appendChild(div);
+      });
+      container.appendChild(section);
+    }
+  });
+
+  // Latest Articles: includes leftovers + all other categories
+  const latestArticles = allArticles.filter(a => !specialCats.includes(a.category)).concat(leftoverArticles);
+  if (latestArticles.length > 0) {
+    const section = document.createElement("div");
+    section.className = "category-section";
+    section.innerHTML = `<h2>Latest Articles</h2>`;
+    latestArticles.forEach(a => {
+      const div = document.createElement("div");
+      div.className = "article-item";
+      div.innerHTML = `
+        <a href="articles.html?id=${a.id}">${a.title}</a>
+        <div class="article-time">${formatTime(a.published_at)}</div>
+      `;
+      section.appendChild(div);
+    });
+    container.appendChild(section);
+  }
+}
+
+// Display single category (from menu)
+function displayCategory(category) {
+  const container = document.getElementById("news-container");
+  container.innerHTML = "";
+  const catArticles = allArticles.filter(a => a.category === category);
+
+  // Back to home button
+  const backBtn = document.createElement("div");
+  backBtn.className = "back-home";
+  backBtn.textContent = "← Back to Home";
+  backBtn.onclick = () => loadArticles();
+  container.appendChild(backBtn);
+
+  const section = document.createElement("div");
+  section.className = "category-section";
+  section.innerHTML = `<h2>${category}</h2>`;
+  catArticles.forEach(a => {
     const div = document.createElement("div");
     div.className = "article-item";
     div.innerHTML = `
       <a href="articles.html?id=${a.id}">${a.title}</a>
       <div class="article-time">${formatTime(a.published_at)}</div>
     `;
-    container.appendChild(div);
+    section.appendChild(div);
   });
-  displayIndex += batch.length;
+  container.appendChild(section);
 }
-
-// Infinite scroll listener
-window.addEventListener("scroll", () => {
-  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
-    displayNextBatch();
-  }
-});
 
 // Category menu click
 document.querySelectorAll("#categories-menu a").forEach(link => {
@@ -225,14 +285,6 @@ document.querySelectorAll("#categories-menu a").forEach(link => {
     const cat = e.target.dataset.category;
     loadArticles(cat);
     categoriesMenu.classList.remove("active");
-
-    // Add back button
-    const container = document.getElementById("news-container");
-    const backBtn = document.createElement("div");
-    backBtn.className = "back-home";
-    backBtn.textContent = "← Back to Home";
-    backBtn.onclick = () => loadArticles();
-    container.insertBefore(backBtn, container.firstChild);
   });
 });
 
