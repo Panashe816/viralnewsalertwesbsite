@@ -168,25 +168,11 @@ function formatTime(published_at) {
   return `${diffDays} d`;
 }
 
-let allArticles = [];
-let currentCategory = null;
-
-// We only want highlighted_articles content to appear.
-// Your backend already merges sources, but we will FILTER to highlighted_articles only.
-function isHighlightedArticle(a) {
-  // Supports common backend fields: table, source_table, origin, is_highlighted
-  const t = (a.table || a.source_table || a.origin || "").toString().toLowerCase();
-  if (t.includes("highlighted")) return true;
-  if (a.is_highlighted === true) return true;
-  if (a.highlighted === true) return true;
-  // Fallback: if backend already returns only highlighted, keep it.
-  return true;
-}
-
 function sanitizeTitle(t) {
   return (t || "").toString().replace(/[\[\]\*\<\>\"\'\`]/g, "").trim();
 }
 
+// Canonical category order (must match your generator/scraper buckets)
 const CATEGORY_ORDER = [
   "breaking",
   "trending",
@@ -200,71 +186,109 @@ const CATEGORY_ORDER = [
   "Entertainment"
 ];
 
-// Fetch articles from backend
+// Normalize incoming category strings from backend to our canonical names
+function normalizeCategory(raw) {
+  const c = (raw || "").toString().trim();
+
+  const lower = c.toLowerCase();
+  if (lower === "breaking") return "breaking";
+  if (lower === "trending") return "trending";
+  if (lower === "top headlines" || lower === "topheadlines" || lower === "top-headlines") return "top headlines";
+
+  // Keep these exact title-case buckets
+  if (lower === "general news") return "General News";
+  if (lower === "world news") return "World News";
+  if (lower === "politics") return "Politics";
+  if (lower === "technology" || lower === "tech") return "Technology";
+  if (lower === "sports") return "Sports";
+  if (lower === "health & fitness" || lower === "health and fitness" || lower === "health") return "Health & Fitness";
+  if (lower === "entertainment") return "Entertainment";
+
+  // fallback
+  return "General News";
+}
+
+// We only want highlighted_articles content to appear.
+// If your backend already returns only highlighted, this still works.
+function isHighlightedArticle(a) {
+  const t = (a.table || a.source_table || a.origin || "").toString().toLowerCase();
+  if (t.includes("highlighted")) return true;
+  if (a.is_highlighted === true) return true;
+  if (a.highlighted === true) return true;
+  return true; // fallback
+}
+
+let allArticles = [];
+
 async function loadArticles(category = null) {
   const container = document.getElementById("news-container");
   container.innerHTML = "";
-  currentCategory = category;
 
   try {
     const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
     const articles = await res.json();
 
-    // Map articles to clean format (and filter to highlighted)
     allArticles = (articles || [])
       .filter(isHighlightedArticle)
       .filter(a => a.title)
       .map(a => ({
         id: a.id,
         title: sanitizeTitle(a.title),
-        category: (a.category || "General News"),
+        category: normalizeCategory(a.category),
         published_at: a.published_at
-      }));
+      }))
+      .filter(a => a.id && a.title && a.published_at);
 
-    // Sort newest -> oldest once
+    // Sort newest -> oldest
     allArticles.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
-    if (!category) {
-      displayFrontPage();
-    } else {
-      displayCategory(category);
-    }
+    if (!category) displayFrontPage();
+    else displayCategory(category);
+
   } catch (err) {
     container.innerHTML = "Failed to load articles. Please try again later.";
     console.error(err);
   }
 }
 
-// Display front page: 10 categories (5 each) + More for you (everything else not already shown)
+function renderArticleItem(a) {
+  const div = document.createElement("div");
+  div.className = "article-item";
+  div.innerHTML = `
+    <a href="articles.html?id=${a.id}">${a.title}</a>
+    <div class="article-time">${formatTime(a.published_at)}</div>
+  `;
+  return div;
+}
+
 function displayFrontPage() {
   const container = document.getElementById("news-container");
   container.innerHTML = "";
 
   const shownIds = new Set();
 
-  // Render ordered categories (5 each)
+  // Always render all 10 category sections (5 each)
   CATEGORY_ORDER.forEach(cat => {
+    const section = document.createElement("div");
+    section.className = "category-section";
+    section.innerHTML = `<h2>${cat}</h2>`;
+
     const catArticles = allArticles.filter(a => a.category === cat);
     const top5 = catArticles.slice(0, 5);
 
-    if (top5.length > 0) {
-      const section = document.createElement("div");
-      section.className = "category-section";
-      section.innerHTML = `<h2>${cat}</h2>`;
-
+    if (top5.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "article-item";
+      empty.innerHTML = `<div>(no items yet)</div>`;
+      section.appendChild(empty);
+    } else {
       top5.forEach(a => {
         shownIds.add(a.id);
-        const div = document.createElement("div");
-        div.className = "article-item";
-        div.innerHTML = `
-          <a href="articles.html?id=${a.id}">${a.title}</a>
-          <div class="article-time">${formatTime(a.published_at)}</div>
-        `;
-        section.appendChild(div);
+        section.appendChild(renderArticleItem(a));
       });
-
-      container.appendChild(section);
     }
+
+    container.appendChild(section);
   });
 
   // More for you: everything not shown above (newest -> oldest)
@@ -280,27 +304,19 @@ function displayFrontPage() {
     empty.innerHTML = `<div>No more articles yet.</div>`;
     moreSection.appendChild(empty);
   } else {
-    moreForYou.forEach(a => {
-      const div = document.createElement("div");
-      div.className = "article-item";
-      div.innerHTML = `
-        <a href="articles.html?id=${a.id}">${a.title}</a>
-        <div class="article-time">${formatTime(a.published_at)}</div>
-      `;
-      moreSection.appendChild(div);
-    });
+    moreForYou.forEach(a => moreSection.appendChild(renderArticleItem(a)));
   }
 
   container.appendChild(moreSection);
 }
 
-// Display single category (from menu)
 function displayCategory(category) {
   const container = document.getElementById("news-container");
   container.innerHTML = "";
-  const catArticles = allArticles.filter(a => a.category === category);
 
-  // Back to home button
+  const normalized = normalizeCategory(category);
+  const catArticles = allArticles.filter(a => a.category === normalized);
+
   const backBtn = document.createElement("div");
   backBtn.className = "back-home";
   backBtn.textContent = "← Back to Home";
@@ -309,7 +325,7 @@ function displayCategory(category) {
 
   const section = document.createElement("div");
   section.className = "category-section";
-  section.innerHTML = `<h2>${category}</h2>`;
+  section.innerHTML = `<h2>${normalized}</h2>`;
 
   if (catArticles.length === 0) {
     const empty = document.createElement("div");
@@ -317,21 +333,12 @@ function displayCategory(category) {
     empty.innerHTML = `<div>No articles in this category yet.</div>`;
     section.appendChild(empty);
   } else {
-    catArticles.forEach(a => {
-      const div = document.createElement("div");
-      div.className = "article-item";
-      div.innerHTML = `
-        <a href="articles.html?id=${a.id}">${a.title}</a>
-        <div class="article-time">${formatTime(a.published_at)}</div>
-      `;
-      section.appendChild(div);
-    });
+    catArticles.forEach(a => section.appendChild(renderArticleItem(a)));
   }
 
   container.appendChild(section);
 }
 
-// Category menu click
 document.querySelectorAll("#categories-menu a").forEach(link => {
   link.addEventListener("click", e => {
     e.preventDefault();
