@@ -128,9 +128,9 @@ header h1 {
 
 <div id="categories-menu">
   <h2>Categories</h2>
-  <a href="#" data-category="Trending">Trending</a>
-  <a href="#" data-category="Breaking">Breaking</a>
-  <a href="#" data-category="Top Headlines">Top Headlines</a>
+  <a href="#" data-category="breaking">breaking</a>
+  <a href="#" data-category="trending">trending</a>
+  <a href="#" data-category="top headlines">top headlines</a>
   <a href="#" data-category="General News">General News</a>
   <a href="#" data-category="World News">World News</a>
   <a href="#" data-category="Politics">Politics</a>
@@ -169,6 +169,36 @@ function formatTime(published_at) {
 }
 
 let allArticles = [];
+let currentCategory = null;
+
+// We only want highlighted_articles content to appear.
+// Your backend already merges sources, but we will FILTER to highlighted_articles only.
+function isHighlightedArticle(a) {
+  // Supports common backend fields: table, source_table, origin, is_highlighted
+  const t = (a.table || a.source_table || a.origin || "").toString().toLowerCase();
+  if (t.includes("highlighted")) return true;
+  if (a.is_highlighted === true) return true;
+  if (a.highlighted === true) return true;
+  // Fallback: if backend already returns only highlighted, keep it.
+  return true;
+}
+
+function sanitizeTitle(t) {
+  return (t || "").toString().replace(/[\[\]\*\<\>\"\'\`]/g, "").trim();
+}
+
+const CATEGORY_ORDER = [
+  "breaking",
+  "trending",
+  "top headlines",
+  "General News",
+  "World News",
+  "Politics",
+  "Technology",
+  "Sports",
+  "Health & Fitness",
+  "Entertainment"
+];
 
 // Fetch articles from backend
 async function loadArticles(category = null) {
@@ -180,15 +210,19 @@ async function loadArticles(category = null) {
     const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
     const articles = await res.json();
 
-    // Map articles to clean format
-    allArticles = articles
+    // Map articles to clean format (and filter to highlighted)
+    allArticles = (articles || [])
+      .filter(isHighlightedArticle)
       .filter(a => a.title)
       .map(a => ({
         id: a.id,
-        title: a.title.replace(/[\[\]\*\<\>\"\'\`]/g, "").trim(),
-        category: a.category || "General",
+        title: sanitizeTitle(a.title),
+        category: (a.category || "General News"),
         published_at: a.published_at
       }));
+
+    // Sort newest -> oldest once
+    allArticles.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
     if (!category) {
       displayFrontPage();
@@ -201,24 +235,25 @@ async function loadArticles(category = null) {
   }
 }
 
-// Display front page: Trending, Breaking, Top Headlines, Latest
+// Display front page: 10 categories (5 each) + More for you (everything else not already shown)
 function displayFrontPage() {
   const container = document.getElementById("news-container");
   container.innerHTML = "";
 
-  const specialCats = ["Trending", "Breaking", "Top Headlines"];
-  let leftoverArticles = [];
+  const shownIds = new Set();
 
-  specialCats.forEach(cat => {
+  // Render ordered categories (5 each)
+  CATEGORY_ORDER.forEach(cat => {
     const catArticles = allArticles.filter(a => a.category === cat);
     const top5 = catArticles.slice(0, 5);
-    leftoverArticles.push(...catArticles.slice(5));
 
     if (top5.length > 0) {
       const section = document.createElement("div");
       section.className = "category-section";
       section.innerHTML = `<h2>${cat}</h2>`;
+
       top5.forEach(a => {
+        shownIds.add(a.id);
         const div = document.createElement("div");
         div.className = "article-item";
         div.innerHTML = `
@@ -227,27 +262,36 @@ function displayFrontPage() {
         `;
         section.appendChild(div);
       });
+
       container.appendChild(section);
     }
   });
 
-  // Latest Articles: includes leftovers + all other categories
-  const latestArticles = allArticles.filter(a => !specialCats.includes(a.category)).concat(leftoverArticles);
-  if (latestArticles.length > 0) {
-    const section = document.createElement("div");
-    section.className = "category-section";
-    section.innerHTML = `<h2>Latest Articles</h2>`;
-    latestArticles.forEach(a => {
+  // More for you: everything not shown above (newest -> oldest)
+  const moreForYou = allArticles.filter(a => !shownIds.has(a.id));
+
+  const moreSection = document.createElement("div");
+  moreSection.className = "category-section";
+  moreSection.innerHTML = `<h2>More for you</h2>`;
+
+  if (moreForYou.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "article-item";
+    empty.innerHTML = `<div>No more articles yet.</div>`;
+    moreSection.appendChild(empty);
+  } else {
+    moreForYou.forEach(a => {
       const div = document.createElement("div");
       div.className = "article-item";
       div.innerHTML = `
         <a href="articles.html?id=${a.id}">${a.title}</a>
         <div class="article-time">${formatTime(a.published_at)}</div>
       `;
-      section.appendChild(div);
+      moreSection.appendChild(div);
     });
-    container.appendChild(section);
   }
+
+  container.appendChild(moreSection);
 }
 
 // Display single category (from menu)
@@ -266,15 +310,24 @@ function displayCategory(category) {
   const section = document.createElement("div");
   section.className = "category-section";
   section.innerHTML = `<h2>${category}</h2>`;
-  catArticles.forEach(a => {
-    const div = document.createElement("div");
-    div.className = "article-item";
-    div.innerHTML = `
-      <a href="articles.html?id=${a.id}">${a.title}</a>
-      <div class="article-time">${formatTime(a.published_at)}</div>
-    `;
-    section.appendChild(div);
-  });
+
+  if (catArticles.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "article-item";
+    empty.innerHTML = `<div>No articles in this category yet.</div>`;
+    section.appendChild(empty);
+  } else {
+    catArticles.forEach(a => {
+      const div = document.createElement("div");
+      div.className = "article-item";
+      div.innerHTML = `
+        <a href="articles.html?id=${a.id}">${a.title}</a>
+        <div class="article-time">${formatTime(a.published_at)}</div>
+      `;
+      section.appendChild(div);
+    });
+  }
+
   container.appendChild(section);
 }
 
