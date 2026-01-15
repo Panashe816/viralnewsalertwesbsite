@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <title>VIRAL NEWS</title>
 <meta name="description" content="Viral News – Latest headlines from all categories">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #0a1d3f; /* Navy-blue background */
+  background: #0a1d3f;
   color: #fff;
   margin: 0;
   padding: 0;
@@ -18,7 +19,7 @@ header {
   align-items: center;
   justify-content: space-between;
   padding: 15px 20px;
-  background: #081737; 
+  background: #081737;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -68,28 +69,26 @@ header h1 {
   padding: 10px 0;
   font-size: 14px;
 }
-#categories-menu a:hover {
-  color: #ffcc00;
-}
+#categories-menu a:hover { color: #ffcc00; }
+
 #news-container {
   max-width: 900px;
   margin: 20px auto;
   padding: 0 20px;
 }
-.category-section {
-  margin-bottom: 40px;
-}
+.category-section { margin-bottom: 40px; }
 .category-section h2 {
   font-size: 20px;
-  border-bottom: 2px solid #444;
-  padding-bottom: 5px;
+  border-bottom: 2px solid #334a7a;
+  padding-bottom: 6px;
   margin-bottom: 15px;
+  text-transform: capitalize;
 }
 .article-item {
   background: #0f264f;
   margin-bottom: 10px;
   padding: 12px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 .article-item a {
   color: #fff;
@@ -97,31 +96,34 @@ header h1 {
   font-weight: bold;
   display: block;
 }
-.article-item a:hover {
-  color: #ffcc00;
-}
+.article-item a:hover { color: #ffcc00; }
 .article-time {
   font-size: 12px;
-  color: #ccc;
-  margin-top: 3px;
+  color: #cfd8ea;
+  margin-top: 4px;
+}
+.error-box {
+  background: #331a1a;
+  border: 1px solid #ff6b6b;
+  padding: 12px;
+  border-radius: 8px;
 }
 .back-home {
   display: inline-block;
-  margin-bottom: 15px;
+  margin: 10px 0 18px;
   font-size: 14px;
   color: #ffcc00;
   cursor: pointer;
 }
+.small-muted { color: #cfd8ea; font-size: 12px; }
 </style>
 </head>
 
 <body>
 
 <header>
-  <div class="menu-icon" id="menu-toggle">
-    <div></div>
-    <div></div>
-    <div></div>
+  <div class="menu-icon" id="menu-toggle" aria-label="Open menu">
+    <div></div><div></div><div></div>
   </div>
   <h1>VIRAL NEWS</h1>
 </header>
@@ -143,147 +145,95 @@ header h1 {
 <div id="news-container">Loading…</div>
 
 <script>
+const API_BASE = "https://viral-news-backend-3.onrender.com";
+
 const menuToggle = document.getElementById("menu-toggle");
 const categoriesMenu = document.getElementById("categories-menu");
-menuToggle.addEventListener("click", () => {
-  categoriesMenu.classList.toggle("active");
-});
+menuToggle.addEventListener("click", () => categoriesMenu.classList.toggle("active"));
 
-// Close menu when clicking outside
 document.addEventListener("click", (e) => {
   if (!categoriesMenu.contains(e.target) && !menuToggle.contains(e.target)) {
     categoriesMenu.classList.remove("active");
   }
 });
 
-// Helper: format time (23 m, 5 h)
+// 14m / 3h / 2d
 function formatTime(published_at) {
   const pubDate = new Date(published_at);
+  if (isNaN(pubDate.getTime())) return "";
   const diffMs = Date.now() - pubDate.getTime();
   const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 60) return `${diffMins} m`;
+  if (diffMins < 1) return "now";
+  if (diffMins < 60) return `${diffMins}m`;
   const diffHrs = Math.floor(diffMins / 60);
-  if (diffHrs < 24) return `${diffHrs} h`;
+  if (diffHrs < 24) return `${diffHrs}h`;
   const diffDays = Math.floor(diffHrs / 24);
-  return `${diffDays} d`;
+  return `${diffDays}d`;
 }
 
 function sanitizeTitle(t) {
   return (t || "").toString().replace(/[\[\]\*\<\>\"\'\`]/g, "").trim();
 }
 
-// Canonical category order (must match your generator/scraper buckets)
-const CATEGORY_ORDER = [
-  "breaking",
-  "trending",
-  "top headlines",
-  "General News",
-  "World News",
-  "Politics",
-  "Technology",
-  "Sports",
-  "Health & Fitness",
-  "Entertainment"
-];
-
-// Normalize incoming category strings from backend to our canonical names
-function normalizeCategory(raw) {
-  const c = (raw || "").toString().trim();
-
-  const lower = c.toLowerCase();
-  if (lower === "breaking") return "breaking";
-  if (lower === "trending") return "trending";
-  if (lower === "top headlines" || lower === "topheadlines" || lower === "top-headlines") return "top headlines";
-
-  // Keep these exact title-case buckets
-  if (lower === "general news") return "General News";
-  if (lower === "world news") return "World News";
-  if (lower === "politics") return "Politics";
-  if (lower === "technology" || lower === "tech") return "Technology";
-  if (lower === "sports") return "Sports";
-  if (lower === "health & fitness" || lower === "health and fitness" || lower === "health") return "Health & Fitness";
-  if (lower === "entertainment") return "Entertainment";
-
-  // fallback
-  return "General News";
-}
-
-// We only want highlighted_articles content to appear.
-// If your backend already returns only highlighted, this still works.
-function isHighlightedArticle(a) {
-  const t = (a.table || a.source_table || a.origin || "").toString().toLowerCase();
-  if (t.includes("highlighted")) return true;
-  if (a.is_highlighted === true) return true;
-  if (a.highlighted === true) return true;
-  return true; // fallback
-}
-
-let allArticles = [];
-
-async function loadArticles(category = null) {
-  const container = document.getElementById("news-container");
-  container.innerHTML = "";
-
-  try {
-    const res = await fetch("https://viral-news-backend-3.onrender.com/articles/");
-    const articles = await res.json();
-
-    allArticles = (articles || [])
-      .filter(isHighlightedArticle)
-      .filter(a => a.title)
-      .map(a => ({
-        id: a.id,
-        title: sanitizeTitle(a.title),
-        category: normalizeCategory(a.category),
-        published_at: a.published_at
-      }))
-      .filter(a => a.id && a.title && a.published_at);
-
-    // Sort newest -> oldest
-    allArticles.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
-
-    if (!category) displayFrontPage();
-    else displayCategory(category);
-
-  } catch (err) {
-    container.innerHTML = "Failed to load articles. Please try again later.";
-    console.error(err);
-  }
-}
-
 function renderArticleItem(a) {
   const div = document.createElement("div");
   div.className = "article-item";
   div.innerHTML = `
-    <a href="articles.html?id=${a.id}">${a.title}</a>
-    <div class="article-time">${formatTime(a.published_at)}</div>
+    <a href="articles.html?id=${a.id}">${sanitizeTitle(a.title)}</a>
+    <div class="article-time">${formatTime(a.published_at || a.created_at)}</div>
   `;
   return div;
+}
+
+let homepageData = null;
+
+async function loadHomepage() {
+  const container = document.getElementById("news-container");
+  container.innerHTML = "Loading…";
+
+  try {
+    const res = await fetch(`${API_BASE}/homepage`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    homepageData = await res.json();
+
+    displayFrontPage();
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `
+      <div class="error-box">
+        Failed to load articles from API.<br>
+        <span class="small-muted">${String(err)}</span>
+      </div>
+    `;
+  }
 }
 
 function displayFrontPage() {
   const container = document.getElementById("news-container");
   container.innerHTML = "";
 
+  const order = (homepageData && homepageData.order) || [];
+  const categories = (homepageData && homepageData.categories) || {};
+  const all = (homepageData && homepageData.all) || [];
+
   const shownIds = new Set();
 
-  // Always render all 10 category sections (5 each)
-  CATEGORY_ORDER.forEach(cat => {
+  // Render 10 category sections (top 5 each)
+  order.forEach(cat => {
     const section = document.createElement("div");
     section.className = "category-section";
     section.innerHTML = `<h2>${cat}</h2>`;
 
-    const catArticles = allArticles.filter(a => a.category === cat);
-    const top5 = catArticles.slice(0, 5);
+    const items = (categories[cat] || []).slice(0, 5);
 
-    if (top5.length === 0) {
+    if (items.length === 0) {
       const empty = document.createElement("div");
       empty.className = "article-item";
       empty.innerHTML = `<div>(no items yet)</div>`;
       section.appendChild(empty);
     } else {
-      top5.forEach(a => {
-        shownIds.add(a.id);
+      items.forEach(a => {
+        if (a && a.id) shownIds.add(a.id);
         section.appendChild(renderArticleItem(a));
       });
     }
@@ -291,8 +241,8 @@ function displayFrontPage() {
     container.appendChild(section);
   });
 
-  // More for you: everything not shown above (newest -> oldest)
-  const moreForYou = allArticles.filter(a => !shownIds.has(a.id));
+  // More for you = anything not in the first 10 buckets top-5 set
+  const moreForYou = all.filter(a => a && a.id && !shownIds.has(a.id));
 
   const moreSection = document.createElement("div");
   moreSection.className = "category-section";
@@ -314,26 +264,33 @@ function displayCategory(category) {
   const container = document.getElementById("news-container");
   container.innerHTML = "";
 
-  const normalized = normalizeCategory(category);
-  const catArticles = allArticles.filter(a => a.category === normalized);
+  const order = (homepageData && homepageData.order) || [];
+  const categories = (homepageData && homepageData.categories) || {};
+
+  // if unknown category, fallback to front page
+  if (!order.includes(category)) {
+    displayFrontPage();
+    return;
+  }
 
   const backBtn = document.createElement("div");
   backBtn.className = "back-home";
   backBtn.textContent = "← Back to Home";
-  backBtn.onclick = () => loadArticles();
+  backBtn.onclick = () => displayFrontPage();
   container.appendChild(backBtn);
 
   const section = document.createElement("div");
   section.className = "category-section";
-  section.innerHTML = `<h2>${normalized}</h2>`;
+  section.innerHTML = `<h2>${category}</h2>`;
 
-  if (catArticles.length === 0) {
+  const items = categories[category] || [];
+  if (items.length === 0) {
     const empty = document.createElement("div");
     empty.className = "article-item";
     empty.innerHTML = `<div>No articles in this category yet.</div>`;
     section.appendChild(empty);
   } else {
-    catArticles.forEach(a => section.appendChild(renderArticleItem(a)));
+    items.forEach(a => section.appendChild(renderArticleItem(a)));
   }
 
   container.appendChild(section);
@@ -343,13 +300,14 @@ document.querySelectorAll("#categories-menu a").forEach(link => {
   link.addEventListener("click", e => {
     e.preventDefault();
     const cat = e.target.dataset.category;
-    loadArticles(cat);
     categoriesMenu.classList.remove("active");
+    if (!homepageData) return;
+    displayCategory(cat);
   });
 });
 
 // Initial load
-loadArticles();
+loadHomepage();
 </script>
 
 </body>
