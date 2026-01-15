@@ -1,121 +1,471 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>VIRAL NEWS</title>
-<meta name="description" content="Viral News – Latest headlines from all categories">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Viral News – Latest headlines from all categories" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #0a1d3f;
-  color: #fff;
-  margin: 0;
-  padding: 0;
-}
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px 20px;
-  background: #081737;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-header h1 {
-  margin: 0;
-  font-size: 26px;
-  color: #fff;
-}
-.menu-icon {
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 25px;
-  height: 20px;
-}
-.menu-icon div {
-  height: 3px;
-  background: #fff;
-  border-radius: 2px;
-}
-#categories-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 250px;
-  height: 100%;
-  background: #1a2c5b;
-  padding: 20px;
-  transform: translateX(-260px);
-  transition: transform 0.3s ease;
-  overflow-y: auto;
-  z-index: 999;
-}
-#categories-menu.active {
-  transform: translateX(0);
-}
-#categories-menu h2 {
-  font-size: 18px;
-  margin-bottom: 15px;
-}
-#categories-menu a {
-  display: block;
-  text-decoration: none;
-  color: #fff;
-  padding: 10px 0;
-  font-size: 14px;
-}
-#categories-menu a:hover { color: #ffcc00; }
+  :root{
+    --bg:#0a1d3f;
+    --bg2:#081737;
+    --panel:#0f264f;
+    --panel2:#112b57;
+    --line:#334a7a;
+    --text:#ffffff;
+    --muted:#cfd8ea;
+    --accent:#ffcc00;
+    --danger:#ff6b6b;
+    --shadow: 0 10px 24px rgba(0,0,0,.25);
+    --radius: 12px;
+  }
 
-#news-container {
-  max-width: 900px;
-  margin: 20px auto;
-  padding: 0 20px;
-}
-.category-section { margin-bottom: 40px; }
-.category-section h2 {
-  font-size: 20px;
-  border-bottom: 2px solid #334a7a;
-  padding-bottom: 6px;
-  margin-bottom: 15px;
-  text-transform: capitalize;
-}
-.article-item {
-  background: #0f264f;
-  margin-bottom: 10px;
-  padding: 12px;
-  border-radius: 8px;
-}
-.article-item a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: bold;
-  display: block;
-}
-.article-item a:hover { color: #ffcc00; }
-.article-time {
-  font-size: 12px;
-  color: #cfd8ea;
-  margin-top: 4px;
-}
-.error-box {
-  background: #331a1a;
-  border: 1px solid #ff6b6b;
-  padding: 12px;
-  border-radius: 8px;
-}
-.back-home {
-  display: inline-block;
-  margin: 10px 0 18px;
-  font-size: 14px;
-  color: #ffcc00;
-  cursor: pointer;
-}
-.small-muted { color: #cfd8ea; font-size: 12px; }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* Header */
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 14px 18px;
+    background: var(--bg2);
+    position: sticky;
+    top:0;
+    z-index:1000;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  header h1{
+    margin:0;
+    font-size: 22px;
+    letter-spacing: .6px;
+  }
+  .menu-icon{
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    width:26px;
+    height:20px;
+  }
+  .menu-icon div{
+    height:3px;
+    background:#fff;
+    border-radius: 2px;
+  }
+
+  /* Side menu */
+  #categories-menu{
+    position:fixed;
+    top:0; left:0;
+    width:260px;
+    height:100%;
+    background:#1a2c5b;
+    padding: 18px 18px 28px;
+    transform: translateX(-270px);
+    transition: transform .25s ease;
+    overflow-y:auto;
+    z-index:999;
+    border-right: 1px solid rgba(255,255,255,.06);
+  }
+  #categories-menu.active{ transform: translateX(0); }
+  #categories-menu h2{
+    font-size: 16px;
+    margin: 6px 0 14px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  #categories-menu a{
+    display:block;
+    text-decoration:none;
+    color:#fff;
+    padding: 10px 0;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  #categories-menu a:hover{ color: var(--accent); }
+
+  /* Page container */
+  #news-container{
+    max-width: 1120px;
+    margin: 18px auto 60px;
+    padding: 0 16px;
+  }
+
+  /* BBC-style section title */
+  .section-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin: 26px 0 14px;
+  }
+  .section-title .bar{
+    width:4px; height:18px;
+    background: var(--accent);
+    border-radius: 10px;
+  }
+  .section-title h2{
+    margin:0;
+    font-size: 18px;
+    letter-spacing: .3px;
+  }
+  .section-title .viewall{
+    margin-left:auto;
+    color: var(--accent);
+    font-size: 13px;
+    text-decoration:none;
+  }
+  .section-title .viewall:hover{ text-decoration: underline; }
+
+  /* Cards */
+  .card{
+    background: var(--panel);
+    border-radius: var(--radius);
+    overflow:hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,.06);
+  }
+
+  /* HERO */
+  .hero-grid{
+    display:grid;
+    grid-template-columns: 1.35fr .65fr;
+    gap: 14px;
+    margin-top: 12px;
+  }
+
+  .hero-main{
+    display:flex;
+    flex-direction:column;
+  }
+  .hero-main .img{
+    width:100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+    position:relative;
+    overflow:hidden;
+  }
+  .hero-main .img img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    display:block;
+  }
+  .hero-main .body{
+    padding: 14px 14px 12px;
+  }
+  .kicker{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .chip{
+    background: rgba(255,204,0,.16);
+    color: var(--accent);
+    border: 1px solid rgba(255,204,0,.25);
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing:.4px;
+  }
+
+  .hero-title{
+    font-size: 22px;
+    margin: 0 0 8px;
+    line-height: 1.25;
+  }
+  .hero-title a{
+    color:#fff;
+    text-decoration:none;
+  }
+  .hero-title a:hover{ color: var(--accent); }
+  .hero-desc{
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .hero-side{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+  .side-item{
+    display:grid;
+    grid-template-columns: 86px 1fr;
+    gap:10px;
+    padding: 10px;
+    background: var(--panel);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,.06);
+  }
+  .side-thumb{
+    width:86px;
+    height:64px;
+    border-radius: 10px;
+    overflow:hidden;
+    background: rgba(255,255,255,.06);
+  }
+  .side-thumb img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    display:block;
+  }
+  .side-title{
+    margin:0;
+    font-size: 13px;
+    line-height: 1.25;
+    font-weight: 700;
+  }
+  .side-title a{
+    color:#fff;
+    text-decoration:none;
+  }
+  .side-title a:hover{ color: var(--accent); }
+  .meta{
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Breaking strip (compact list) */
+  .strip{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .strip-item{
+    display:flex;
+    gap: 12px;
+    align-items:flex-start;
+    padding: 12px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+  }
+  .strip-item a{
+    color:#fff;
+    text-decoration:none;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .strip-item a:hover{ color: var(--accent); }
+  .strip-meta{
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  /* Category blocks */
+  .cat-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .cat-block{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+
+  .lead{
+    display:grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+  }
+  .lead .thumb{
+    width:120px;
+    height:84px;
+    border-radius: 12px;
+    overflow:hidden;
+    background: rgba(255,255,255,.06);
+  }
+  .lead .thumb img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    display:block;
+  }
+  .lead h3{
+    margin:0;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+  .lead h3 a{
+    color:#fff;
+    text-decoration:none;
+  }
+  .lead h3 a:hover{ color: var(--accent); }
+
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap: 8px;
+  }
+  .list-row{
+    display:flex;
+    gap: 10px;
+    align-items:center;
+    padding: 10px 12px;
+    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255,255,255,.05);
+    border-radius: 12px;
+  }
+  .list-row .mini{
+    width:56px;
+    height:42px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.06);
+    overflow:hidden;
+    flex: 0 0 auto;
+  }
+  .list-row .mini img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    display:block;
+  }
+  .list-row a{
+    color:#fff;
+    text-decoration:none;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.25;
+  }
+  .list-row a:hover{ color: var(--accent); }
+  .list-row .time{
+    margin-left:auto;
+    color: var(--muted);
+    font-size: 12px;
+    flex: 0 0 auto;
+  }
+
+  /* Horizontal rail */
+  .rail{
+    display:flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-snap-type: x mandatory;
+  }
+  .rail::-webkit-scrollbar{ height: 8px; }
+  .rail::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,.18);
+    border-radius: 999px;
+  }
+  .rail-card{
+    min-width: 260px;
+    max-width: 260px;
+    scroll-snap-align: start;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+    overflow:hidden;
+  }
+  .rail-card .thumb{
+    width:100%;
+    height: 150px;
+    background: rgba(255,255,255,.06);
+    overflow:hidden;
+  }
+  .rail-card .thumb img{
+    width:100%;
+    height:100%;
+    object-fit: cover;
+    display:block;
+  }
+  .rail-card .body{
+    padding: 10px 12px 12px;
+  }
+  .rail-card .title{
+    margin:0;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+  .rail-card .title a{
+    color:#fff;
+    text-decoration:none;
+    font-weight: 800;
+  }
+  .rail-card .title a:hover{ color: var(--accent); }
+  .rail-card .meta{
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* More For You */
+  .more-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .more-item{
+    padding: 12px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+  }
+  .more-item a{
+    color:#fff;
+    text-decoration:none;
+    font-weight: 800;
+    line-height: 1.25;
+    display:block;
+  }
+  .more-item a:hover{ color: var(--accent); }
+  .more-item .meta{ margin-top: 6px; }
+
+  /* Utilities */
+  .error-box{
+    background: #331a1a;
+    border: 1px solid var(--danger);
+    padding: 12px;
+    border-radius: var(--radius);
+  }
+  .small-muted{ color: var(--muted); font-size: 12px; }
+
+  /* Responsive */
+  @media (max-width: 980px){
+    .hero-grid{ grid-template-columns: 1fr; }
+    .hero-side{ flex-direction: row; flex-wrap: wrap; }
+    .side-item{ grid-template-columns: 70px 1fr; flex: 1 1 280px; }
+  }
+
+  @media (max-width: 760px){
+    #news-container{ padding: 0 12px; }
+    header h1{ font-size: 20px; }
+    .cat-grid{ grid-template-columns: 1fr; }
+    .more-grid{ grid-template-columns: 1fr; }
+    .lead{ grid-template-columns: 92px 1fr; }
+    .lead .thumb{ width:92px; height:70px; }
+    .hero-title{ font-size: 20px; }
+  }
+
+  @media (max-width: 420px){
+    .side-item{ grid-template-columns: 64px 1fr; }
+    .side-thumb{ width:64px; height:52px; }
+    .rail-card{ min-width: 220px; max-width: 220px; }
+    .rail-card .thumb{ height: 130px; }
+  }
 </style>
 </head>
 
@@ -130,9 +480,9 @@ header h1 {
 
 <div id="categories-menu">
   <h2>Categories</h2>
-  <a href="#" data-category="breaking">breaking</a>
-  <a href="#" data-category="trending">trending</a>
-  <a href="#" data-category="top headlines">top headlines</a>
+  <a href="#" data-category="breaking">Breaking</a>
+  <a href="#" data-category="trending">Trending</a>
+  <a href="#" data-category="top headlines">Top Headlines</a>
   <a href="#" data-category="General News">General News</a>
   <a href="#" data-category="World News">World News</a>
   <a href="#" data-category="Politics">Politics</a>
@@ -150,7 +500,6 @@ const API_BASE = "https://viral-news-backend-3.onrender.com";
 const menuToggle = document.getElementById("menu-toggle");
 const categoriesMenu = document.getElementById("categories-menu");
 menuToggle.addEventListener("click", () => categoriesMenu.classList.toggle("active"));
-
 document.addEventListener("click", (e) => {
   if (!categoriesMenu.contains(e.target) && !menuToggle.contains(e.target)) {
     categoriesMenu.classList.remove("active");
@@ -158,31 +507,65 @@ document.addEventListener("click", (e) => {
 });
 
 // 14m / 3h / 2d
-function formatTime(published_at) {
-  const pubDate = new Date(published_at);
-  if (isNaN(pubDate.getTime())) return "";
-  const diffMs = Date.now() - pubDate.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "now";
-  if (diffMins < 60) return `${diffMins}m`;
-  const diffHrs = Math.floor(diffMins / 60);
-  if (diffHrs < 24) return `${diffHrs}h`;
-  const diffDays = Math.floor(diffHrs / 24);
-  return `${diffDays}d`;
+function formatTime(dt) {
+  const d = new Date(dt);
+  if (isNaN(d.getTime())) return "";
+  const diffMs = Date.now() - d.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "now";
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d`;
 }
 
-function sanitizeTitle(t) {
-  return (t || "").toString().replace(/[\[\]\*\<\>\"\'\`]/g, "").trim();
+function escapeHtml(s) {
+  return (s || "").toString()
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function renderArticleItem(a) {
-  const div = document.createElement("div");
-  div.className = "article-item";
-  div.innerHTML = `
-    <a href="articles.html?id=${a.id}">${sanitizeTitle(a.title)}</a>
-    <div class="article-time">${formatTime(a.published_at || a.created_at)}</div>
+function safeTime(a){
+  return a.published_at || a.created_at || "";
+}
+
+function linkToArticle(a){
+  return `articles.html?id=${a.id}`;
+}
+
+function pickImage(a){
+  const img = (a.image_url || "").trim();
+  return img || null;
+}
+
+function firstNonEmpty(arr){
+  for (const x of (arr || [])) {
+    if (x && x.id && x.title) return x;
+  }
+  return null;
+}
+
+function take(arr, n){
+  return (arr || []).slice(0, n);
+}
+
+function withoutShown(all, shownSet){
+  return (all || []).filter(a => a && a.id && !shownSet.has(a.id));
+}
+
+function sectionHeader(title, viewAllCategory=null){
+  const viewAll = viewAllCategory ? `<a class="viewall" href="#" data-viewall="${escapeHtml(viewAllCategory)}">View all</a>` : "";
+  return `
+    <div class="section-title">
+      <div class="bar"></div>
+      <h2>${escapeHtml(title)}</h2>
+      ${viewAll}
+    </div>
   `;
-  return div;
 }
 
 let homepageData = null;
@@ -190,119 +573,385 @@ let homepageData = null;
 async function loadHomepage() {
   const container = document.getElementById("news-container");
   container.innerHTML = "Loading…";
-
   try {
     const res = await fetch(`${API_BASE}/homepage`, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     homepageData = await res.json();
-
-    displayFrontPage();
+    renderBBCStyleHome();
   } catch (err) {
     console.error(err);
     container.innerHTML = `
       <div class="error-box">
         Failed to load articles from API.<br>
-        <span class="small-muted">${String(err)}</span>
+        <span class="small-muted">${escapeHtml(String(err))}</span>
       </div>
     `;
   }
 }
 
-function displayFrontPage() {
+function renderBBCStyleHome(){
   const container = document.getElementById("news-container");
   container.innerHTML = "";
 
-  const order = (homepageData && homepageData.order) || [];
-  const categories = (homepageData && homepageData.categories) || {};
-  const all = (homepageData && homepageData.all) || [];
+  const order = homepageData?.order || [];
+  const categories = homepageData?.categories || {};
+  const all = homepageData?.all || [];
 
-  const shownIds = new Set();
+  // ===== HERO (Top Headlines) =====
+  const top = categories["top headlines"] || categories["Top Headlines"] || [];
+  const heroMain = firstNonEmpty(top) || firstNonEmpty(all);
 
-  // Render 10 category sections (top 5 each)
-  order.forEach(cat => {
-    const section = document.createElement("div");
-    section.className = "category-section";
-    section.innerHTML = `<h2>${cat}</h2>`;
+  const heroSideItems = take(top.filter(a => heroMain ? a.id !== heroMain.id : true), 4);
 
-    const items = (categories[cat] || []).slice(0, 5);
+  const heroWrap = document.createElement("div");
+  heroWrap.innerHTML = sectionHeader("Top Headlines", "top headlines");
 
-    if (items.length === 0) {
-      const empty = document.createElement("div");
-      empty.className = "article-item";
-      empty.innerHTML = `<div>(no items yet)</div>`;
-      section.appendChild(empty);
-    } else {
-      items.forEach(a => {
-        if (a && a.id) shownIds.add(a.id);
-        section.appendChild(renderArticleItem(a));
-      });
-    }
+  const heroGrid = document.createElement("div");
+  heroGrid.className = "hero-grid";
 
-    container.appendChild(section);
-  });
+  // Hero main card
+  const mainCard = document.createElement("div");
+  mainCard.className = "card hero-main";
 
-  // More for you = anything not in the first 10 buckets top-5 set
-  const moreForYou = all.filter(a => a && a.id && !shownIds.has(a.id));
+  const mainImg = pickImage(heroMain);
+  const mainTime = heroMain ? formatTime(safeTime(heroMain)) : "";
 
-  const moreSection = document.createElement("div");
-  moreSection.className = "category-section";
-  moreSection.innerHTML = `<h2>More for you</h2>`;
+  mainCard.innerHTML = `
+    <div class="img">
+      ${mainImg ? `<img src="${mainImg}" alt="${escapeHtml(heroMain.title)}">` : ""}
+    </div>
+    <div class="body">
+      <div class="kicker">
+        <span class="chip">Top</span>
+        <span>${escapeHtml(heroMain?.source || "Viral News")}</span>
+        <span>•</span>
+        <span>${escapeHtml(mainTime)}</span>
+      </div>
+      <h3 class="hero-title">
+        <a href="${heroMain ? linkToArticle(heroMain) : "#"}">${escapeHtml(heroMain?.title || "No headline yet")}</a>
+      </h3>
+      <p class="hero-desc">${escapeHtml(heroMain?.summary || "")}</p>
+    </div>
+  `;
 
-  if (moreForYou.length === 0) {
+  // Hero side list
+  const sideCol = document.createElement("div");
+  sideCol.className = "hero-side";
+
+  if (heroSideItems.length === 0) {
     const empty = document.createElement("div");
-    empty.className = "article-item";
-    empty.innerHTML = `<div>No more articles yet.</div>`;
-    moreSection.appendChild(empty);
+    empty.className = "side-item";
+    empty.innerHTML = `<div class="side-thumb"></div><div><p class="side-title">No more headlines yet.</p></div>`;
+    sideCol.appendChild(empty);
   } else {
-    moreForYou.forEach(a => moreSection.appendChild(renderArticleItem(a)));
+    heroSideItems.forEach(a => {
+      const img = pickImage(a);
+      const t = formatTime(safeTime(a));
+      const div = document.createElement("div");
+      div.className = "side-item";
+      div.innerHTML = `
+        <div class="side-thumb">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
+        <div>
+          <p class="side-title"><a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a></p>
+          <div class="meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(t)}</div>
+        </div>
+      `;
+      sideCol.appendChild(div);
+    });
   }
 
-  container.appendChild(moreSection);
+  heroGrid.appendChild(mainCard);
+  heroGrid.appendChild(sideCol);
+
+  heroWrap.appendChild(heroGrid);
+  container.appendChild(heroWrap);
+
+  // ===== Breaking (compact strip) =====
+  const breaking = categories["breaking"] || [];
+  const breakingBlock = document.createElement("div");
+  breakingBlock.innerHTML = sectionHeader("Breaking", "breaking");
+
+  const strip = document.createElement("div");
+  strip.className = "strip";
+
+  const breakingItems = take(breaking, 6);
+  if (breakingItems.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "strip-item";
+    empty.innerHTML = `<div>(no items yet)</div>`;
+    strip.appendChild(empty);
+  } else {
+    breakingItems.forEach(a => {
+      const row = document.createElement("div");
+      row.className = "strip-item";
+      row.innerHTML = `
+        <div style="flex:1">
+          <a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a>
+          <div class="strip-meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(formatTime(safeTime(a)))}</div>
+        </div>
+      `;
+      strip.appendChild(row);
+    });
+  }
+  breakingBlock.appendChild(strip);
+  container.appendChild(breakingBlock);
+
+  // ===== Trending Rail (horizontal scroll) =====
+  const trending = categories["trending"] || [];
+  const trendWrap = document.createElement("div");
+  trendWrap.innerHTML = sectionHeader("Trending", "trending");
+
+  const rail = document.createElement("div");
+  rail.className = "rail";
+
+  const trendItems = take(trending, 12);
+  if (trendItems.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "more-item";
+    empty.innerHTML = `<div>(no items yet)</div>`;
+    trendWrap.appendChild(empty);
+  } else {
+    trendItems.forEach(a => {
+      const img = pickImage(a);
+      const t = formatTime(safeTime(a));
+      const card = document.createElement("div");
+      card.className = "rail-card";
+      card.innerHTML = `
+        <div class="thumb">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
+        <div class="body">
+          <p class="title"><a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a></p>
+          <div class="meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(t)}</div>
+        </div>
+      `;
+      rail.appendChild(card);
+    });
+    trendWrap.appendChild(rail);
+  }
+  container.appendChild(trendWrap);
+
+  // ===== Category blocks (BBC-ish grid) =====
+  const blockCats = [
+    "General News",
+    "World News",
+    "Politics",
+    "Technology",
+    "Sports",
+    "Health & Fitness",
+  ];
+
+  const catGridWrap = document.createElement("div");
+  catGridWrap.innerHTML = sectionHeader("Latest by Category");
+  const catGrid = document.createElement("div");
+  catGrid.className = "cat-grid";
+
+  blockCats.forEach(catName => {
+    const items = categories[catName] || [];
+    const leadItem = firstNonEmpty(items);
+    const rest = items.filter(a => leadItem ? a.id !== leadItem.id : true);
+
+    const block = document.createElement("div");
+    block.className = "cat-block";
+
+    // Sub-header
+    const sub = document.createElement("div");
+    sub.innerHTML = sectionHeader(catName, catName);
+    block.appendChild(sub);
+
+    // Lead
+    if (leadItem) {
+      const img = pickImage(leadItem);
+      const t = formatTime(safeTime(leadItem));
+      const lead = document.createElement("div");
+      lead.className = "lead";
+      lead.innerHTML = `
+        <div class="thumb">${img ? `<img src="${img}" alt="${escapeHtml(leadItem.title)}">` : ""}</div>
+        <div>
+          <h3><a href="${linkToArticle(leadItem)}">${escapeHtml(leadItem.title)}</a></h3>
+          <div class="meta">${escapeHtml(leadItem.source || "Viral News")} • ${escapeHtml(t)}</div>
+        </div>
+      `;
+      block.appendChild(lead);
+    } else {
+      const empty = document.createElement("div");
+      empty.className = "lead";
+      empty.innerHTML = `<div>(no items yet)</div>`;
+      block.appendChild(empty);
+    }
+
+    // List rows
+    const list = document.createElement("div");
+    list.className = "list";
+    take(rest, 4).forEach(a => {
+      const img = pickImage(a);
+      const t = formatTime(safeTime(a));
+      const row = document.createElement("div");
+      row.className = "list-row";
+      row.innerHTML = `
+        <div class="mini">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
+        <a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a>
+        <div class="time">${escapeHtml(t)}</div>
+      `;
+      list.appendChild(row);
+    });
+
+    if (list.children.length === 0) {
+      const row = document.createElement("div");
+      row.className = "list-row";
+      row.innerHTML = `<div>(no more items)</div>`;
+      list.appendChild(row);
+    }
+
+    block.appendChild(list);
+    catGrid.appendChild(block);
+  });
+
+  catGridWrap.appendChild(catGrid);
+  container.appendChild(catGridWrap);
+
+  // ===== Entertainment rail (horizontal scroll) =====
+  const ent = categories["Entertainment"] || [];
+  const entWrap = document.createElement("div");
+  entWrap.innerHTML = sectionHeader("Entertainment", "Entertainment");
+
+  const entRail = document.createElement("div");
+  entRail.className = "rail";
+
+  const entItems = take(ent, 12);
+  if (entItems.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "more-item";
+    empty.innerHTML = `<div>(no items yet)</div>`;
+    entWrap.appendChild(empty);
+  } else {
+    entItems.forEach(a => {
+      const img = pickImage(a);
+      const t = formatTime(safeTime(a));
+      const card = document.createElement("div");
+      card.className = "rail-card";
+      card.innerHTML = `
+        <div class="thumb">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
+        <div class="body">
+          <p class="title"><a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a></p>
+          <div class="meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(t)}</div>
+        </div>
+      `;
+      entRail.appendChild(card);
+    });
+    entWrap.appendChild(entRail);
+  }
+  container.appendChild(entWrap);
+
+  // ===== More for you (rest of everything) =====
+  const shownIds = new Set();
+
+  // Mark shown from hero + hero side + breaking + trending + blocks + entertainment
+  if (heroMain?.id) shownIds.add(heroMain.id);
+  heroSideItems.forEach(a => a?.id && shownIds.add(a.id));
+  breakingItems.forEach(a => a?.id && shownIds.add(a.id));
+  trendItems.forEach(a => a?.id && shownIds.add(a.id));
+  blockCats.forEach(cat => (categories[cat] || []).slice(0, 5).forEach(a => a?.id && shownIds.add(a.id)));
+  entItems.forEach(a => a?.id && shownIds.add(a.id));
+
+  const more = withoutShown(all, shownIds).slice(0, 20);
+
+  const moreWrap = document.createElement("div");
+  moreWrap.innerHTML = sectionHeader("More for you");
+  const moreGrid = document.createElement("div");
+  moreGrid.className = "more-grid";
+
+  if (more.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "more-item";
+    empty.innerHTML = `<div>No more articles yet.</div>`;
+    moreGrid.appendChild(empty);
+  } else {
+    more.forEach(a => {
+      const div = document.createElement("div");
+      div.className = "more-item";
+      div.innerHTML = `
+        <a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a>
+        <div class="meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(formatTime(safeTime(a)))}</div>
+      `;
+      moreGrid.appendChild(div);
+    });
+  }
+  moreWrap.appendChild(moreGrid);
+  container.appendChild(moreWrap);
+
+  // Wire View All links
+  container.querySelectorAll('[data-viewall]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const cat = btn.getAttribute('data-viewall');
+      showCategoryView(cat);
+    });
+  });
 }
 
-function displayCategory(category) {
+function showCategoryView(category){
   const container = document.getElementById("news-container");
   container.innerHTML = "";
 
-  const order = (homepageData && homepageData.order) || [];
-  const categories = (homepageData && homepageData.categories) || {};
+  const categories = homepageData?.categories || {};
+  const items = categories[category] || [];
 
-  // if unknown category, fallback to front page
-  if (!order.includes(category)) {
-    displayFrontPage();
+  const back = document.createElement("a");
+  back.href = "#";
+  back.style.color = "var(--accent)";
+  back.style.textDecoration = "none";
+  back.style.display = "inline-block";
+  back.style.margin = "10px 0 8px";
+  back.textContent = "← Back to Home";
+  back.addEventListener("click", (e) => {
+    e.preventDefault();
+    renderBBCStyleHome();
+  });
+
+  const wrap = document.createElement("div");
+  wrap.appendChild(back);
+
+  const header = document.createElement("div");
+  header.innerHTML = sectionHeader(category);
+  wrap.appendChild(header);
+
+  if (!items.length) {
+    const empty = document.createElement("div");
+    empty.className = "error-box";
+    empty.innerHTML = `No articles in this category yet.`;
+    wrap.appendChild(empty);
+    container.appendChild(wrap);
     return;
   }
 
-  const backBtn = document.createElement("div");
-  backBtn.className = "back-home";
-  backBtn.textContent = "← Back to Home";
-  backBtn.onclick = () => displayFrontPage();
-  container.appendChild(backBtn);
+  // Simple list view (BBC-ish)
+  const list = document.createElement("div");
+  list.className = "list";
 
-  const section = document.createElement("div");
-  section.className = "category-section";
-  section.innerHTML = `<h2>${category}</h2>`;
+  items.forEach(a => {
+    const img = pickImage(a);
+    const t = formatTime(safeTime(a));
+    const row = document.createElement("div");
+    row.className = "list-row";
+    row.innerHTML = `
+      <div class="mini">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
+      <a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a>
+      <div class="time">${escapeHtml(t)}</div>
+    `;
+    list.appendChild(row);
+  });
 
-  const items = categories[category] || [];
-  if (items.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "article-item";
-    empty.innerHTML = `<div>No articles in this category yet.</div>`;
-    section.appendChild(empty);
-  } else {
-    items.forEach(a => section.appendChild(renderArticleItem(a)));
-  }
-
-  container.appendChild(section);
+  wrap.appendChild(list);
+  container.appendChild(wrap);
 }
 
+// Category menu click
 document.querySelectorAll("#categories-menu a").forEach(link => {
-  link.addEventListener("click", e => {
+  link.addEventListener("click", (e) => {
     e.preventDefault();
-    const cat = e.target.dataset.category;
     categoriesMenu.classList.remove("active");
+    const cat = e.target.dataset.category;
     if (!homepageData) return;
-    displayCategory(cat);
+    showCategoryView(cat);
   });
 });
 
@@ -312,3 +961,4 @@ loadHomepage();
 
 </body>
 </html>
+```
