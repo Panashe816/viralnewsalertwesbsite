@@ -28,65 +28,66 @@
     color: var(--text);
   }
 
+  /* ===== Top Header (Brand + Category Bar) ===== */
   header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding: 14px 18px;
     background: var(--bg2);
     position: sticky;
     top:0;
     z-index:1000;
-    border-bottom: 1px solid rgba(255,255,255,.06);
-  }
-  header h1{
-    margin:0;
-    font-size: 22px;
-    letter-spacing: .6px;
-  }
-  .menu-icon{
-    cursor:pointer;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    width:26px;
-    height:20px;
-  }
-  .menu-icon div{
-    height:3px;
-    background:#fff;
-    border-radius: 2px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
   }
 
-  #categories-menu{
-    position:fixed;
-    top:0; left:0;
-    width:260px;
-    height:100%;
-    background:#1a2c5b;
-    padding: 18px 18px 28px;
-    transform: translateX(-270px);
-    transition: transform .25s ease;
-    overflow-y:auto;
-    z-index:999;
-    border-right: 1px solid rgba(255,255,255,.06);
+  .top-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 12px 18px 10px;
   }
-  #categories-menu.active{ transform: translateX(0); }
-  #categories-menu h2{
-    font-size: 16px;
-    margin: 6px 0 14px;
-    color: var(--muted);
-    font-weight: 700;
+  .brand{
+    margin:0;
+    font-size: 22px;
+    letter-spacing: .7px;
+    font-weight: 800;
   }
-  #categories-menu a{
-    display:block;
-    text-decoration:none;
+
+  .catbar{
+    display:flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px 12px 12px;
+    border-top: 1px solid rgba(255,255,255,.06);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .catbar::-webkit-scrollbar{ height: 8px; }
+  .catbar::-webkit-scrollbar-thumb{
+    background: rgba(255,255,255,.18);
+    border-radius: 999px;
+  }
+
+  .catbtn{
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04);
     color:#fff;
-    padding: 10px 0;
-    font-size: 14px;
-    border-bottom: 1px solid rgba(255,255,255,.06);
+    text-decoration:none;
+    font-size: 13px;
+    font-weight: 800;
+    user-select:none;
+    white-space: nowrap;
   }
-  #categories-menu a:hover{ color: var(--accent); }
+  .catbtn:hover{ border-color: rgba(255,204,0,.35); color: var(--accent); }
+  .catbtn.active{
+    background: rgba(255,204,0,.16);
+    border-color: rgba(255,204,0,.30);
+    color: var(--accent);
+  }
 
   #news-container{
     max-width: 1120px;
@@ -126,6 +127,17 @@
     border: 1px solid rgba(255,255,255,.06);
   }
 
+  /* Back to Home */
+  .back-home{
+    display:inline-block;
+    margin: 10px 0 8px;
+    color: var(--accent);
+    text-decoration:none;
+    font-weight: 800;
+    font-size: 14px;
+  }
+  .back-home:hover{ text-decoration: underline; }
+
   /* HERO */
   .hero-grid{
     display:grid;
@@ -158,7 +170,7 @@
     border: 1px solid rgba(255,204,0,.25);
     padding: 3px 8px;
     border-radius: 999px;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing:.4px;
@@ -203,7 +215,7 @@
     margin:0;
     font-size: 13px;
     line-height: 1.25;
-    font-weight: 700;
+    font-weight: 900;
   }
   .side-title a{ color:#fff; text-decoration:none; }
   .side-title a:hover{ color: var(--accent); }
@@ -226,7 +238,7 @@
   .strip-item a{
     color:#fff;
     text-decoration:none;
-    font-weight: 800;
+    font-weight: 900;
     line-height: 1.25;
   }
   .strip-item a:hover{ color: var(--accent); }
@@ -287,7 +299,7 @@
   .list-row a{
     color:#fff;
     text-decoration:none;
-    font-weight: 800;
+    font-weight: 900;
     font-size: 13px;
     line-height: 1.25;
     display:block;
@@ -415,7 +427,7 @@
   }
   @media (max-width: 760px){
     #news-container{ padding: 0 12px; }
-    header h1{ font-size: 20px; }
+    .brand{ font-size: 20px; }
     .cat-grid{ grid-template-columns: 1fr; }
     .lead{ grid-template-columns: 92px 1fr; }
     .lead .thumb{ width:92px; height:70px; }
@@ -435,40 +447,31 @@
 <body>
 
 <header>
-  <div class="menu-icon" id="menu-toggle" aria-label="Open menu">
-    <div></div><div></div><div></div>
+  <div class="top-row">
+    <h1 class="brand">VIRAL NEWS</h1>
   </div>
-  <h1>VIRAL NEWS</h1>
-</header>
 
-<div id="categories-menu">
-  <h2>Categories</h2>
-  <a href="#" data-category="breaking">Breaking</a>
-  <a href="#" data-category="trending">Trending</a>
-  <a href="#" data-category="top headlines">Top Headlines</a>
-  <a href="#" data-category="General News">General News</a>
-  <a href="#" data-category="World News">World News</a>
-  <a href="#" data-category="Politics">Politics</a>
-  <a href="#" data-category="Technology">Technology</a>
-  <a href="#" data-category="Sports">Sports</a>
-  <a href="#" data-category="Health & Fitness">Health & Fitness</a>
-  <a href="#" data-category="Entertainment">Entertainment</a>
-</div>
+  <!-- Horizontal scroll category bar -->
+  <nav class="catbar" id="catbar">
+    <a class="catbtn active" href="#" data-cat="__home__">Home</a>
+    <a class="catbtn" href="#" data-cat="breaking">Breaking</a>
+    <a class="catbtn" href="#" data-cat="trending">Trending</a>
+    <a class="catbtn" href="#" data-cat="top headlines">Top Headlines</a>
+    <a class="catbtn" href="#" data-cat="General News">General News</a>
+    <a class="catbtn" href="#" data-cat="World News">World News</a>
+    <a class="catbtn" href="#" data-cat="Politics">Politics</a>
+    <a class="catbtn" href="#" data-cat="Technology">Technology</a>
+    <a class="catbtn" href="#" data-cat="Sports">Sports</a>
+    <a class="catbtn" href="#" data-cat="Health & Fitness">Health & Fitness</a>
+    <a class="catbtn" href="#" data-cat="Entertainment">Entertainment</a>
+  </nav>
+</header>
 
 <div id="news-container">Loading…</div>
 
 <script>
 (function(){
   var API_BASE = "https://viral-news-backend-3.onrender.com";
-
-  var menuToggle = document.getElementById("menu-toggle");
-  var categoriesMenu = document.getElementById("categories-menu");
-  menuToggle.addEventListener("click", function(){ categoriesMenu.classList.toggle("active"); });
-  document.addEventListener("click", function(e){
-    if (!categoriesMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-      categoriesMenu.classList.remove("active");
-    }
-  });
 
   function escapeHtml(s){
     s = (s || "").toString();
@@ -532,9 +535,6 @@
     return arr;
   }
 
-  // IMPORTANT RULES YOU ASKED:
-  // - For category "frontpage" (lead + 4 list) => ONLY use items WITH images where images are shown.
-  // - More for you => images first; show thumbnail if exists; infinite scroll.
   function pickTopWithImages(items, count){
     items = sortNewestFirst(items || []);
     var withImg = [];
@@ -550,7 +550,6 @@
     for (var i=0;i<items.length;i++){
       if (hasImage(items[i])) return items[i];
     }
-    // if none have image, fallback to first
     return firstNonEmpty(items);
   }
 
@@ -577,6 +576,7 @@
   var moreListEl = null;
   var moreLoadingEl = null;
   var loadingMore = false;
+  var infiniteInstalled = false;
 
   function renderMoreBatch(){
     if (!moreListEl || loadingMore) return;
@@ -591,7 +591,7 @@
       var div = document.createElement("div");
       div.className = "more-item";
       div.innerHTML =
-        '<div class="more-thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div class="more-thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
         '<div>' +
           '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
           '<div class="more-meta">' + escapeHtml(t) + '</div>' +
@@ -612,6 +612,9 @@
   }
 
   function installInfiniteScroll(){
+    if (infiniteInstalled) return;
+    infiniteInstalled = true;
+
     window.addEventListener("scroll", function(){
       if (!moreListEl) return;
       if (moreShown >= moreAll.length) return;
@@ -623,7 +626,17 @@
     }, { passive:true });
   }
 
+  function setActiveTab(cat){
+    document.querySelectorAll(".catbtn").forEach(function(btn){
+      btn.classList.remove("active");
+    });
+    var sel = document.querySelector('.catbtn[data-cat="' + cat.replace(/"/g,'\\"') + '"]');
+    if (sel) sel.classList.add("active");
+  }
+
   function renderBBCStyleHome(){
+    setActiveTab("__home__");
+
     var container = document.getElementById("news-container");
     container.innerHTML = "";
 
@@ -632,13 +645,11 @@
 
     // ----- HERO (Top Headlines) -----
     var top = categories["top headlines"] || categories["Top Headlines"] || [];
-    // you asked: hero should look premium => pick first with image if possible
     var heroMain = pickFirstWithImage(top) || pickFirstWithImage(all);
 
     var heroSideCandidates = top.filter(function(x){ return heroMain ? x.id !== heroMain.id : true; });
     heroSideCandidates = sortNewestFirst(heroSideCandidates);
 
-    // side items: prefer ones WITH images first, then fill
     var sideWithImg = heroSideCandidates.filter(hasImage);
     var sideNoImg = heroSideCandidates.filter(function(x){ return !hasImage(x); });
     var heroSideItems = take(sideWithImg.concat(sideNoImg), 4);
@@ -656,7 +667,7 @@
     var mainTime = heroMain ? formatTime(safeTime(heroMain)) : "";
 
     mainCard.innerHTML =
-      '<div class="img">' + (mainImg ? '<img src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
+      '<div class="img">' + (mainImg ? '<img loading="lazy" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
       '<div class="body">' +
         '<div class="kicker">' +
           '<span class="chip">Top</span>' +
@@ -681,7 +692,7 @@
         var div = document.createElement("div");
         div.className = "side-item";
         div.innerHTML =
-          '<div class="side-thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="side-thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div>' +
             '<p class="side-title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -725,7 +736,7 @@
     breakingBlock.appendChild(strip);
     container.appendChild(breakingBlock);
 
-    // ----- Trending rail (keep as rail) -----
+    // ----- Trending rail -----
     var trending = sortNewestFirst(categories["trending"] || []);
     var trendWrap = document.createElement("div");
     trendWrap.innerHTML = sectionHeader("Trending", "trending");
@@ -746,7 +757,7 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div class="body">' +
             '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -757,8 +768,7 @@
     }
     container.appendChild(trendWrap);
 
-    // ----- Category blocks (lead + list) -----
-    // YOUR RULE: the 5 shown must have images.
+    // ----- Category blocks (lead + list, MUST BE IMAGE ITEMS) -----
     var blockCats = ["World News","Politics","General News","Technology","Sports"];
     var catGridWrap = document.createElement("div");
     catGridWrap.innerHTML = sectionHeader("Latest by Category");
@@ -768,7 +778,6 @@
     blockCats.forEach(function(catName){
       var items = sortNewestFirst(categories[catName] || []);
       var withImagesTop5 = pickTopWithImages(items, 5); // only with images
-      // If not enough image items, we still show what we have (BBC sites also do that)
       var leadItem = withImagesTop5.length ? withImagesTop5[0] : null;
       var rest = withImagesTop5.length > 1 ? withImagesTop5.slice(1) : [];
 
@@ -785,7 +794,7 @@
         var lead = document.createElement("div");
         lead.className = "lead";
         lead.innerHTML =
-          '<div class="thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
           '<div>' +
             '<h3><a href="' + linkToArticle(leadItem) + '">' + escapeHtml(leadItem.title) + '</a></h3>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -808,7 +817,7 @@
           var row = document.createElement("div");
           row.className = "list-row";
           row.innerHTML =
-            '<div class="mini">' + (img2 ? '<img src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+            '<div class="mini">' + (img2 ? '<img loading="lazy" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
             '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
             '<div class="time">' + escapeHtml(t2) + '</div>';
           list.appendChild(row);
@@ -827,7 +836,7 @@
     catGridWrap.appendChild(catGrid);
     container.appendChild(catGridWrap);
 
-    // ----- Health & Fitness rail (scrollable, with images) -----
+    // ----- Health & Fitness rail (scrollable) -----
     var health = sortNewestFirst(categories["Health & Fitness"] || []);
     var healthWrap = document.createElement("div");
     healthWrap.innerHTML = sectionHeader("Health & Fitness", "Health & Fitness");
@@ -835,7 +844,6 @@
     var healthRail = document.createElement("div");
     healthRail.className = "rail";
 
-    // For rail, strongly prefer images; if missing, still allow (but will look blank)
     var healthPrefer = health.filter(hasImage).concat(health.filter(function(x){ return !hasImage(x); }));
     var healthItems = take(healthPrefer, 12);
 
@@ -851,7 +859,7 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div class="body">' +
             '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -862,7 +870,7 @@
     }
     container.appendChild(healthWrap);
 
-    // ----- Entertainment (NOT scrollable, text-only) -----
+    // ----- Entertainment (text-only) -----
     var ent = sortNewestFirst(categories["Entertainment"] || []);
     var entWrap = document.createElement("div");
     entWrap.innerHTML = sectionHeader("Entertainment", "Entertainment");
@@ -891,8 +899,7 @@
     entWrap.appendChild(textOnly);
     container.appendChild(entWrap);
 
-    // ----- MORE FOR YOU (images first + infinite scroll) -----
-    // Build "shown" set so we don't repeat.
+    // ----- MORE FOR YOU (infinite scroll, images first) -----
     var shown = {};
     function markShown(arr){
       arr = arr || [];
@@ -905,7 +912,6 @@
     markShown(breakingItems);
     markShown(trendItems);
 
-    // mark category blocks items shown (withImagesTop5)
     blockCats.forEach(function(cat){
       var items = pickTopWithImages(categories[cat] || [], 5);
       markShown(items);
@@ -914,10 +920,8 @@
     markShown(healthItems);
     markShown(entItems);
 
-    // More for you candidates = all not shown
     var candidates = (all || []).filter(function(a){ return a && a.id && !shown[a.id]; });
 
-    // Your rule: images first, then no-images
     var withImg = candidates.filter(hasImage);
     var noImg = candidates.filter(function(x){ return !hasImage(x); });
     moreAll = sortNewestFirst(withImg).concat(sortNewestFirst(noImg));
@@ -933,7 +937,6 @@
     moreLoadingEl.className = "load-hint";
     moreLoadingEl.textContent = "Scroll for more…";
 
-    // reset infinite state
     moreShown = 0;
     moreWrap.appendChild(moreListEl);
     moreWrap.appendChild(moreLoadingEl);
@@ -942,17 +945,20 @@
     renderMoreBatch();
     installInfiniteScroll();
 
-    // Wire View all links
     container.querySelectorAll("[data-viewall]").forEach(function(btn){
       btn.addEventListener("click", function(e){
         e.preventDefault();
         var cat = btn.getAttribute("data-viewall");
         showCategoryView(cat);
+        // highlight tab on view all
+        if (cat) setActiveTab(cat);
       });
     });
   }
 
   function showCategoryView(category){
+    setActiveTab(category);
+
     var container = document.getElementById("news-container");
     container.innerHTML = "";
 
@@ -961,33 +967,27 @@
 
     var back = document.createElement("a");
     back.href = "#";
-    back.style.color = "var(--accent)";
-    back.style.textDecoration = "none";
-    back.style.display = "inline-block";
-    back.style.margin = "10px 0 8px";
+    back.className = "back-home";
     back.textContent = "← Back to Home";
     back.addEventListener("click", function(e){
       e.preventDefault();
       renderBBCStyleHome();
     });
 
-    var wrap = document.createElement("div");
-    wrap.appendChild(back);
+    container.appendChild(back);
 
     var header = document.createElement("div");
     header.innerHTML = sectionHeader(category);
-    wrap.appendChild(header);
+    container.appendChild(header);
 
     if (!items.length){
       var empty = document.createElement("div");
       empty.className = "error-box";
       empty.textContent = "No articles in this category yet.";
-      wrap.appendChild(empty);
-      container.appendChild(wrap);
+      container.appendChild(empty);
       return;
     }
 
-    // Category view: show image if exists; image-first
     var withImg = items.filter(hasImage);
     var noImg = items.filter(function(x){ return !hasImage(x); });
     items = sortNewestFirst(withImg).concat(sortNewestFirst(noImg));
@@ -1001,7 +1001,7 @@
       var div = document.createElement("div");
       div.className = "more-item";
       div.innerHTML =
-        '<div class="more-thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div class="more-thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
         '<div>' +
           '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
           '<div class="more-meta">' + escapeHtml(t) + '</div>' +
@@ -1009,13 +1009,21 @@
       list.appendChild(div);
     });
 
-    wrap.appendChild(list);
-    container.appendChild(wrap);
+    container.appendChild(list);
+  }
+
+  function setActiveTab(cat){
+    document.querySelectorAll(".catbtn").forEach(function(btn){
+      btn.classList.remove("active");
+    });
+    var sel = document.querySelector('.catbtn[data-cat="' + cat.replace(/"/g,'\\"') + '"]');
+    if (sel) sel.classList.add("active");
   }
 
   function loadHomepage(){
     var container = document.getElementById("news-container");
     container.innerHTML = "Loading…";
+
     fetchWithTimeout(API_BASE + "/homepage", 25000)
       .then(function(res){
         if (!res.ok) throw new Error("HTTP " + res.status);
@@ -1035,13 +1043,18 @@
       });
   }
 
-  document.querySelectorAll("#categories-menu a").forEach(function(link){
-    link.addEventListener("click", function(e){
+  // Category bar click wiring
+  document.querySelectorAll(".catbtn").forEach(function(btn){
+    btn.addEventListener("click", function(e){
       e.preventDefault();
-      categoriesMenu.classList.remove("active");
-      var cat = e.target.dataset.category;
       if (!homepageData) return;
-      showCategoryView(cat);
+
+      var cat = btn.getAttribute("data-cat");
+      if (cat === "__home__") {
+        renderBBCStyleHome();
+      } else {
+        showCategoryView(cat);
+      }
     });
   });
 
