@@ -2,79 +2,187 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Article</title>
+<title>Article • Viral News</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   font-family: Arial, sans-serif;
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-  line-height: 1.7;
-  background: #f4f4f4;
+  background: #0a1d3f;
+  color: #fff;
+  margin: 0;
+  padding: 0;
 }
-img {
-  max-width: 100%;
-  border-radius: 8px;
-  margin: 15px 0;
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background: #081737;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
-h1 {
-  font-size: 28px;
-  margin-bottom: 15px;
-}
-#most-read {
-  margin-top: 50px;
-}
-#most-read h2 {
+header h1 {
+  margin: 0;
   font-size: 22px;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #ddd;
-  padding-bottom: 6px;
+  color: #fff;
 }
+header a {
+  color: #ffcc00;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.container {
+  max-width: 900px;
+  margin: 18px auto;
+  padding: 0 20px 40px;
+}
+
+.card {
+  background: #0f264f;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+h1 {
+  font-size: 24px;
+  margin: 0 0 10px;
+  line-height: 1.3;
+}
+
+.meta {
+  font-size: 12px;
+  color: #cfd8ea;
+  margin-bottom: 10px;
+}
+
+.article-img {
+  width: 100%;
+  border-radius: 10px;
+  margin: 10px 0 14px;
+}
+
+.article-content {
+  color: #fff;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.article-content img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin: 12px 0;
+}
+
+#most-read h2 {
+  font-size: 18px;
+  margin: 0 0 12px;
+  border-bottom: 2px solid #334a7a;
+  padding-bottom: 8px;
+}
+
 ul.headline-list {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
+
 li.headline-item {
-  background: #fff;
+  background: #0f264f;
   margin-bottom: 10px;
   padding: 12px;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-radius: 8px;
 }
+
 li.headline-item a {
   text-decoration: none;
-  color: #000;
+  color: #fff;
   font-weight: bold;
+}
+
+li.headline-item a:hover {
+  color: #ffcc00;
+}
+
+.loading {
+  text-align: center;
+  margin: 14px 0 0;
+  color: #cfd8ea;
+  font-size: 13px;
+}
+
+.error-box {
+  background: #331a1a;
+  border: 1px solid #ff6b6b;
+  padding: 12px;
+  border-radius: 8px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="article">Loading article…</div>
+<header>
+  <h1>VIRAL NEWS</h1>
+  <a href="index.html">← Home</a>
+</header>
 
-<div id="most-read">
-  <h2>Most Read Stories</h2>
-  <ul id="most-read-list" class="headline-list"></ul>
-  <div id="loading" style="text-align:center; margin:20px;">Loading…</div>
+<div class="container">
+
+  <div id="article" class="card">Loading article…</div>
+
+  <div id="most-read" class="card">
+    <h2>Most Read Stories</h2>
+    <ul id="most-read-list" class="headline-list"></ul>
+    <div id="loading" class="loading">Loading…</div>
+  </div>
+
 </div>
 
 <script>
+const API_BASE = "https://viral-news-backend-3.onrender.com";
 const params = new URLSearchParams(window.location.search);
 const id = params.get("id");
+
 const articleContainer = document.getElementById("article");
 const mostReadList = document.getElementById("most-read-list");
 const loading = document.getElementById("loading");
 
 let allArticles = [];
 let displayedCount = 0;
-const batchSize = 5;
+const batchSize = 7;
 
-// Fetch all articles for "Most Read Stories"
+function escapeHtml(s) {
+  return (s || "").toString()
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// 14m / 3h / 2d
+function formatTime(published_at) {
+  const pubDate = new Date(published_at);
+  if (isNaN(pubDate.getTime())) return "";
+  const diffMs = Date.now() - pubDate.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return "now";
+  if (diffMins < 60) return `${diffMins}m`;
+  const diffHrs = Math.floor(diffMins / 60);
+  if (diffHrs < 24) return `${diffHrs}h`;
+  const diffDays = Math.floor(diffHrs / 24);
+  return `${diffDays}d`;
+}
+
 async function fetchMostRead() {
   try {
-    const res = await fetch('https://viral-news-backend-3.onrender.com/articles/');
+    const res = await fetch(`${API_BASE}/articles/?limit=500`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     allArticles = await res.json();
     loadMoreHeadlines();
   } catch (e) {
@@ -84,58 +192,81 @@ async function fetchMostRead() {
 }
 
 function loadMoreHeadlines() {
+  if (!Array.isArray(allArticles) || allArticles.length === 0) {
+    loading.innerText = "No stories.";
+    return;
+  }
+
   if (displayedCount >= allArticles.length) {
     loading.innerText = "No more stories.";
     return;
   }
 
   const slice = allArticles.slice(displayedCount, displayedCount + batchSize);
+
   slice.forEach(a => {
-    if (!a.title || a.id == id) return; // skip the current article
+    if (!a || !a.title) return;
+    if (String(a.id) === String(id)) return; // skip current article
+
     const li = document.createElement('li');
     li.className = 'headline-item';
-    li.innerHTML = `<a href="?id=${a.id}">${a.title}</a>`;
+    li.innerHTML = `<a href="articles.html?id=${a.id}">${escapeHtml(a.title)}</a>`;
     mostReadList.appendChild(li);
   });
 
   displayedCount += batchSize;
+
+  // if we still didn't append anything because of filters, try next batch
+  if (mostReadList.children.length < 5 && displayedCount < allArticles.length) {
+    loadMoreHeadlines();
+  }
 }
 
-// Infinite scroll for Most Read block
 document.addEventListener('scroll', () => {
   const rect = mostReadList.getBoundingClientRect();
-  if (rect.bottom <= window.innerHeight + 50) {
+  if (rect.bottom <= window.innerHeight + 120) {
     loadMoreHeadlines();
   }
 });
 
 // Load main article
-if (!id) {
-  articleContainer.innerHTML = "Article not found.";
-} else {
-  fetch(`https://viral-news-backend-3.onrender.com/articles/${id}`)
-    .then(res => res.json())
-    .then(a => {
-      if (!a || !a.title) {
-        articleContainer.innerHTML = "Article not found.";
-        return;
-      }
+async function loadArticle() {
+  if (!id) {
+    articleContainer.innerHTML = `<div class="error-box">Article not found (missing id).</div>`;
+    return;
+  }
 
-      document.title = a.title;
+  try {
+    const res = await fetch(`${API_BASE}/articles/${id}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const a = await res.json();
 
-      articleContainer.innerHTML = `
-        <h1>${a.title}</h1>
-        ${a.image_url ? `<img src="${a.image_url}" style="width:100%;border-radius:10px;">` : ""}
-        ${a.content}
-      `;
+    if (!a || !a.title) {
+      articleContainer.innerHTML = `<div class="error-box">Article not found.</div>`;
+      return;
+    }
 
-      // After main article is loaded, fetch Most Read
-      fetchMostRead();
-    })
-    .catch(() => {
-      articleContainer.innerHTML = "Failed to load article.";
-    });
+    document.title = `${a.title} • Viral News`;
+
+    const timeStr = formatTime(a.published_at || a.created_at);
+    const cat = a.category ? ` • ${escapeHtml(a.category)}` : "";
+
+    articleContainer.innerHTML = `
+      <h1>${escapeHtml(a.title)}</h1>
+      <div class="meta">${timeStr}${cat}</div>
+      ${a.image_url ? `<img class="article-img" src="${a.image_url}" alt="${escapeHtml(a.title)}">` : ""}
+      <div class="article-content">${a.content || ""}</div>
+    `;
+
+    // After main article is loaded, fetch Most Read
+    fetchMostRead();
+  } catch (e) {
+    articleContainer.innerHTML = `<div class="error-box">Failed to load article.</div>`;
+    console.error(e);
+  }
 }
+
+loadArticle();
 </script>
 
 </body>
