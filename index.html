@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +11,6 @@
     --bg:#0a1d3f;
     --bg2:#081737;
     --panel:#0f264f;
-    --panel2:#112b57;
     --line:#334a7a;
     --text:#ffffff;
     --muted:#cfd8ea;
@@ -30,7 +28,6 @@
     color: var(--text);
   }
 
-  /* Header */
   header{
     display:flex;
     align-items:center;
@@ -61,7 +58,6 @@
     border-radius: 2px;
   }
 
-  /* Side menu */
   #categories-menu{
     position:fixed;
     top:0; left:0;
@@ -92,14 +88,12 @@
   }
   #categories-menu a:hover{ color: var(--accent); }
 
-  /* Page container */
   #news-container{
     max-width: 1120px;
-    margin: 18px auto 60px;
+    margin: 18px auto 70px;
     padding: 0 16px;
   }
 
-  /* BBC-style section title */
   .section-title{
     display:flex;
     align-items:center;
@@ -124,7 +118,6 @@
   }
   .section-title .viewall:hover{ text-decoration: underline; }
 
-  /* Cards */
   .card{
     background: var(--panel);
     border-radius: var(--radius);
@@ -140,11 +133,7 @@
     gap: 14px;
     margin-top: 12px;
   }
-
-  .hero-main{
-    display:flex;
-    flex-direction:column;
-  }
+  .hero-main{ display:flex; flex-direction:column; }
   .hero-main .img{
     width:100%;
     aspect-ratio: 16/9;
@@ -152,15 +141,9 @@
     position:relative;
     overflow:hidden;
   }
-  .hero-main .img img{
-    width:100%;
-    height:100%;
-    object-fit: cover;
-    display:block;
-  }
-  .hero-main .body{
-    padding: 14px 14px 12px;
-  }
+  .hero-main .img img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .hero-main .body{ padding: 14px 14px 12px; }
+
   .kicker{
     display:flex;
     gap:10px;
@@ -180,16 +163,12 @@
     text-transform: uppercase;
     letter-spacing:.4px;
   }
-
   .hero-title{
     font-size: 22px;
-    margin: 0 0 8px;
+    margin: 0 0 6px;
     line-height: 1.25;
   }
-  .hero-title a{
-    color:#fff;
-    text-decoration:none;
-  }
+  .hero-title a{ color:#fff; text-decoration:none; }
   .hero-title a:hover{ color: var(--accent); }
   .hero-desc{
     margin: 0;
@@ -219,22 +198,14 @@
     overflow:hidden;
     background: rgba(255,255,255,.06);
   }
-  .side-thumb img{
-    width:100%;
-    height:100%;
-    object-fit: cover;
-    display:block;
-  }
+  .side-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
   .side-title{
     margin:0;
     font-size: 13px;
     line-height: 1.25;
     font-weight: 700;
   }
-  .side-title a{
-    color:#fff;
-    text-decoration:none;
-  }
+  .side-title a{ color:#fff; text-decoration:none; }
   .side-title a:hover{ color: var(--accent); }
   .meta{
     margin-top: 6px;
@@ -242,15 +213,10 @@
     color: var(--muted);
   }
 
-  /* Breaking strip (compact list) */
-  .strip{
-    display:grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
+  /* Breaking strip */
+  .strip{ display:grid; grid-template-columns: 1fr; gap: 10px; }
   .strip-item{
     display:flex;
-    gap: 12px;
     align-items:flex-start;
     padding: 12px;
     background: rgba(255,255,255,.03);
@@ -260,7 +226,7 @@
   .strip-item a{
     color:#fff;
     text-decoration:none;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.25;
   }
   .strip-item a:hover{ color: var(--accent); }
@@ -276,11 +242,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 14px;
   }
-  .cat-block{
-    display:flex;
-    flex-direction:column;
-    gap: 10px;
-  }
+  .cat-block{ display:flex; flex-direction:column; gap: 10px; }
 
   .lead{
     display:grid;
@@ -298,28 +260,12 @@
     overflow:hidden;
     background: rgba(255,255,255,.06);
   }
-  .lead .thumb img{
-    width:100%;
-    height:100%;
-    object-fit: cover;
-    display:block;
-  }
-  .lead h3{
-    margin:0;
-    font-size: 14px;
-    line-height: 1.25;
-  }
-  .lead h3 a{
-    color:#fff;
-    text-decoration:none;
-  }
+  .lead .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .lead h3{ margin:0; font-size: 14px; line-height: 1.25; }
+  .lead h3 a{ color:#fff; text-decoration:none; font-weight: 900; }
   .lead h3 a:hover{ color: var(--accent); }
 
-  .list{
-    display:flex;
-    flex-direction:column;
-    gap: 8px;
-  }
+  .list{ display:flex; flex-direction:column; gap: 8px; }
   .list-row{
     display:flex;
     gap: 10px;
@@ -337,18 +283,14 @@
     overflow:hidden;
     flex: 0 0 auto;
   }
-  .list-row .mini img{
-    width:100%;
-    height:100%;
-    object-fit: cover;
-    display:block;
-  }
+  .list-row .mini img{ width:100%; height:100%; object-fit:cover; display:block; }
   .list-row a{
     color:#fff;
     text-decoration:none;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 13px;
     line-height: 1.25;
+    display:block;
   }
   .list-row a:hover{ color: var(--accent); }
   .list-row .time{
@@ -363,7 +305,7 @@
     display:flex;
     gap: 12px;
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding-bottom: 6px;
     scroll-snap-type: x mandatory;
   }
   .rail::-webkit-scrollbar{ height: 8px; }
@@ -386,80 +328,101 @@
     background: rgba(255,255,255,.06);
     overflow:hidden;
   }
-  .rail-card .thumb img{
-    width:100%;
-    height:100%;
-    object-fit: cover;
-    display:block;
-  }
-  .rail-card .body{
-    padding: 10px 12px 12px;
-  }
-  .rail-card .title{
-    margin:0;
-    font-size: 14px;
-    line-height: 1.25;
-  }
+  .rail-card .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .rail-card .body{ padding: 10px 12px 12px; }
+  .rail-card .title{ margin:0; font-size: 14px; line-height: 1.25; }
   .rail-card .title a{
     color:#fff;
     text-decoration:none;
-    font-weight: 800;
+    font-weight: 900;
   }
   .rail-card .title a:hover{ color: var(--accent); }
-  .rail-card .meta{
-    margin-top: 8px;
-    font-size: 12px;
-    color: var(--muted);
-  }
+  .rail-card .meta{ margin-top: 8px; font-size: 12px; color: var(--muted); }
 
-  /* More For You */
-  .more-grid{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
+  /* Entertainment text-only block */
+  .text-only{
+    display:flex;
+    flex-direction:column;
     gap: 10px;
   }
-  .more-item{
+  .text-only .row{
     padding: 12px;
     background: rgba(255,255,255,.03);
     border: 1px solid rgba(255,255,255,.06);
     border-radius: var(--radius);
   }
+  .text-only .row a{
+    color:#fff;
+    text-decoration:none;
+    font-weight: 900;
+    line-height: 1.25;
+  }
+  .text-only .row a:hover{ color: var(--accent); }
+  .text-only .meta{ margin-top: 6px; }
+
+  /* More for you (infinite) */
+  .more-wrap{ margin-top: 10px; }
+  .more-list{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+  }
+  .more-item{
+    display:grid;
+    grid-template-columns: 92px 1fr;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+  }
+  .more-thumb{
+    width:92px;
+    height:72px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.06);
+    overflow:hidden;
+  }
+  .more-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
   .more-item a{
     color:#fff;
     text-decoration:none;
-    font-weight: 800;
+    font-weight: 900;
     line-height: 1.25;
     display:block;
   }
   .more-item a:hover{ color: var(--accent); }
-  .more-item .meta{ margin-top: 6px; }
+  .more-meta{ margin-top: 6px; color: var(--muted); font-size: 12px; }
 
-  /* Utilities */
+  .load-hint{
+    text-align:center;
+    margin: 16px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
   .error-box{
     background: #331a1a;
     border: 1px solid var(--danger);
     padding: 12px;
     border-radius: var(--radius);
   }
-  .small-muted{ color: var(--muted); font-size: 12px; }
 
-  /* Responsive */
   @media (max-width: 980px){
     .hero-grid{ grid-template-columns: 1fr; }
     .hero-side{ flex-direction: row; flex-wrap: wrap; }
     .side-item{ grid-template-columns: 70px 1fr; flex: 1 1 280px; }
   }
-
   @media (max-width: 760px){
     #news-container{ padding: 0 12px; }
     header h1{ font-size: 20px; }
     .cat-grid{ grid-template-columns: 1fr; }
-    .more-grid{ grid-template-columns: 1fr; }
     .lead{ grid-template-columns: 92px 1fr; }
     .lead .thumb{ width:92px; height:70px; }
     .hero-title{ font-size: 20px; }
+    .more-item{ grid-template-columns: 80px 1fr; }
+    .more-thumb{ width:80px; height:62px; }
   }
-
   @media (max-width: 420px){
     .side-item{ grid-template-columns: 64px 1fr; }
     .side-thumb{ width:64px; height:52px; }
@@ -495,470 +458,596 @@
 <div id="news-container">Loading…</div>
 
 <script>
-const API_BASE = "https://viral-news-backend-3.onrender.com";
+(function(){
+  var API_BASE = "https://viral-news-backend-3.onrender.com";
 
-const menuToggle = document.getElementById("menu-toggle");
-const categoriesMenu = document.getElementById("categories-menu");
-menuToggle.addEventListener("click", () => categoriesMenu.classList.toggle("active"));
-document.addEventListener("click", (e) => {
-  if (!categoriesMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-    categoriesMenu.classList.remove("active");
-  }
-});
-
-// 14m / 3h / 2d
-function formatTime(dt) {
-  const d = new Date(dt);
-  if (isNaN(d.getTime())) return "";
-  const diffMs = Date.now() - d.getTime();
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return "now";
-  if (mins < 60) return `${mins}m`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d`;
-}
-
-function escapeHtml(s) {
-  return (s || "").toString()
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function safeTime(a){
-  return a.published_at || a.created_at || "";
-}
-
-function linkToArticle(a){
-  return `articles.html?id=${a.id}`;
-}
-
-function pickImage(a){
-  const img = (a.image_url || "").trim();
-  return img || null;
-}
-
-function firstNonEmpty(arr){
-  for (const x of (arr || [])) {
-    if (x && x.id && x.title) return x;
-  }
-  return null;
-}
-
-function take(arr, n){
-  return (arr || []).slice(0, n);
-}
-
-function withoutShown(all, shownSet){
-  return (all || []).filter(a => a && a.id && !shownSet.has(a.id));
-}
-
-function sectionHeader(title, viewAllCategory=null){
-  const viewAll = viewAllCategory ? `<a class="viewall" href="#" data-viewall="${escapeHtml(viewAllCategory)}">View all</a>` : "";
-  return `
-    <div class="section-title">
-      <div class="bar"></div>
-      <h2>${escapeHtml(title)}</h2>
-      ${viewAll}
-    </div>
-  `;
-}
-
-let homepageData = null;
-
-async function loadHomepage() {
-  const container = document.getElementById("news-container");
-  container.innerHTML = "Loading…";
-  try {
-    const res = await fetch(`${API_BASE}/homepage`, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    homepageData = await res.json();
-    renderBBCStyleHome();
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = `
-      <div class="error-box">
-        Failed to load articles from API.<br>
-        <span class="small-muted">${escapeHtml(String(err))}</span>
-      </div>
-    `;
-  }
-}
-
-function renderBBCStyleHome(){
-  const container = document.getElementById("news-container");
-  container.innerHTML = "";
-
-  const order = homepageData?.order || [];
-  const categories = homepageData?.categories || {};
-  const all = homepageData?.all || [];
-
-  // ===== HERO (Top Headlines) =====
-  const top = categories["top headlines"] || categories["Top Headlines"] || [];
-  const heroMain = firstNonEmpty(top) || firstNonEmpty(all);
-
-  const heroSideItems = take(top.filter(a => heroMain ? a.id !== heroMain.id : true), 4);
-
-  const heroWrap = document.createElement("div");
-  heroWrap.innerHTML = sectionHeader("Top Headlines", "top headlines");
-
-  const heroGrid = document.createElement("div");
-  heroGrid.className = "hero-grid";
-
-  // Hero main card
-  const mainCard = document.createElement("div");
-  mainCard.className = "card hero-main";
-
-  const mainImg = pickImage(heroMain);
-  const mainTime = heroMain ? formatTime(safeTime(heroMain)) : "";
-
-  mainCard.innerHTML = `
-    <div class="img">
-      ${mainImg ? `<img src="${mainImg}" alt="${escapeHtml(heroMain.title)}">` : ""}
-    </div>
-    <div class="body">
-      <div class="kicker">
-        <span class="chip">Top</span>
-        <span>${escapeHtml(heroMain?.source || "Viral News")}</span>
-        <span>•</span>
-        <span>${escapeHtml(mainTime)}</span>
-      </div>
-      <h3 class="hero-title">
-        <a href="${heroMain ? linkToArticle(heroMain) : "#"}">${escapeHtml(heroMain?.title || "No headline yet")}</a>
-      </h3>
-      <p class="hero-desc">${escapeHtml(heroMain?.summary || "")}</p>
-    </div>
-  `;
-
-  // Hero side list
-  const sideCol = document.createElement("div");
-  sideCol.className = "hero-side";
-
-  if (heroSideItems.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "side-item";
-    empty.innerHTML = `<div class="side-thumb"></div><div><p class="side-title">No more headlines yet.</p></div>`;
-    sideCol.appendChild(empty);
-  } else {
-    heroSideItems.forEach(a => {
-      const img = pickImage(a);
-      const t = formatTime(safeTime(a));
-      const div = document.createElement("div");
-      div.className = "side-item";
-      div.innerHTML = `
-        <div class="side-thumb">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
-        <div>
-          <p class="side-title"><a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a></p>
-          <div class="meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(t)}</div>
-        </div>
-      `;
-      sideCol.appendChild(div);
-    });
-  }
-
-  heroGrid.appendChild(mainCard);
-  heroGrid.appendChild(sideCol);
-
-  heroWrap.appendChild(heroGrid);
-  container.appendChild(heroWrap);
-
-  // ===== Breaking (compact strip) =====
-  const breaking = categories["breaking"] || [];
-  const breakingBlock = document.createElement("div");
-  breakingBlock.innerHTML = sectionHeader("Breaking", "breaking");
-
-  const strip = document.createElement("div");
-  strip.className = "strip";
-
-  const breakingItems = take(breaking, 6);
-  if (breakingItems.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "strip-item";
-    empty.innerHTML = `<div>(no items yet)</div>`;
-    strip.appendChild(empty);
-  } else {
-    breakingItems.forEach(a => {
-      const row = document.createElement("div");
-      row.className = "strip-item";
-      row.innerHTML = `
-        <div style="flex:1">
-          <a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a>
-          <div class="strip-meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(formatTime(safeTime(a)))}</div>
-        </div>
-      `;
-      strip.appendChild(row);
-    });
-  }
-  breakingBlock.appendChild(strip);
-  container.appendChild(breakingBlock);
-
-  // ===== Trending Rail (horizontal scroll) =====
-  const trending = categories["trending"] || [];
-  const trendWrap = document.createElement("div");
-  trendWrap.innerHTML = sectionHeader("Trending", "trending");
-
-  const rail = document.createElement("div");
-  rail.className = "rail";
-
-  const trendItems = take(trending, 12);
-  if (trendItems.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "more-item";
-    empty.innerHTML = `<div>(no items yet)</div>`;
-    trendWrap.appendChild(empty);
-  } else {
-    trendItems.forEach(a => {
-      const img = pickImage(a);
-      const t = formatTime(safeTime(a));
-      const card = document.createElement("div");
-      card.className = "rail-card";
-      card.innerHTML = `
-        <div class="thumb">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
-        <div class="body">
-          <p class="title"><a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a></p>
-          <div class="meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(t)}</div>
-        </div>
-      `;
-      rail.appendChild(card);
-    });
-    trendWrap.appendChild(rail);
-  }
-  container.appendChild(trendWrap);
-
-  // ===== Category blocks (BBC-ish grid) =====
-  const blockCats = [
-    "General News",
-    "World News",
-    "Politics",
-    "Technology",
-    "Sports",
-    "Health & Fitness",
-  ];
-
-  const catGridWrap = document.createElement("div");
-  catGridWrap.innerHTML = sectionHeader("Latest by Category");
-  const catGrid = document.createElement("div");
-  catGrid.className = "cat-grid";
-
-  blockCats.forEach(catName => {
-    const items = categories[catName] || [];
-    const leadItem = firstNonEmpty(items);
-    const rest = items.filter(a => leadItem ? a.id !== leadItem.id : true);
-
-    const block = document.createElement("div");
-    block.className = "cat-block";
-
-    // Sub-header
-    const sub = document.createElement("div");
-    sub.innerHTML = sectionHeader(catName, catName);
-    block.appendChild(sub);
-
-    // Lead
-    if (leadItem) {
-      const img = pickImage(leadItem);
-      const t = formatTime(safeTime(leadItem));
-      const lead = document.createElement("div");
-      lead.className = "lead";
-      lead.innerHTML = `
-        <div class="thumb">${img ? `<img src="${img}" alt="${escapeHtml(leadItem.title)}">` : ""}</div>
-        <div>
-          <h3><a href="${linkToArticle(leadItem)}">${escapeHtml(leadItem.title)}</a></h3>
-          <div class="meta">${escapeHtml(leadItem.source || "Viral News")} • ${escapeHtml(t)}</div>
-        </div>
-      `;
-      block.appendChild(lead);
-    } else {
-      const empty = document.createElement("div");
-      empty.className = "lead";
-      empty.innerHTML = `<div>(no items yet)</div>`;
-      block.appendChild(empty);
+  var menuToggle = document.getElementById("menu-toggle");
+  var categoriesMenu = document.getElementById("categories-menu");
+  menuToggle.addEventListener("click", function(){ categoriesMenu.classList.toggle("active"); });
+  document.addEventListener("click", function(e){
+    if (!categoriesMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+      categoriesMenu.classList.remove("active");
     }
-
-    // List rows
-    const list = document.createElement("div");
-    list.className = "list";
-    take(rest, 4).forEach(a => {
-      const img = pickImage(a);
-      const t = formatTime(safeTime(a));
-      const row = document.createElement("div");
-      row.className = "list-row";
-      row.innerHTML = `
-        <div class="mini">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
-        <a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a>
-        <div class="time">${escapeHtml(t)}</div>
-      `;
-      list.appendChild(row);
-    });
-
-    if (list.children.length === 0) {
-      const row = document.createElement("div");
-      row.className = "list-row";
-      row.innerHTML = `<div>(no more items)</div>`;
-      list.appendChild(row);
-    }
-
-    block.appendChild(list);
-    catGrid.appendChild(block);
   });
 
-  catGridWrap.appendChild(catGrid);
-  container.appendChild(catGridWrap);
-
-  // ===== Entertainment rail (horizontal scroll) =====
-  const ent = categories["Entertainment"] || [];
-  const entWrap = document.createElement("div");
-  entWrap.innerHTML = sectionHeader("Entertainment", "Entertainment");
-
-  const entRail = document.createElement("div");
-  entRail.className = "rail";
-
-  const entItems = take(ent, 12);
-  if (entItems.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "more-item";
-    empty.innerHTML = `<div>(no items yet)</div>`;
-    entWrap.appendChild(empty);
-  } else {
-    entItems.forEach(a => {
-      const img = pickImage(a);
-      const t = formatTime(safeTime(a));
-      const card = document.createElement("div");
-      card.className = "rail-card";
-      card.innerHTML = `
-        <div class="thumb">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
-        <div class="body">
-          <p class="title"><a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a></p>
-          <div class="meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(t)}</div>
-        </div>
-      `;
-      entRail.appendChild(card);
-    });
-    entWrap.appendChild(entRail);
+  function escapeHtml(s){
+    s = (s || "").toString();
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   }
-  container.appendChild(entWrap);
 
-  // ===== More for you (rest of everything) =====
-  const shownIds = new Set();
+  function formatTime(dt){
+    var d = new Date(dt);
+    if (isNaN(d.getTime())) return "";
+    var diffMs = Date.now() - d.getTime();
+    var mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return "now";
+    if (mins < 60) return mins + "m";
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + "h";
+    var days = Math.floor(hrs / 24);
+    return days + "d";
+  }
 
-  // Mark shown from hero + hero side + breaking + trending + blocks + entertainment
-  if (heroMain?.id) shownIds.add(heroMain.id);
-  heroSideItems.forEach(a => a?.id && shownIds.add(a.id));
-  breakingItems.forEach(a => a?.id && shownIds.add(a.id));
-  trendItems.forEach(a => a?.id && shownIds.add(a.id));
-  blockCats.forEach(cat => (categories[cat] || []).slice(0, 5).forEach(a => a?.id && shownIds.add(a.id)));
-  entItems.forEach(a => a?.id && shownIds.add(a.id));
+  function safeTime(a){ return a.published_at || a.created_at || ""; }
+  function hasImage(a){ return !!((a.image_url || "").trim()); }
+  function pickImage(a){
+    var img = (a.image_url || "").trim();
+    return img ? img : null;
+  }
+  function linkToArticle(a){ return "articles.html?id=" + encodeURIComponent(a.id); }
 
-  const more = withoutShown(all, shownIds).slice(0, 20);
+  function sectionHeader(title, viewAllCategory){
+    var viewAll = viewAllCategory ? '<a class="viewall" href="#" data-viewall="' + escapeHtml(viewAllCategory) + '">View all</a>' : "";
+    return '' +
+      '<div class="section-title">' +
+        '<div class="bar"></div>' +
+        '<h2>' + escapeHtml(title) + '</h2>' +
+        viewAll +
+      '</div>';
+  }
 
-  const moreWrap = document.createElement("div");
-  moreWrap.innerHTML = sectionHeader("More for you");
-  const moreGrid = document.createElement("div");
-  moreGrid.className = "more-grid";
+  function firstNonEmpty(arr){
+    arr = arr || [];
+    for (var i=0;i<arr.length;i++){
+      var x = arr[i];
+      if (x && x.id && x.title) return x;
+    }
+    return null;
+  }
 
-  if (more.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "more-item";
-    empty.innerHTML = `<div>No more articles yet.</div>`;
-    moreGrid.appendChild(empty);
-  } else {
-    more.forEach(a => {
-      const div = document.createElement("div");
+  function take(arr, n){ return (arr || []).slice(0, n); }
+
+  function sortNewestFirst(arr){
+    arr = (arr || []).slice();
+    arr.sort(function(a,b){
+      var da = new Date(safeTime(a)).getTime() || 0;
+      var db = new Date(safeTime(b)).getTime() || 0;
+      return db - da;
+    });
+    return arr;
+  }
+
+  // IMPORTANT RULES YOU ASKED:
+  // - For category "frontpage" (lead + 4 list) => ONLY use items WITH images where images are shown.
+  // - More for you => images first; show thumbnail if exists; infinite scroll.
+  function pickTopWithImages(items, count){
+    items = sortNewestFirst(items || []);
+    var withImg = [];
+    for (var i=0;i<items.length;i++){
+      if (hasImage(items[i])) withImg.push(items[i]);
+      if (withImg.length >= count) break;
+    }
+    return withImg;
+  }
+
+  function pickFirstWithImage(items){
+    items = sortNewestFirst(items || []);
+    for (var i=0;i<items.length;i++){
+      if (hasImage(items[i])) return items[i];
+    }
+    // if none have image, fallback to first
+    return firstNonEmpty(items);
+  }
+
+  function fetchWithTimeout(url, ms){
+    return new Promise(function(resolve, reject){
+      var timer = setTimeout(function(){ reject(new Error("Request timed out after " + ms + "ms")); }, ms);
+      fetch(url, { cache:"no-store" })
+        .then(function(res){ clearTimeout(timer); resolve(res); })
+        .catch(function(err){ clearTimeout(timer); reject(err); });
+    });
+  }
+
+  function showError(msg){
+    var c = document.getElementById("news-container");
+    c.innerHTML = '<div class="error-box">Failed to load homepage.<br><span style="color:var(--muted);font-size:12px;">' + escapeHtml(msg) + '</span></div>';
+  }
+
+  var homepageData = null;
+
+  // More For You infinite scroll state
+  var moreAll = [];
+  var moreShown = 0;
+  var MORE_BATCH = 12;
+  var moreListEl = null;
+  var moreLoadingEl = null;
+  var loadingMore = false;
+
+  function renderMoreBatch(){
+    if (!moreListEl || loadingMore) return;
+    loadingMore = true;
+
+    var end = Math.min(moreAll.length, moreShown + MORE_BATCH);
+    for (var i=moreShown;i<end;i++){
+      var a = moreAll[i];
+      var img = pickImage(a);
+      var t = formatTime(safeTime(a));
+
+      var div = document.createElement("div");
       div.className = "more-item";
-      div.innerHTML = `
-        <a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a>
-        <div class="meta">${escapeHtml(a.source || "Viral News")} • ${escapeHtml(formatTime(safeTime(a)))}</div>
-      `;
-      moreGrid.appendChild(div);
+      div.innerHTML =
+        '<div class="more-thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div>' +
+          '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+          '<div class="more-meta">' + escapeHtml(t) + '</div>' +
+        '</div>';
+
+      moreListEl.appendChild(div);
+    }
+
+    moreShown = end;
+
+    if (moreShown >= moreAll.length){
+      moreLoadingEl.textContent = "No more articles.";
+    } else {
+      moreLoadingEl.textContent = "Scroll for more…";
+    }
+
+    loadingMore = false;
+  }
+
+  function installInfiniteScroll(){
+    window.addEventListener("scroll", function(){
+      if (!moreListEl) return;
+      if (moreShown >= moreAll.length) return;
+
+      var rect = moreListEl.getBoundingClientRect();
+      if (rect.bottom <= window.innerHeight + 300){
+        renderMoreBatch();
+      }
+    }, { passive:true });
+  }
+
+  function renderBBCStyleHome(){
+    var container = document.getElementById("news-container");
+    container.innerHTML = "";
+
+    var categories = homepageData.categories || {};
+    var all = homepageData.all || [];
+
+    // ----- HERO (Top Headlines) -----
+    var top = categories["top headlines"] || categories["Top Headlines"] || [];
+    // you asked: hero should look premium => pick first with image if possible
+    var heroMain = pickFirstWithImage(top) || pickFirstWithImage(all);
+
+    var heroSideCandidates = top.filter(function(x){ return heroMain ? x.id !== heroMain.id : true; });
+    heroSideCandidates = sortNewestFirst(heroSideCandidates);
+
+    // side items: prefer ones WITH images first, then fill
+    var sideWithImg = heroSideCandidates.filter(hasImage);
+    var sideNoImg = heroSideCandidates.filter(function(x){ return !hasImage(x); });
+    var heroSideItems = take(sideWithImg.concat(sideNoImg), 4);
+
+    var heroWrap = document.createElement("div");
+    heroWrap.innerHTML = sectionHeader("Top Headlines", "top headlines");
+
+    var heroGrid = document.createElement("div");
+    heroGrid.className = "hero-grid";
+
+    var mainCard = document.createElement("div");
+    mainCard.className = "card hero-main";
+
+    var mainImg = heroMain ? pickImage(heroMain) : null;
+    var mainTime = heroMain ? formatTime(safeTime(heroMain)) : "";
+
+    mainCard.innerHTML =
+      '<div class="img">' + (mainImg ? '<img src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
+      '<div class="body">' +
+        '<div class="kicker">' +
+          '<span class="chip">Top</span>' +
+          '<span>' + escapeHtml(mainTime) + '</span>' +
+        '</div>' +
+        '<h3 class="hero-title"><a href="' + (heroMain ? linkToArticle(heroMain) : '#') + '">' + escapeHtml(heroMain ? heroMain.title : 'No headline yet') + '</a></h3>' +
+        '<p class="hero-desc">' + escapeHtml(heroMain && heroMain.summary ? heroMain.summary : '') + '</p>' +
+      '</div>';
+
+    var sideCol = document.createElement("div");
+    sideCol.className = "hero-side";
+
+    if (!heroSideItems.length){
+      var empty = document.createElement("div");
+      empty.className = "side-item";
+      empty.innerHTML = '<div class="side-thumb"></div><div><p class="side-title">No more headlines yet.</p></div>';
+      sideCol.appendChild(empty);
+    } else {
+      heroSideItems.forEach(function(a){
+        var img = pickImage(a);
+        var t = formatTime(safeTime(a));
+        var div = document.createElement("div");
+        div.className = "side-item";
+        div.innerHTML =
+          '<div class="side-thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div>' +
+            '<p class="side-title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+            '<div class="meta">' + escapeHtml(t) + '</div>' +
+          '</div>';
+        sideCol.appendChild(div);
+      });
+    }
+
+    heroGrid.appendChild(mainCard);
+    heroGrid.appendChild(sideCol);
+    heroWrap.appendChild(heroGrid);
+    container.appendChild(heroWrap);
+
+    // ----- Breaking strip -----
+    var breaking = sortNewestFirst(categories["breaking"] || []);
+    var breakingBlock = document.createElement("div");
+    breakingBlock.innerHTML = sectionHeader("Breaking", "breaking");
+
+    var strip = document.createElement("div");
+    strip.className = "strip";
+
+    var breakingItems = take(breaking, 6);
+    if (!breakingItems.length){
+      var bEmpty = document.createElement("div");
+      bEmpty.className = "strip-item";
+      bEmpty.innerHTML = "<div>(no items yet)</div>";
+      strip.appendChild(bEmpty);
+    } else {
+      breakingItems.forEach(function(a){
+        var row = document.createElement("div");
+        row.className = "strip-item";
+        row.innerHTML =
+          '<div style="flex:1">' +
+            '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+            '<div class="strip-meta">' + escapeHtml(formatTime(safeTime(a))) + '</div>' +
+          '</div>';
+        strip.appendChild(row);
+      });
+    }
+
+    breakingBlock.appendChild(strip);
+    container.appendChild(breakingBlock);
+
+    // ----- Trending rail (keep as rail) -----
+    var trending = sortNewestFirst(categories["trending"] || []);
+    var trendWrap = document.createElement("div");
+    trendWrap.innerHTML = sectionHeader("Trending", "trending");
+
+    var rail = document.createElement("div");
+    rail.className = "rail";
+
+    var trendItems = take(trending, 12);
+    if (!trendItems.length){
+      var tEmpty = document.createElement("div");
+      tEmpty.className = "error-box";
+      tEmpty.textContent = "(no items yet)";
+      trendWrap.appendChild(tEmpty);
+    } else {
+      trendItems.forEach(function(a){
+        var img = pickImage(a);
+        var t = formatTime(safeTime(a));
+        var card = document.createElement("div");
+        card.className = "rail-card";
+        card.innerHTML =
+          '<div class="thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="body">' +
+            '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+            '<div class="meta">' + escapeHtml(t) + '</div>' +
+          '</div>';
+        rail.appendChild(card);
+      });
+      trendWrap.appendChild(rail);
+    }
+    container.appendChild(trendWrap);
+
+    // ----- Category blocks (lead + list) -----
+    // YOUR RULE: the 5 shown must have images.
+    var blockCats = ["World News","Politics","General News","Technology","Sports"];
+    var catGridWrap = document.createElement("div");
+    catGridWrap.innerHTML = sectionHeader("Latest by Category");
+    var catGrid = document.createElement("div");
+    catGrid.className = "cat-grid";
+
+    blockCats.forEach(function(catName){
+      var items = sortNewestFirst(categories[catName] || []);
+      var withImagesTop5 = pickTopWithImages(items, 5); // only with images
+      // If not enough image items, we still show what we have (BBC sites also do that)
+      var leadItem = withImagesTop5.length ? withImagesTop5[0] : null;
+      var rest = withImagesTop5.length > 1 ? withImagesTop5.slice(1) : [];
+
+      var block = document.createElement("div");
+      block.className = "cat-block";
+
+      var sub = document.createElement("div");
+      sub.innerHTML = sectionHeader(catName, catName);
+      block.appendChild(sub);
+
+      if (leadItem){
+        var img = pickImage(leadItem);
+        var t = formatTime(safeTime(leadItem));
+        var lead = document.createElement("div");
+        lead.className = "lead";
+        lead.innerHTML =
+          '<div class="thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
+          '<div>' +
+            '<h3><a href="' + linkToArticle(leadItem) + '">' + escapeHtml(leadItem.title) + '</a></h3>' +
+            '<div class="meta">' + escapeHtml(t) + '</div>' +
+          '</div>';
+        block.appendChild(lead);
+      } else {
+        var emptyLead = document.createElement("div");
+        emptyLead.className = "lead";
+        emptyLead.innerHTML = "<div>(no image items yet)</div>";
+        block.appendChild(emptyLead);
+      }
+
+      var list = document.createElement("div");
+      list.className = "list";
+
+      if (rest.length){
+        rest.forEach(function(a){
+          var img2 = pickImage(a);
+          var t2 = formatTime(safeTime(a));
+          var row = document.createElement("div");
+          row.className = "list-row";
+          row.innerHTML =
+            '<div class="mini">' + (img2 ? '<img src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+            '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+            '<div class="time">' + escapeHtml(t2) + '</div>';
+          list.appendChild(row);
+        });
+      } else {
+        var noMore = document.createElement("div");
+        noMore.className = "list-row";
+        noMore.innerHTML = "<div>(no more image items)</div>";
+        list.appendChild(noMore);
+      }
+
+      block.appendChild(list);
+      catGrid.appendChild(block);
+    });
+
+    catGridWrap.appendChild(catGrid);
+    container.appendChild(catGridWrap);
+
+    // ----- Health & Fitness rail (scrollable, with images) -----
+    var health = sortNewestFirst(categories["Health & Fitness"] || []);
+    var healthWrap = document.createElement("div");
+    healthWrap.innerHTML = sectionHeader("Health & Fitness", "Health & Fitness");
+
+    var healthRail = document.createElement("div");
+    healthRail.className = "rail";
+
+    // For rail, strongly prefer images; if missing, still allow (but will look blank)
+    var healthPrefer = health.filter(hasImage).concat(health.filter(function(x){ return !hasImage(x); }));
+    var healthItems = take(healthPrefer, 12);
+
+    if (!healthItems.length){
+      var hEmpty = document.createElement("div");
+      hEmpty.className = "error-box";
+      hEmpty.textContent = "(no items yet)";
+      healthWrap.appendChild(hEmpty);
+    } else {
+      healthItems.forEach(function(a){
+        var img = pickImage(a);
+        var t = formatTime(safeTime(a));
+        var card = document.createElement("div");
+        card.className = "rail-card";
+        card.innerHTML =
+          '<div class="thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="body">' +
+            '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+            '<div class="meta">' + escapeHtml(t) + '</div>' +
+          '</div>';
+        healthRail.appendChild(card);
+      });
+      healthWrap.appendChild(healthRail);
+    }
+    container.appendChild(healthWrap);
+
+    // ----- Entertainment (NOT scrollable, text-only) -----
+    var ent = sortNewestFirst(categories["Entertainment"] || []);
+    var entWrap = document.createElement("div");
+    entWrap.innerHTML = sectionHeader("Entertainment", "Entertainment");
+
+    var textOnly = document.createElement("div");
+    textOnly.className = "text-only";
+
+    var entItems = take(ent, 6);
+    if (!entItems.length){
+      var eEmpty = document.createElement("div");
+      eEmpty.className = "row";
+      eEmpty.textContent = "(no items yet)";
+      textOnly.appendChild(eEmpty);
+    } else {
+      entItems.forEach(function(a){
+        var t = formatTime(safeTime(a));
+        var row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML =
+          '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+          '<div class="meta">' + escapeHtml(t) + '</div>';
+        textOnly.appendChild(row);
+      });
+    }
+
+    entWrap.appendChild(textOnly);
+    container.appendChild(entWrap);
+
+    // ----- MORE FOR YOU (images first + infinite scroll) -----
+    // Build "shown" set so we don't repeat.
+    var shown = {};
+    function markShown(arr){
+      arr = arr || [];
+      for (var i=0;i<arr.length;i++){
+        if (arr[i] && arr[i].id) shown[arr[i].id] = true;
+      }
+    }
+    if (heroMain && heroMain.id) shown[heroMain.id] = true;
+    markShown(heroSideItems);
+    markShown(breakingItems);
+    markShown(trendItems);
+
+    // mark category blocks items shown (withImagesTop5)
+    blockCats.forEach(function(cat){
+      var items = pickTopWithImages(categories[cat] || [], 5);
+      markShown(items);
+    });
+
+    markShown(healthItems);
+    markShown(entItems);
+
+    // More for you candidates = all not shown
+    var candidates = (all || []).filter(function(a){ return a && a.id && !shown[a.id]; });
+
+    // Your rule: images first, then no-images
+    var withImg = candidates.filter(hasImage);
+    var noImg = candidates.filter(function(x){ return !hasImage(x); });
+    moreAll = sortNewestFirst(withImg).concat(sortNewestFirst(noImg));
+
+    var moreWrap = document.createElement("div");
+    moreWrap.className = "more-wrap";
+    moreWrap.innerHTML = sectionHeader("More for you");
+
+    moreListEl = document.createElement("div");
+    moreListEl.className = "more-list";
+
+    moreLoadingEl = document.createElement("div");
+    moreLoadingEl.className = "load-hint";
+    moreLoadingEl.textContent = "Scroll for more…";
+
+    // reset infinite state
+    moreShown = 0;
+    moreWrap.appendChild(moreListEl);
+    moreWrap.appendChild(moreLoadingEl);
+    container.appendChild(moreWrap);
+
+    renderMoreBatch();
+    installInfiniteScroll();
+
+    // Wire View all links
+    container.querySelectorAll("[data-viewall]").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.preventDefault();
+        var cat = btn.getAttribute("data-viewall");
+        showCategoryView(cat);
+      });
     });
   }
-  moreWrap.appendChild(moreGrid);
-  container.appendChild(moreWrap);
 
-  // Wire View All links
-  container.querySelectorAll('[data-viewall]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  function showCategoryView(category){
+    var container = document.getElementById("news-container");
+    container.innerHTML = "";
+
+    var categories = homepageData.categories || {};
+    var items = sortNewestFirst(categories[category] || []);
+
+    var back = document.createElement("a");
+    back.href = "#";
+    back.style.color = "var(--accent)";
+    back.style.textDecoration = "none";
+    back.style.display = "inline-block";
+    back.style.margin = "10px 0 8px";
+    back.textContent = "← Back to Home";
+    back.addEventListener("click", function(e){
       e.preventDefault();
-      const cat = btn.getAttribute('data-viewall');
+      renderBBCStyleHome();
+    });
+
+    var wrap = document.createElement("div");
+    wrap.appendChild(back);
+
+    var header = document.createElement("div");
+    header.innerHTML = sectionHeader(category);
+    wrap.appendChild(header);
+
+    if (!items.length){
+      var empty = document.createElement("div");
+      empty.className = "error-box";
+      empty.textContent = "No articles in this category yet.";
+      wrap.appendChild(empty);
+      container.appendChild(wrap);
+      return;
+    }
+
+    // Category view: show image if exists; image-first
+    var withImg = items.filter(hasImage);
+    var noImg = items.filter(function(x){ return !hasImage(x); });
+    items = sortNewestFirst(withImg).concat(sortNewestFirst(noImg));
+
+    var list = document.createElement("div");
+    list.className = "more-list";
+
+    items.forEach(function(a){
+      var img = pickImage(a);
+      var t = formatTime(safeTime(a));
+      var div = document.createElement("div");
+      div.className = "more-item";
+      div.innerHTML =
+        '<div class="more-thumb">' + (img ? '<img src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div>' +
+          '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+          '<div class="more-meta">' + escapeHtml(t) + '</div>' +
+        '</div>';
+      list.appendChild(div);
+    });
+
+    wrap.appendChild(list);
+    container.appendChild(wrap);
+  }
+
+  function loadHomepage(){
+    var container = document.getElementById("news-container");
+    container.innerHTML = "Loading…";
+    fetchWithTimeout(API_BASE + "/homepage", 25000)
+      .then(function(res){
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      })
+      .then(function(data){
+        homepageData = data;
+        if (!homepageData || !homepageData.categories || !homepageData.all){
+          showError("Bad JSON structure.");
+          return;
+        }
+        renderBBCStyleHome();
+      })
+      .catch(function(err){
+        console.error(err);
+        showError(String(err && err.message ? err.message : err));
+      });
+  }
+
+  document.querySelectorAll("#categories-menu a").forEach(function(link){
+    link.addEventListener("click", function(e){
+      e.preventDefault();
+      categoriesMenu.classList.remove("active");
+      var cat = e.target.dataset.category;
+      if (!homepageData) return;
       showCategoryView(cat);
     });
   });
-}
 
-function showCategoryView(category){
-  const container = document.getElementById("news-container");
-  container.innerHTML = "";
-
-  const categories = homepageData?.categories || {};
-  const items = categories[category] || [];
-
-  const back = document.createElement("a");
-  back.href = "#";
-  back.style.color = "var(--accent)";
-  back.style.textDecoration = "none";
-  back.style.display = "inline-block";
-  back.style.margin = "10px 0 8px";
-  back.textContent = "← Back to Home";
-  back.addEventListener("click", (e) => {
-    e.preventDefault();
-    renderBBCStyleHome();
-  });
-
-  const wrap = document.createElement("div");
-  wrap.appendChild(back);
-
-  const header = document.createElement("div");
-  header.innerHTML = sectionHeader(category);
-  wrap.appendChild(header);
-
-  if (!items.length) {
-    const empty = document.createElement("div");
-    empty.className = "error-box";
-    empty.innerHTML = `No articles in this category yet.`;
-    wrap.appendChild(empty);
-    container.appendChild(wrap);
-    return;
-  }
-
-  // Simple list view (BBC-ish)
-  const list = document.createElement("div");
-  list.className = "list";
-
-  items.forEach(a => {
-    const img = pickImage(a);
-    const t = formatTime(safeTime(a));
-    const row = document.createElement("div");
-    row.className = "list-row";
-    row.innerHTML = `
-      <div class="mini">${img ? `<img src="${img}" alt="${escapeHtml(a.title)}">` : ""}</div>
-      <a href="${linkToArticle(a)}">${escapeHtml(a.title)}</a>
-      <div class="time">${escapeHtml(t)}</div>
-    `;
-    list.appendChild(row);
-  });
-
-  wrap.appendChild(list);
-  container.appendChild(wrap);
-}
-
-// Category menu click
-document.querySelectorAll("#categories-menu a").forEach(link => {
-  link.addEventListener("click", (e) => {
-    e.preventDefault();
-    categoriesMenu.classList.remove("active");
-    const cat = e.target.dataset.category;
-    if (!homepageData) return;
-    showCategoryView(cat);
-  });
-});
-
-// Initial load
-loadHomepage();
+  loadHomepage();
+})();
 </script>
 
 </body>
 </html>
-```
