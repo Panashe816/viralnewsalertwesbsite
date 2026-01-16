@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -72,6 +73,23 @@ h1 {
   font-size: 15px;
 }
 
+.article-content p {
+  margin: 0 0 12px;
+}
+
+.article-content h2,
+.article-content h3 {
+  margin: 18px 0 10px;
+  line-height: 1.25;
+}
+
+.article-content hr {
+  border: none;
+  border-top: 1px solid #334a7a;
+  margin: 14px 0;
+  opacity: .8;
+}
+
 .article-content img {
   max-width: 100%;
   border-radius: 10px;
@@ -85,6 +103,7 @@ h1 {
   padding-bottom: 8px;
 }
 
+/* We keep your UL but re-style items to match "More for you" cards */
 ul.headline-list {
   list-style: none;
   padding: 0;
@@ -92,20 +111,48 @@ ul.headline-list {
 }
 
 li.headline-item {
-  background: #0f264f;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
   margin-bottom: 10px;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 12px;
+  align-items: center;
 }
 
-li.headline-item a {
+.mr-thumb {
+  width: 92px;
+  height: 72px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  overflow: hidden;
+}
+
+.mr-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mr-title a {
   text-decoration: none;
   color: #fff;
   font-weight: bold;
+  line-height: 1.25;
+  display: block;
 }
 
-li.headline-item a:hover {
+.mr-title a:hover {
   color: #ffcc00;
+}
+
+.mr-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #cfd8ea;
 }
 
 .loading {
@@ -120,6 +167,16 @@ li.headline-item a:hover {
   border: 1px solid #ff6b6b;
   padding: 12px;
   border-radius: 8px;
+}
+
+@media (max-width: 520px) {
+  li.headline-item {
+    grid-template-columns: 80px 1fr;
+  }
+  .mr-thumb {
+    width: 80px;
+    height: 62px;
+  }
 }
 </style>
 </head>
@@ -157,12 +214,14 @@ let displayedCount = 0;
 const batchSize = 7;
 
 function escapeHtml(s) {
-  return (s || "").toString()
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+  s = (s || "").toString();
+  // avoid replaceAll for broader compatibility
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 // 14m / 3h / 2d
@@ -179,16 +238,136 @@ function formatTime(published_at) {
   return `${diffDays}d`;
 }
 
+function safeTime(a) {
+  return a && (a.published_at || a.created_at) ? (a.published_at || a.created_at) : "";
+}
+
+function hasImage(a) {
+  return !!(a && a.image_url && String(a.image_url).trim());
+}
+
+/* ============================
+   FIX #1: NO DUPLICATE IMAGES
+   - If content already contains an <img>, do NOT add top image_url img
+   - If content has no image, use image_url if present
+============================ */
+function contentHasImgNearTop(html) {
+  if (!html) return false;
+  const s = String(html);
+  const head = s.slice(0, 1200).toLowerCase();
+  return head.indexOf("<img") !== -1;
+}
+
+function stripFirstImageTag(html) {
+  // Remove first <img ...> tag (only) from content
+  if (!html) return "";
+  return String(html).replace(/<img\b[^>]*>/i, "");
+}
+
+/* ============================
+   FIX #2: PARAGRAPH FORMATTING + CLEAN TEMPLATE LABELS
+   - Convert plain text/newlines into <p> blocks
+   - Convert --- into <hr>
+   - Clean "Title:", "Main Stories:", "Featured News:", "Major Stories:"
+============================ */
+function normalizeContent(raw) {
+  if (!raw) return "";
+
+  let s = String(raw);
+
+  // Convert "---" separators into <hr>
+  s = s.replace(/\n\s*---\s*\n/g, "\n<hr>\n");
+  s = s.replace(/<br\s*\/?>\s*---\s*<br\s*\/?>/gi, "<hr>");
+
+  // Clean repeated labels (keep meaning but remove annoying prefixes)
+  // If you want to KEEP them as headings, we convert to <h3> blocks
+  s = s.replace(/\bTitle:\s*/gi, "");
+  s = s.replace(/\bMain Stories:\s*/gi, "");
+  s = s.replace(/\bFeatured News:\s*/gi, "");
+  s = s.replace(/\bMajor Stories:\s*/gi, "");
+
+  // If it already looks like structured HTML paragraphs/headings, keep it
+  const hasBlocks = /<(p|h1|h2|h3|ul|ol|li|blockquote)\b/i.test(s);
+  if (hasBlocks) {
+    // still improve readability: replace double <br><br> into paragraphs when possible
+    // but do not over-aggressively rewrite real HTML
+    return s;
+  }
+
+  // Plain text -> paragraphs
+  // Normalize newlines
+  s = s.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  // Replace multiple blank lines into paragraph breaks
+  const parts = s.split(/\n\s*\n+/);
+
+  const out = [];
+  for (let i = 0; i < parts.length; i++) {
+    let p = parts[i].trim();
+    if (!p) continue;
+
+    // If it contains <hr> as a standalone token, keep it
+    if (p === "<hr>") {
+      out.push("<hr>");
+      continue;
+    }
+
+    // Convert any remaining single newlines to spaces
+    p = p.replace(/\n+/g, " ");
+
+    out.push("<p>" + escapeHtml(p) + "</p>");
+  }
+  return out.join("");
+}
+
+/* ============================
+   FIX #3: Most Read = "More for you" cards
+   - Show thumbnail if available
+   - Show time
+   - Images first, then no-image
+   - Infinite scroll batching (already existed, we keep it)
+============================ */
 async function fetchMostRead() {
   try {
     const res = await fetch(`${API_BASE}/articles/?limit=500`, { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     allArticles = await res.json();
+
+    // sort newest -> oldest
+    if (Array.isArray(allArticles)) {
+      allArticles.sort((a, b) => new Date(safeTime(b)) - new Date(safeTime(a)));
+      // images first
+      const withImg = allArticles.filter(hasImage);
+      const noImg = allArticles.filter(a => !hasImage(a));
+      allArticles = withImg.concat(noImg);
+    }
+
     loadMoreHeadlines();
   } catch (e) {
     loading.innerText = "Failed to load headlines.";
     console.error(e);
   }
+}
+
+function renderMostReadItem(a) {
+  const li = document.createElement("li");
+  li.className = "headline-item";
+
+  const t = formatTime(safeTime(a));
+  const img = hasImage(a) ? String(a.image_url).trim() : "";
+
+  li.innerHTML = `
+    <div class="mr-thumb">
+      ${img ? `<img loading="lazy" src="${img}" alt="${escapeHtml(a.title)}">` : ``}
+    </div>
+    <div>
+      <div class="mr-title">
+        <a href="articles.html?id=${a.id}">${escapeHtml(a.title)}</a>
+      </div>
+      <div class="mr-meta">${escapeHtml(t)}</div>
+    </div>
+  `;
+  return li;
 }
 
 function loadMoreHeadlines() {
@@ -204,27 +383,25 @@ function loadMoreHeadlines() {
 
   const slice = allArticles.slice(displayedCount, displayedCount + batchSize);
 
+  let appended = 0;
   slice.forEach(a => {
     if (!a || !a.title) return;
     if (String(a.id) === String(id)) return; // skip current article
-
-    const li = document.createElement('li');
-    li.className = 'headline-item';
-    li.innerHTML = `<a href="articles.html?id=${a.id}">${escapeHtml(a.title)}</a>`;
-    mostReadList.appendChild(li);
+    mostReadList.appendChild(renderMostReadItem(a));
+    appended++;
   });
 
   displayedCount += batchSize;
 
-  // if we still didn't append anything because of filters, try next batch
-  if (mostReadList.children.length < 5 && displayedCount < allArticles.length) {
+  // If we skipped too many, try next batch once
+  if (appended === 0 && displayedCount < allArticles.length) {
     loadMoreHeadlines();
   }
 }
 
 document.addEventListener('scroll', () => {
   const rect = mostReadList.getBoundingClientRect();
-  if (rect.bottom <= window.innerHeight + 120) {
+  if (rect.bottom <= window.innerHeight + 200) {
     loadMoreHeadlines();
   }
 });
@@ -251,11 +428,29 @@ async function loadArticle() {
     const timeStr = formatTime(a.published_at || a.created_at);
     const cat = a.category ? ` • ${escapeHtml(a.category)}` : "";
 
+    const rawContent = a.content || "";
+
+    // Decide whether to show top image
+    const hasImgInContent = contentHasImgNearTop(rawContent);
+    const topImg = (!hasImgInContent && a.image_url && String(a.image_url).trim())
+      ? String(a.image_url).trim()
+      : "";
+
+    // If content has an image AND image_url also exists, remove the first image from content
+    // so the reader doesn't see duplicates (some generators include image in both places).
+    let cleanedContent = rawContent;
+    if (hasImgInContent && a.image_url && String(a.image_url).trim()) {
+      cleanedContent = stripFirstImageTag(cleanedContent);
+    }
+
+    // Make content readable (paragraphs + clean labels)
+    const pretty = normalizeContent(cleanedContent);
+
     articleContainer.innerHTML = `
       <h1>${escapeHtml(a.title)}</h1>
       <div class="meta">${timeStr}${cat}</div>
-      ${a.image_url ? `<img class="article-img" src="${a.image_url}" alt="${escapeHtml(a.title)}">` : ""}
-      <div class="article-content">${a.content || ""}</div>
+      ${topImg ? `<img class="article-img" src="${topImg}" alt="${escapeHtml(a.title)}">` : ""}
+      <div class="article-content">${pretty}</div>
     `;
 
     // After main article is loaded, fetch Most Read
@@ -271,3 +466,4 @@ loadArticle();
 
 </body>
 </html>
+```
