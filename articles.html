@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -215,7 +214,6 @@ const batchSize = 7;
 
 function escapeHtml(s) {
   s = (s || "").toString();
-  // avoid replaceAll for broader compatibility
   return s
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -247,28 +245,28 @@ function hasImage(a) {
 }
 
 /* ============================
-   FIX #1: NO DUPLICATE IMAGES
-   - If content already contains an <img>, do NOT add top image_url img
-   - If content has no image, use image_url if present
+   NEW FIX: Extract first image from content
 ============================ */
-function contentHasImgNearTop(html) {
-  if (!html) return false;
-  const s = String(html);
-  const head = s.slice(0, 1200).toLowerCase();
-  return head.indexOf("<img") !== -1;
+function extractFirstImgSrc(html) {
+  if (!html) return "";
+  const m = String(html).match(/<img\b[^>]*\bsrc\s*=\s*["']?([^"'\s>]+)[^>]*>/i);
+  return m && m[1] ? m[1].trim() : "";
 }
 
-function stripFirstImageTag(html) {
-  // Remove first <img ...> tag (only) from content
+function removeFirstImgTag(html) {
   if (!html) return "";
   return String(html).replace(/<img\b[^>]*>/i, "");
 }
 
+function contentHasImgNearTop(html) {
+  if (!html) return false;
+  const s = String(html);
+  const head = s.slice(0, 1400).toLowerCase();
+  return head.indexOf("<img") !== -1;
+}
+
 /* ============================
-   FIX #2: PARAGRAPH FORMATTING + CLEAN TEMPLATE LABELS
-   - Convert plain text/newlines into <p> blocks
-   - Convert --- into <hr>
-   - Clean "Title:", "Main Stories:", "Featured News:", "Major Stories:"
+   PARAGRAPH FORMATTER (works even if HTML is present)
 ============================ */
 function normalizeContent(raw) {
   if (!raw) return "";
@@ -279,53 +277,60 @@ function normalizeContent(raw) {
   s = s.replace(/\n\s*---\s*\n/g, "\n<hr>\n");
   s = s.replace(/<br\s*\/?>\s*---\s*<br\s*\/?>/gi, "<hr>");
 
-  // Clean repeated labels (keep meaning but remove annoying prefixes)
-  // If you want to KEEP them as headings, we convert to <h3> blocks
+  // Clean repeated labels
   s = s.replace(/\bTitle:\s*/gi, "");
   s = s.replace(/\bMain Stories:\s*/gi, "");
   s = s.replace(/\bFeatured News:\s*/gi, "");
   s = s.replace(/\bMajor Stories:\s*/gi, "");
 
-  // If it already looks like structured HTML paragraphs/headings, keep it
-  const hasBlocks = /<(p|h1|h2|h3|ul|ol|li|blockquote)\b/i.test(s);
-  if (hasBlocks) {
-    // still improve readability: replace double <br><br> into paragraphs when possible
-    // but do not over-aggressively rewrite real HTML
-    return s;
-  }
+  // If already has <p>, leave it
+  if (/<p\b/i.test(s)) return s;
 
-  // Plain text -> paragraphs
-  // Normalize newlines
+  // If it contains HTML tags but no paragraphs, we still want paragraphs.
+  // Strategy:
+  // - Temporarily protect tags we don't want to break (h2/h3/hr/br/ul/ol/li/blockquote)
+  // - Convert line breaks into paragraph breaks
   s = s.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-  // Replace multiple blank lines into paragraph breaks
+  // Convert <br><br> to paragraph break token
+  s = s.replace(/(<br\s*\/?>\s*){2,}/gi, "\n\n");
+
+  // Convert single <br> to newline (soft break)
+  s = s.replace(/<br\s*\/?>/gi, "\n");
+
+  // Ensure <hr> becomes its own line breaks
+  s = s.replace(/<hr\s*\/?>/gi, "\n<hr>\n");
+
+  // Split into blocks by blank lines
   const parts = s.split(/\n\s*\n+/);
 
   const out = [];
   for (let i = 0; i < parts.length; i++) {
-    let p = parts[i].trim();
-    if (!p) continue;
+    let block = parts[i].trim();
+    if (!block) continue;
 
-    // If it contains <hr> as a standalone token, keep it
-    if (p === "<hr>") {
+    // Keep hr as-is
+    if (block === "<hr>") {
       out.push("<hr>");
       continue;
     }
 
-    // Convert any remaining single newlines to spaces
-    p = p.replace(/\n+/g, " ");
+    // Keep headings if generator inserted them
+    if (/^<h[23]\b/i.test(block)) {
+      out.push(block);
+      continue;
+    }
 
-    out.push("<p>" + escapeHtml(p) + "</p>");
+    // If block contains other HTML tags (like links/em), keep them,
+    // but still wrap in <p> for spacing.
+    out.push("<p>" + block + "</p>");
   }
+
   return out.join("");
 }
 
 /* ============================
-   FIX #3: Most Read = "More for you" cards
-   - Show thumbnail if available
-   - Show time
-   - Images first, then no-image
-   - Infinite scroll batching (already existed, we keep it)
+   MOST READ (unchanged behavior, just card UI)
 ============================ */
 async function fetchMostRead() {
   try {
@@ -333,10 +338,8 @@ async function fetchMostRead() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     allArticles = await res.json();
 
-    // sort newest -> oldest
     if (Array.isArray(allArticles)) {
       allArticles.sort((a, b) => new Date(safeTime(b)) - new Date(safeTime(a)));
-      // images first
       const withImg = allArticles.filter(hasImage);
       const noImg = allArticles.filter(a => !hasImage(a));
       allArticles = withImg.concat(noImg);
@@ -386,14 +389,13 @@ function loadMoreHeadlines() {
   let appended = 0;
   slice.forEach(a => {
     if (!a || !a.title) return;
-    if (String(a.id) === String(id)) return; // skip current article
+    if (String(a.id) === String(id)) return;
     mostReadList.appendChild(renderMostReadItem(a));
     appended++;
   });
 
   displayedCount += batchSize;
 
-  // If we skipped too many, try next batch once
   if (appended === 0 && displayedCount < allArticles.length) {
     loadMoreHeadlines();
   }
@@ -428,23 +430,18 @@ async function loadArticle() {
     const timeStr = formatTime(a.published_at || a.created_at);
     const cat = a.category ? ` • ${escapeHtml(a.category)}` : "";
 
-    const rawContent = a.content || "";
+    let rawContent = a.content || "";
 
-    // Decide whether to show top image
-    const hasImgInContent = contentHasImgNearTop(rawContent);
-    const topImg = (!hasImgInContent && a.image_url && String(a.image_url).trim())
-      ? String(a.image_url).trim()
-      : "";
-
-    // If content has an image AND image_url also exists, remove the first image from content
-    // so the reader doesn't see duplicates (some generators include image in both places).
-    let cleanedContent = rawContent;
-    if (hasImgInContent && a.image_url && String(a.image_url).trim()) {
-      cleanedContent = stripFirstImageTag(cleanedContent);
+    // If content includes an image, extract it and use it as top image
+    let topImg = "";
+    if (contentHasImgNearTop(rawContent)) {
+      topImg = extractFirstImgSrc(rawContent);
+      rawContent = removeFirstImgTag(rawContent);
+    } else if (a.image_url && String(a.image_url).trim()) {
+      topImg = String(a.image_url).trim();
     }
 
-    // Make content readable (paragraphs + clean labels)
-    const pretty = normalizeContent(cleanedContent);
+    const pretty = normalizeContent(rawContent);
 
     articleContainer.innerHTML = `
       <h1>${escapeHtml(a.title)}</h1>
@@ -453,7 +450,6 @@ async function loadArticle() {
       <div class="article-content">${pretty}</div>
     `;
 
-    // After main article is loaded, fetch Most Read
     fetchMostRead();
   } catch (e) {
     articleContainer.innerHTML = `<div class="error-box">Failed to load article.</div>`;
@@ -466,4 +462,3 @@ loadArticle();
 
 </body>
 </html>
-```
