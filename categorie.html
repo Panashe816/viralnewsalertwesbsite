@@ -2,47 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Category – Viral News</title>
+  <title>Redirecting… | Viral News</title>
+  <meta name="robots" content="noindex, follow">
 
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="icon" href="/favicon.ico">
-  <link rel="manifest" href="/site.webmanifest">
-  <meta name="theme-color" content="#081737">
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+
+      // old formats: ?name=technology OR ?c=technology
+      const category =
+        params.get("name") ||
+        params.get("c") ||
+        "general";
+
+      const target = `/category/${category}.html`;
+
+      // SEO-friendly redirect
+      window.location.replace(target);
+    })();
+  </script>
+
+  <!-- Fallback for crawlers -->
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/category/general.html">
+  </noscript>
+
+  <link rel="canonical" href="https://viralnewsalert.com/category/general.html">
 </head>
+
 <body>
-
-<h2 id="category-title"></h2>
-
-<div id="category-articles"></div>
-
-<script>
-const params = new URLSearchParams(window.location.search);
-const category = params.get("name");
-
-document.getElementById("category-title").innerText =
-  category.toUpperCase();
-
-async function loadCategory() {
-  const res = await fetch(
-    `https://viral-news-backend-3.onrender.com/articles/category/${category}`
-  );
-  const articles = await res.json();
-
-  const container = document.getElementById("category-articles");
-
-  articles.forEach(article => {
-    container.innerHTML += `
-      <h3>${article.title}</h3>
-      <a href="article.html?id=${article.id}">Read</a>
-      <hr>
-    `;
-  });
-}
-
-loadCategory();
-</script>
-
+  <p>Redirecting to the new category page…</p>
 </body>
 </html>
