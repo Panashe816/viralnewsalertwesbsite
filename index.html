@@ -543,10 +543,10 @@
     return days + "d";
   }
 
-  function safeTime(a){ return a.published_at || a.created_at || ""; }
-  function hasImage(a){ return !!((a.image_url || "").trim()); }
+  function safeTime(a){ return (a && (a.published_at || a.created_at)) ? (a.published_at || a.created_at) : ""; }
+  function hasImage(a){ return !!(a && a.image_url && String(a.image_url).trim()); }
   function pickImage(a){
-    var img = (a.image_url || "").trim();
+    var img = a && a.image_url ? String(a.image_url).trim() : "";
     return img ? img : null;
   }
   function linkToArticle(a){ return "articles.html?id=" + encodeURIComponent(a.id); }
@@ -637,23 +637,21 @@
     });
   }
 
-  function fetchJsonWithRetry(url, timeoutMs, retries){
-    retries = retries || 0;
-
+  function fetchJsonWithRetry(url, timeoutMs, tries){
+    tries = tries || 0;
     return fetchWithTimeout(url, timeoutMs).then(function(res){
       if (!res.ok){
-        // Retry once for 503/504 (common on Render cold)
-        if ((res.status === 503 || res.status === 504) && retries < 1){
+        if ((res.status === 503 || res.status === 504) && tries < 1){
           return new Promise(function(r){ setTimeout(r, 1200); })
-            .then(function(){ return fetchJsonWithRetry(url, timeoutMs, retries + 1); });
+            .then(function(){ return fetchJsonWithRetry(url, timeoutMs, tries + 1); });
         }
         throw new Error("HTTP " + res.status);
       }
       return res.json();
     }).catch(function(err){
-      if (retries < 1){
+      if (tries < 1){
         return new Promise(function(r){ setTimeout(r, 1200); })
-          .then(function(){ return fetchJsonWithRetry(url, timeoutMs, retries + 1); });
+          .then(function(){ return fetchJsonWithRetry(url, timeoutMs, tries + 1); });
       }
       throw err;
     });
@@ -661,7 +659,9 @@
 
   function showError(msg){
     var c = document.getElementById("news-container");
-    c.innerHTML = '<div class="error-box">Failed to load homepage.<br><span style="color:var(--muted);font-size:12px;">' + escapeHtml(msg) + '</span></div>';
+    c.innerHTML =
+      '<div class="error-box">Failed to load homepage.<br>' +
+      '<span style="color:var(--muted);font-size:12px;">' + escapeHtml(msg) + '</span></div>';
   }
 
   var homepageData = null;
@@ -688,7 +688,9 @@
       var div = document.createElement("div");
       div.className = "more-item";
       div.innerHTML =
-        '<div class="more-thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div class="more-thumb">' +
+          (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') +
+        '</div>' +
         '<div>' +
           '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
           '<div class="more-meta">' + escapeHtml(t) + '</div>' +
@@ -754,7 +756,9 @@
     var mainTime = heroMain ? formatTime(safeTime(heroMain)) : "";
 
     mainCard.innerHTML =
-      '<div class="img">' + (mainImg ? '<img loading="lazy" decoding="async" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
+      '<div class="img">' +
+        (mainImg ? '<img loading="lazy" decoding="async" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') +
+      '</div>' +
       '<div class="body">' +
         '<div class="kicker">' +
           '<span class="chip">Top</span>' +
@@ -779,7 +783,9 @@
         var div = document.createElement("div");
         div.className = "side-item";
         div.innerHTML =
-          '<div class="side-thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="side-thumb">' +
+            (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') +
+          '</div>' +
           '<div>' +
             '<p class="side-title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -844,7 +850,9 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' +
+            (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') +
+          '</div>' +
           '<div class="body">' +
             '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -881,7 +889,9 @@
         var lead = document.createElement("div");
         lead.className = "lead";
         lead.innerHTML =
-          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' +
+            (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') +
+          '</div>' +
           '<div>' +
             '<h3><a href="' + linkToArticle(leadItem) + '">' + escapeHtml(leadItem.title) + '</a></h3>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -904,7 +914,9 @@
           var row = document.createElement("div");
           row.className = "list-row";
           row.innerHTML =
-            '<div class="mini">' + (img2 ? '<img loading="lazy" decoding="async" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+            '<div class="mini">' +
+              (img2 ? '<img loading="lazy" decoding="async" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') +
+            '</div>' +
             '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
             '<div class="time">' + escapeHtml(t2) + '</div>';
           list.appendChild(row);
@@ -946,7 +958,9 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' +
+            (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') +
+          '</div>' +
           '<div class="body">' +
             '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -1037,7 +1051,7 @@
     var container = document.getElementById("news-container");
     container.innerHTML = "Loading…";
 
-    // ✅ show cache instantly
+    // ✅ show cache instantly (if fresh)
     var cached = readHomeCache();
     if (cached && cached.categories && cached.all){
       homepageData = cached;
