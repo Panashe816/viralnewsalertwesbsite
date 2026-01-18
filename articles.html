@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <title>Article • Viral News</title>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
      crossorigin="anonymous"></script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
@@ -209,231 +211,184 @@ li.headline-item {
 </div>
 
 <script>
-const API_BASE = "https://viral-news-backend-3.onrender.com";
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
+(function(){
+  // =========================
+  // CONFIG
+  // =========================
+  const API_BASE = "https://viral-news-backend-3.onrender.com";
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
 
-const articleContainer = document.getElementById("article");
-const mostReadList = document.getElementById("most-read-list");
-const loading = document.getElementById("loading");
+  const articleContainer = document.getElementById("article");
+  const mostReadList = document.getElementById("most-read-list");
+  const loading = document.getElementById("loading");
 
-let allArticles = [];
-let displayedCount = 0;
-const batchSize = 7;
+  // localStorage caches
+  const HOME_CACHE_KEY = "vn_homepage_cache_v1";              // (from your index.html)
+  const ARTICLE_CACHE_PREFIX = "vn_article_cache_v1_";        // per-article cache
+  const ARTICLE_CACHE_TTL = 12 * 60 * 60 * 1000;              // 12 hours
+  const MOSTREAD_CACHE_KEY = "vn_mostread_cache_v1";
+  const MOSTREAD_CACHE_TTL = 10 * 60 * 1000;                  // 10 minutes
 
-function escapeHtml(s) {
-  s = (s || "").toString();
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+  let allArticles = [];
+  let displayedCount = 0;
+  const batchSize = 7;
 
-// 14m / 3h / 2d
-function formatTime(published_at) {
-  const pubDate = new Date(published_at);
-  if (isNaN(pubDate.getTime())) return "";
-  const diffMs = Date.now() - pubDate.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "now";
-  if (diffMins < 60) return `${diffMins}m`;
-  const diffHrs = Math.floor(diffMins / 60);
-  if (diffHrs < 24) return `${diffHrs}h`;
-  const diffDays = Math.floor(diffHrs / 24);
-  return `${diffDays}d`;
-}
+  // =========================
+  // UTILS
+  // =========================
+  function escapeHtml(s) {
+    s = (s || "").toString();
+    return s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-function safeTime(a) {
-  return a && (a.published_at || a.created_at) ? (a.published_at || a.created_at) : "";
-}
+  // 14m / 3h / 2d
+  function formatTime(published_at) {
+    const pubDate = new Date(published_at);
+    if (isNaN(pubDate.getTime())) return "";
+    const diffMs = Date.now() - pubDate.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "now";
+    if (diffMins < 60) return `${diffMins}m`;
+    const diffHrs = Math.floor(diffMins / 60);
+    if (diffHrs < 24) return `${diffHrs}h`;
+    const diffDays = Math.floor(diffHrs / 24);
+    return `${diffDays}d`;
+  }
 
-function hasImage(a) {
-  return !!(a && a.image_url && String(a.image_url).trim());
-}
+  function safeTime(a) {
+    return a && (a.published_at || a.created_at) ? (a.published_at || a.created_at) : "";
+  }
 
-/* ============================
-   NEW FIX: Extract first image from content
-============================ */
-function extractFirstImgSrc(html) {
-  if (!html) return "";
-  const m = String(html).match(/<img\b[^>]*\bsrc\s*=\s*["']?([^"'\s>]+)[^>]*>/i);
-  return m && m[1] ? m[1].trim() : "";
-}
+  function hasImage(a) {
+    return !!(a && a.image_url && String(a.image_url).trim());
+  }
 
-function removeFirstImgTag(html) {
-  if (!html) return "";
-  return String(html).replace(/<img\b[^>]*>/i, "");
-}
+  function readCache(key, ttlMs){
+    try{
+      const raw = localStorage.getItem(key);
+      if(!raw) return null;
+      const obj = JSON.parse(raw);
+      if(!obj || !obj.t || !obj.data) return null;
+      if(Date.now() - obj.t > ttlMs) return null;
+      return obj.data;
+    }catch(e){
+      return null;
+    }
+  }
 
-function contentHasImgNearTop(html) {
-  if (!html) return false;
-  const s = String(html);
-  const head = s.slice(0, 1400).toLowerCase();
-  return head.indexOf("<img") !== -1;
-}
+  function writeCache(key, data){
+    try{
+      localStorage.setItem(key, JSON.stringify({ t: Date.now(), data: data }));
+    }catch(e){}
+  }
 
-/* ============================
-   PARAGRAPH FORMATTER (works even if HTML is present)
-============================ */
-function normalizeContent(raw) {
-  if (!raw) return "";
+  function fetchWithTimeout(url, ms){
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("Request timed out after " + ms + "ms")), ms);
 
-  let s = String(raw);
+      // ✅ allow caching
+      fetch(url, { cache: "default" })
+        .then(res => { clearTimeout(timer); resolve(res); })
+        .catch(err => { clearTimeout(timer); reject(err); });
+    });
+  }
 
-  // Convert "---" separators into <hr>
-  s = s.replace(/\n\s*---\s*\n/g, "\n<hr>\n");
-  s = s.replace(/<br\s*\/?>\s*---\s*<br\s*\/?>/gi, "<hr>");
+  // ✅ retry once (helps Render 503/504 + cold weirdness)
+  function fetchJsonWithRetry(url, timeoutMs, tries){
+    tries = tries || 0;
 
-  // Clean repeated labels
-  s = s.replace(/\bTitle:\s*/gi, "");
-  s = s.replace(/\bMain Stories:\s*/gi, "");
-  s = s.replace(/\bFeatured News:\s*/gi, "");
-  s = s.replace(/\bMajor Stories:\s*/gi, "");
+    return fetchWithTimeout(url, timeoutMs).then(res => {
+      if(!res.ok){
+        if((res.status === 503 || res.status === 504) && tries < 1){
+          return new Promise(r => setTimeout(r, 1200))
+            .then(() => fetchJsonWithRetry(url, timeoutMs, tries + 1));
+        }
+        throw new Error("HTTP " + res.status);
+      }
+      return res.json();
+    }).catch(err => {
+      if(tries < 1){
+        return new Promise(r => setTimeout(r, 1200))
+          .then(() => fetchJsonWithRetry(url, timeoutMs, tries + 1));
+      }
+      throw err;
+    });
+  }
 
-  // If already has <p>, leave it
-  if (/<p\b/i.test(s)) return s;
+  // =========================
+  // CONTENT HELPERS (your logic kept)
+  // =========================
+  function extractFirstImgSrc(html) {
+    if (!html) return "";
+    const m = String(html).match(/<img\b[^>]*\bsrc\s*=\s*["']?([^"'\s>]+)[^>]*>/i);
+    return m && m[1] ? m[1].trim() : "";
+  }
 
-  // If it contains HTML tags but no paragraphs, we still want paragraphs.
-  // Strategy:
-  // - Temporarily protect tags we don't want to break (h2/h3/hr/br/ul/ol/li/blockquote)
-  // - Convert line breaks into paragraph breaks
-  s = s.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  function removeFirstImgTag(html) {
+    if (!html) return "";
+    return String(html).replace(/<img\b[^>]*>/i, "");
+  }
 
-  // Convert <br><br> to paragraph break token
-  s = s.replace(/(<br\s*\/?>\s*){2,}/gi, "\n\n");
+  function contentHasImgNearTop(html) {
+    if (!html) return false;
+    const s = String(html);
+    const head = s.slice(0, 1400).toLowerCase();
+    return head.indexOf("<img") !== -1;
+  }
 
-  // Convert single <br> to newline (soft break)
-  s = s.replace(/<br\s*\/?>/gi, "\n");
+  function normalizeContent(raw) {
+    if (!raw) return "";
 
-  // Ensure <hr> becomes its own line breaks
-  s = s.replace(/<hr\s*\/?>/gi, "\n<hr>\n");
+    let s = String(raw);
 
-  // Split into blocks by blank lines
-  const parts = s.split(/\n\s*\n+/);
+    s = s.replace(/\n\s*---\s*\n/g, "\n<hr>\n");
+    s = s.replace(/<br\s*\/?>\s*---\s*<br\s*\/?>/gi, "<hr>");
 
-  const out = [];
-  for (let i = 0; i < parts.length; i++) {
-    let block = parts[i].trim();
-    if (!block) continue;
+    s = s.replace(/\bTitle:\s*/gi, "");
+    s = s.replace(/\bMain Stories:\s*/gi, "");
+    s = s.replace(/\bFeatured News:\s*/gi, "");
+    s = s.replace(/\bMajor Stories:\s*/gi, "");
 
-    // Keep hr as-is
-    if (block === "<hr>") {
-      out.push("<hr>");
-      continue;
+    if (/<p\b/i.test(s)) return s;
+
+    s = s.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    s = s.replace(/(<br\s*\/?>\s*){2,}/gi, "\n\n");
+    s = s.replace(/<br\s*\/?>/gi, "\n");
+    s = s.replace(/<hr\s*\/?>/gi, "\n<hr>\n");
+
+    const parts = s.split(/\n\s*\n+/);
+
+    const out = [];
+    for (let i = 0; i < parts.length; i++) {
+      let block = parts[i].trim();
+      if (!block) continue;
+
+      if (block === "<hr>") {
+        out.push("<hr>");
+        continue;
+      }
+
+      if (/^<h[23]\b/i.test(block)) {
+        out.push(block);
+        continue;
+      }
+
+      out.push("<p>" + block + "</p>");
     }
 
-    // Keep headings if generator inserted them
-    if (/^<h[23]\b/i.test(block)) {
-      out.push(block);
-      continue;
-    }
-
-    // If block contains other HTML tags (like links/em), keep them,
-    // but still wrap in <p> for spacing.
-    out.push("<p>" + block + "</p>");
+    return out.join("");
   }
 
-  return out.join("");
-}
-
-/* ============================
-   MOST READ (unchanged behavior, just card UI)
-============================ */
-async function fetchMostRead() {
-  try {
-    const res = await fetch(`${API_BASE}/articles/?limit=500`, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    allArticles = await res.json();
-
-    if (Array.isArray(allArticles)) {
-      allArticles.sort((a, b) => new Date(safeTime(b)) - new Date(safeTime(a)));
-      const withImg = allArticles.filter(hasImage);
-      const noImg = allArticles.filter(a => !hasImage(a));
-      allArticles = withImg.concat(noImg);
-    }
-
-    loadMoreHeadlines();
-  } catch (e) {
-    loading.innerText = "Failed to load headlines.";
-    console.error(e);
-  }
-}
-
-function renderMostReadItem(a) {
-  const li = document.createElement("li");
-  li.className = "headline-item";
-
-  const t = formatTime(safeTime(a));
-  const img = hasImage(a) ? String(a.image_url).trim() : "";
-
-  li.innerHTML = `
-    <div class="mr-thumb">
-      ${img ? `<img loading="lazy" src="${img}" alt="${escapeHtml(a.title)}">` : ``}
-    </div>
-    <div>
-      <div class="mr-title">
-        <a href="articles.html?id=${a.id}">${escapeHtml(a.title)}</a>
-      </div>
-      <div class="mr-meta">${escapeHtml(t)}</div>
-    </div>
-  `;
-  return li;
-}
-
-function loadMoreHeadlines() {
-  if (!Array.isArray(allArticles) || allArticles.length === 0) {
-    loading.innerText = "No stories.";
-    return;
-  }
-
-  if (displayedCount >= allArticles.length) {
-    loading.innerText = "No more stories.";
-    return;
-  }
-
-  const slice = allArticles.slice(displayedCount, displayedCount + batchSize);
-
-  let appended = 0;
-  slice.forEach(a => {
-    if (!a || !a.title) return;
-    if (String(a.id) === String(id)) return;
-    mostReadList.appendChild(renderMostReadItem(a));
-    appended++;
-  });
-
-  displayedCount += batchSize;
-
-  if (appended === 0 && displayedCount < allArticles.length) {
-    loadMoreHeadlines();
-  }
-}
-
-document.addEventListener('scroll', () => {
-  const rect = mostReadList.getBoundingClientRect();
-  if (rect.bottom <= window.innerHeight + 200) {
-    loadMoreHeadlines();
-  }
-});
-
-// Load main article
-async function loadArticle() {
-  if (!id) {
-    articleContainer.innerHTML = `<div class="error-box">Article not found (missing id).</div>`;
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/articles/${id}`, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const a = await res.json();
-
-    if (!a || !a.title) {
-      articleContainer.innerHTML = `<div class="error-box">Article not found.</div>`;
-      return;
-    }
-
+  // =========================
+  // RENDER ARTICLE
+  // =========================
+  function renderArticle(a){
     document.title = `${a.title} • Viral News`;
 
     const timeStr = formatTime(a.published_at || a.created_at);
@@ -441,7 +396,7 @@ async function loadArticle() {
 
     let rawContent = a.content || "";
 
-    // If content includes an image, extract it and use it as top image
+    // Top image selection:
     let topImg = "";
     if (contentHasImgNearTop(rawContent)) {
       topImg = extractFirstImgSrc(rawContent);
@@ -454,21 +409,183 @@ async function loadArticle() {
 
     articleContainer.innerHTML = `
       <h1>${escapeHtml(a.title)}</h1>
-      <div class="meta">${timeStr}${cat}</div>
-      ${topImg ? `<img class="article-img" src="${topImg}" alt="${escapeHtml(a.title)}">` : ""}
+      <div class="meta">${escapeHtml(timeStr)}${cat}</div>
+      ${topImg ? `<img class="article-img" loading="lazy" decoding="async" src="${topImg}" alt="${escapeHtml(a.title)}">` : ""}
       <div class="article-content">${pretty}</div>
     `;
-
-    fetchMostRead();
-  } catch (e) {
-    articleContainer.innerHTML = `<div class="error-box">Failed to load article.</div>`;
-    console.error(e);
   }
-}
 
-loadArticle();
+  // =========================
+  // ARTICLE LOAD (FAST PATH)
+  // 1) show from cache instantly if possible
+  // 2) fetch fresh in background
+  // =========================
+  function findArticleInHomepageCache(articleId){
+    const home = readCache(HOME_CACHE_KEY, 60 * 1000); // same TTL as homepage
+    if(!home || !home.all || !Array.isArray(home.all)) return null;
+
+    const found = home.all.find(x => String(x.id) === String(articleId));
+    if(!found) return null;
+
+    // homepage payload doesn't include full content, so only use it for a fast skeleton
+    return {
+      id: found.id,
+      title: found.title,
+      category: found.category || "",
+      image_url: found.image_url || "",
+      published_at: found.published_at || "",
+      created_at: found.created_at || "",
+      content: found.summary ? `<p>${escapeHtml(found.summary)}</p>` : ""
+    };
+  }
+
+  async function loadArticle(){
+    if (!id) {
+      articleContainer.innerHTML = `<div class="error-box">Article not found (missing id).</div>`;
+      return;
+    }
+
+    // ✅ 1) Try full article cache
+    const cachedFull = readCache(ARTICLE_CACHE_PREFIX + id, ARTICLE_CACHE_TTL);
+    if (cachedFull && cachedFull.title) {
+      renderArticle(cachedFull);
+    } else {
+      // ✅ 2) Try homepage cache skeleton (instant feel)
+      const quick = findArticleInHomepageCache(id);
+      if (quick && quick.title) {
+        renderArticle(quick);
+      }
+    }
+
+    // ✅ 3) Fetch fresh (with retry) and update cache + UI
+    try {
+      const a = await fetchJsonWithRetry(`${API_BASE}/articles/${id}`, 20000, 0);
+
+      if (!a || !a.title) {
+        if (!(cachedFull && cachedFull.title)) {
+          articleContainer.innerHTML = `<div class="error-box">Article not found.</div>`;
+        }
+        return;
+      }
+
+      writeCache(ARTICLE_CACHE_PREFIX + id, a);
+      renderArticle(a);
+
+      // Load most read after article is rendered
+      fetchMostRead();
+    } catch (e) {
+      console.error(e);
+      if (!(cachedFull && cachedFull.title)) {
+        articleContainer.innerHTML = `<div class="error-box">Failed to load article.<br><span style="color:#cfd8ea;font-size:12px;">${escapeHtml(String(e && e.message ? e.message : e))}</span></div>`;
+      }
+      // still try most read (maybe works even if article failed)
+      fetchMostRead();
+    }
+  }
+
+  // =========================
+  // MOST READ (FAST + CACHED)
+  // =========================
+  function renderMostReadItem(a) {
+    const li = document.createElement("li");
+    li.className = "headline-item";
+
+    const t = formatTime(safeTime(a));
+    const img = hasImage(a) ? String(a.image_url).trim() : "";
+
+    li.innerHTML = `
+      <div class="mr-thumb">
+        ${img ? `<img loading="lazy" decoding="async" src="${img}" alt="${escapeHtml(a.title)}">` : ``}
+      </div>
+      <div>
+        <div class="mr-title">
+          <a href="articles.html?id=${encodeURIComponent(a.id)}">${escapeHtml(a.title)}</a>
+        </div>
+        <div class="mr-meta">${escapeHtml(t)}</div>
+      </div>
+    `;
+    return li;
+  }
+
+  function loadMoreHeadlines() {
+    if (!Array.isArray(allArticles) || allArticles.length === 0) {
+      loading.innerText = "No stories.";
+      return;
+    }
+
+    if (displayedCount >= allArticles.length) {
+      loading.innerText = "No more stories.";
+      return;
+    }
+
+    const slice = allArticles.slice(displayedCount, displayedCount + batchSize);
+
+    let appended = 0;
+    slice.forEach(a => {
+      if (!a || !a.title) return;
+      if (String(a.id) === String(id)) return;
+      mostReadList.appendChild(renderMostReadItem(a));
+      appended++;
+    });
+
+    displayedCount += batchSize;
+
+    if (appended === 0 && displayedCount < allArticles.length) {
+      loadMoreHeadlines();
+    }
+  }
+
+  async function fetchMostRead() {
+    // show cached instantly
+    const cached = readCache(MOSTREAD_CACHE_KEY, MOSTREAD_CACHE_TTL);
+    if (cached && Array.isArray(cached) && cached.length) {
+      allArticles = cached.slice();
+      displayedCount = 0;
+      mostReadList.innerHTML = "";
+      loading.innerText = "Loading…";
+      loadMoreHeadlines();
+    }
+
+    try {
+      // ✅ much faster than "no-store"
+      const data = await fetchJsonWithRetry(`${API_BASE}/articles/?limit=500`, 20000, 0);
+
+      if (!Array.isArray(data)) {
+        if (!cached) loading.innerText = "No stories.";
+        return;
+      }
+
+      let list = data.slice();
+
+      list.sort((a, b) => new Date(safeTime(b)) - new Date(safeTime(a)));
+      const withImg = list.filter(hasImage);
+      const noImg = list.filter(a => !hasImage(a));
+      list = withImg.concat(noImg);
+
+      writeCache(MOSTREAD_CACHE_KEY, list);
+
+      allArticles = list;
+      displayedCount = 0;
+      mostReadList.innerHTML = "";
+      loadMoreHeadlines();
+    } catch (e) {
+      console.error(e);
+      if (!cached) loading.innerText = "Failed to load headlines.";
+    }
+  }
+
+  // Infinite scroll
+  document.addEventListener("scroll", () => {
+    const rect = mostReadList.getBoundingClientRect();
+    if (rect.bottom <= window.innerHeight + 200) {
+      loadMoreHeadlines();
+    }
+  }, { passive: true });
+
+  // Start
+  loadArticle();
+})();
 </script>
 
 </body>
 </html>
-
