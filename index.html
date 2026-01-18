@@ -472,7 +472,6 @@
     <h1 class="brand">VIRAL NEWS</h1>
   </div>
 
-  <!-- ✅ IMPORTANT: Real internal links for SEO discovery -->
   <nav class="catbar" id="catbar">
     <a class="catbtn active" href="/">Home</a>
     <a class="catbtn" href="/category/breaking.html">Breaking</a>
@@ -499,7 +498,13 @@
 
 <script>
 (function(){
+  // ✅ API base (your backend)
   var API_BASE = "https://viral-news-backend-3.onrender.com";
+  var HOMEPAGE_URL = API_BASE + "/homepage";
+
+  // ✅ local cache: instant feel
+  var HOME_CACHE_KEY = "vn_homepage_cache_v1";
+  var HOME_CACHE_TTL = 60 * 1000; // 60 seconds
 
   // Map homepage category labels -> category page URLs
   var CAT_URL = {
@@ -600,12 +605,57 @@
     return firstNonEmpty(items);
   }
 
+  function readHomeCache(){
+    try{
+      var raw = localStorage.getItem(HOME_CACHE_KEY);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      if (!obj || !obj.t || !obj.data) return null;
+      if (Date.now() - obj.t > HOME_CACHE_TTL) return null;
+      return obj.data;
+    }catch(e){
+      return null;
+    }
+  }
+
+  function writeHomeCache(data){
+    try{
+      localStorage.setItem(HOME_CACHE_KEY, JSON.stringify({ t: Date.now(), data: data }));
+    }catch(e){}
+  }
+
   function fetchWithTimeout(url, ms){
     return new Promise(function(resolve, reject){
-      var timer = setTimeout(function(){ reject(new Error("Request timed out after " + ms + "ms")); }, ms);
-      fetch(url, { cache:"no-store" })
+      var timer = setTimeout(function(){
+        reject(new Error("Request timed out after " + ms + "ms"));
+      }, ms);
+
+      // ✅ allow browser caching (do NOT force no-store)
+      fetch(url, { cache: "default" })
         .then(function(res){ clearTimeout(timer); resolve(res); })
         .catch(function(err){ clearTimeout(timer); reject(err); });
+    });
+  }
+
+  function fetchJsonWithRetry(url, timeoutMs, retries){
+    retries = retries || 0;
+
+    return fetchWithTimeout(url, timeoutMs).then(function(res){
+      if (!res.ok){
+        // Retry once for 503/504 (common on Render cold)
+        if ((res.status === 503 || res.status === 504) && retries < 1){
+          return new Promise(function(r){ setTimeout(r, 1200); })
+            .then(function(){ return fetchJsonWithRetry(url, timeoutMs, retries + 1); });
+        }
+        throw new Error("HTTP " + res.status);
+      }
+      return res.json();
+    }).catch(function(err){
+      if (retries < 1){
+        return new Promise(function(r){ setTimeout(r, 1200); })
+          .then(function(){ return fetchJsonWithRetry(url, timeoutMs, retries + 1); });
+      }
+      throw err;
     });
   }
 
@@ -616,7 +666,7 @@
 
   var homepageData = null;
 
-  // More For You infinite scroll state
+  // Infinite scroll state
   var moreAll = [];
   var moreShown = 0;
   var MORE_BATCH = 12;
@@ -638,7 +688,7 @@
       var div = document.createElement("div");
       div.className = "more-item";
       div.innerHTML =
-        '<div class="more-thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div class="more-thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
         '<div>' +
           '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
           '<div class="more-meta">' + escapeHtml(t) + '</div>' +
@@ -704,7 +754,7 @@
     var mainTime = heroMain ? formatTime(safeTime(heroMain)) : "";
 
     mainCard.innerHTML =
-      '<div class="img">' + (mainImg ? '<img loading="lazy" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
+      '<div class="img">' + (mainImg ? '<img loading="lazy" decoding="async" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
       '<div class="body">' +
         '<div class="kicker">' +
           '<span class="chip">Top</span>' +
@@ -729,7 +779,7 @@
         var div = document.createElement("div");
         div.className = "side-item";
         div.innerHTML =
-          '<div class="side-thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="side-thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div>' +
             '<p class="side-title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -794,7 +844,7 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div class="body">' +
             '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -831,7 +881,7 @@
         var lead = document.createElement("div");
         lead.className = "lead";
         lead.innerHTML =
-          '<div class="thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
           '<div>' +
             '<h3><a href="' + linkToArticle(leadItem) + '">' + escapeHtml(leadItem.title) + '</a></h3>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -854,7 +904,7 @@
           var row = document.createElement("div");
           row.className = "list-row";
           row.innerHTML =
-            '<div class="mini">' + (img2 ? '<img loading="lazy" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+            '<div class="mini">' + (img2 ? '<img loading="lazy" decoding="async" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
             '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
             '<div class="time">' + escapeHtml(t2) + '</div>';
           list.appendChild(row);
@@ -896,7 +946,7 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div class="body">' +
             '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -950,8 +1000,8 @@
     markShown(trendItems);
 
     blockCats.forEach(function(cat){
-      var items = pickTopWithImages(categories[cat] || [], 5);
-      markShown(items);
+      var items2 = pickTopWithImages(categories[cat] || [], 5);
+      markShown(items2);
     });
 
     markShown(healthItems);
@@ -987,22 +1037,27 @@
     var container = document.getElementById("news-container");
     container.innerHTML = "Loading…";
 
-    fetchWithTimeout(API_BASE + "/homepage", 25000)
-      .then(function(res){
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return res.json();
-      })
+    // ✅ show cache instantly
+    var cached = readHomeCache();
+    if (cached && cached.categories && cached.all){
+      homepageData = cached;
+      renderHome();
+    }
+
+    // ✅ fetch fresh in background (with retry)
+    fetchJsonWithRetry(HOMEPAGE_URL, 20000, 0)
       .then(function(data){
-        homepageData = data;
-        if (!homepageData || !homepageData.categories || !homepageData.all){
-          showError("Bad JSON structure.");
+        if (!data || !data.categories || !data.all){
+          if (!cached) showError("Bad JSON structure.");
           return;
         }
+        homepageData = data;
+        writeHomeCache(data);
         renderHome();
       })
       .catch(function(err){
         console.error(err);
-        showError(String(err && err.message ? err.message : err));
+        if (!cached) showError(String(err && err.message ? err.message : err));
       });
   }
 
