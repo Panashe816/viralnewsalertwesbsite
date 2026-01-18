@@ -4,6 +4,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://viralnewsalert.com/</loc>
+    <lastmod>2026-01-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -11,6 +12,7 @@
   <!-- Main listing page -->
   <url>
     <loc>https://viralnewsalert.com/articles.html</loc>
+    <lastmod>2026-01-18</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -18,79 +20,92 @@
   <!-- Category pages -->
   <url>
     <loc>https://viralnewsalert.com/category/breaking.html</loc>
-    <changefreq>hourly</changefreq>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/category/trending.html</loc>
-    <changefreq>hourly</changefreq>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/category/top-headlines.html</loc>
-    <changefreq>hourly</changefreq>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/category/general.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/category/world.html</loc>
-    <changefreq>hourly</changefreq>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/category/politics.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/category/technology.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/category/sports.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/category/health-fitness.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/category/entertainment.html</loc>
-    <changefreq>hourly</changefreq>
-    <priority>0.9</priority>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
   </url>
 
   <!-- Trust / policy pages -->
   <url>
     <loc>https://viralnewsalert.com/about-us.html</loc>
+    <lastmod>2026-01-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/contact.html</loc>
+    <lastmod>2026-01-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/privacy-policy.html</loc>
+    <lastmod>2026-01-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
