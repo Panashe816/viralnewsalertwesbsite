@@ -495,12 +495,15 @@
 
 <script>
 (function(){
+  // ✅ API base
   var API_BASE = "https://viral-news-backend-3.onrender.com";
   var HOMEPAGE_URL = API_BASE + "/homepage";
 
+  // ✅ Frontend cache (SWR)
   var HOME_CACHE_KEY = "vn_homepage_cache_v1";
   var HOME_CACHE_TTL = 60 * 1000; // 60 seconds
 
+  // Map homepage category labels -> category page URLs
   var CAT_URL = {
     "breaking": "/category/breaking.html",
     "trending": "/category/trending.html",
@@ -524,6 +527,7 @@
       .replace(/'/g, "&#039;");
   }
 
+  // ✅ Option A: strip HTML tags from summary so homepage never shows <p> <br> etc
   function stripHtml(s){
     return (s || "").toString().replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
   }
@@ -544,12 +548,20 @@
   function safeTime(a){ return a.published_at || a.created_at || ""; }
   function hasImage(a){ return !!((a.image_url || "").trim()); }
 
-  // ✅ IMPORTANT:
-  // You asked for "full quality" images.
-  // That means: DO NOT add compression params like ?w=900 etc.
+  // Optional: make pexels images lighter (fast win)
+  function optimizeImg(url){
+    if (!url) return "";
+    var u = String(url);
+    if (u.indexOf("images.pexels.com") !== -1){
+      var hasQ = u.indexOf("?") !== -1;
+      return u + (hasQ ? "&" : "?") + "auto=compress&cs=tinysrgb&w=900";
+    }
+    return u;
+  }
+
   function pickImage(a){
     var img = (a.image_url || "").trim();
-    return img ? img : null;
+    return img ? optimizeImg(img) : null;
   }
 
   function linkToArticle(a){ return "articles.html?id=" + encodeURIComponent(a.id); }
@@ -693,7 +705,7 @@
       var div = document.createElement("div");
       div.className = "more-item";
       div.innerHTML =
-        '<div class="more-thumb">' + (img ? '<img loading="eager" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div class="more-thumb">' + (img ? '<img loading="lazy" decoding="async" width="184" height="144" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
         '<div>' +
           '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
           '<div class="more-meta">' + escapeHtml(t) + '</div>' +
@@ -758,15 +770,16 @@
     var mainImg = heroMain ? pickImage(heroMain) : null;
     var mainTime = heroMain ? formatTime(safeTime(heroMain)) : "";
 
-    // ✅ HERO image: eager + high priority
+    // ✅ HERO image: eager + high priority (not lazy)
     mainCard.innerHTML =
-      '<div class="img">' + (mainImg ? '<img loading="eager" fetchpriority="high" decoding="async" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
+      '<div class="img">' + (mainImg ? '<img loading="eager" fetchpriority="high" decoding="async" width="1200" height="675" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
       '<div class="body">' +
         '<div class="kicker">' +
           '<span class="chip">Top</span>' +
           '<span>' + escapeHtml(mainTime) + '</span>' +
         '</div>' +
         '<h3 class="hero-title"><a href="' + (heroMain ? linkToArticle(heroMain) : '#') + '">' + escapeHtml(heroMain ? heroMain.title : 'No headline yet') + '</a></h3>' +
+        // ✅ summary stripped of HTML tags
         '<p class="hero-desc">' + escapeHtml(heroMain && heroMain.summary ? stripHtml(heroMain.summary) : '') + '</p>' +
       '</div>';
 
@@ -785,7 +798,7 @@
         var div = document.createElement("div");
         div.className = "side-item";
         div.innerHTML =
-          '<div class="side-thumb">' + (img ? '<img loading="eager" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="side-thumb">' + (img ? '<img loading="lazy" decoding="async" width="172" height="128" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div>' +
             '<p class="side-title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -850,7 +863,7 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img loading="eager" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" width="520" height="300" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div class="body">' +
             '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -887,7 +900,7 @@
         var lead = document.createElement("div");
         lead.className = "lead";
         lead.innerHTML =
-          '<div class="thumb">' + (img ? '<img loading="eager" decoding="async" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" width="240" height="168" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
           '<div>' +
             '<h3><a href="' + linkToArticle(leadItem) + '">' + escapeHtml(leadItem.title) + '</a></h3>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -910,7 +923,7 @@
           var row = document.createElement("div");
           row.className = "list-row";
           row.innerHTML =
-            '<div class="mini">' + (img2 ? '<img loading="eager" decoding="async" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+            '<div class="mini">' + (img2 ? '<img loading="lazy" decoding="async" width="112" height="84" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
             '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
             '<div class="time">' + escapeHtml(t2) + '</div>';
           list.appendChild(row);
@@ -952,7 +965,7 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img loading="eager" decoding="async" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" width="520" height="300" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div class="body">' +
             '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
@@ -1042,6 +1055,7 @@
   function loadHomepage(){
     var container = document.getElementById("news-container");
 
+    // 1) Instant show cache if available
     var cached = readHomeCache();
     if (cached && isValidHomepage(cached)){
       homepageData = cached;
@@ -1050,6 +1064,7 @@
       container.innerHTML = "Loading…";
     }
 
+    // 2) Background refresh (SWR)
     fetchJsonWithRetry(HOMEPAGE_URL, 20000, 0)
       .then(function(data){
         if (!isValidHomepage(data)){
@@ -1070,7 +1085,7 @@
 })();
 </script>
 
-<!-- Ads moved to bottom so content paints first -->
+<!-- ✅ Ads moved to bottom so content paints first -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
      crossorigin="anonymous"></script>
 
