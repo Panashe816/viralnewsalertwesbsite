@@ -28,6 +28,45 @@
   <a href="/category/world.html" style="color:#fff;">World</a>
   <a href="/category/politics.html" style="color:#fff;">Politics</a>
   <a href="/category/technology.html" style="color:#fff;">Technology</a>
+  <a href="/category/sports.html" style="color:#fff;">Sports</aThis is the specific reason:
+- **Backend canonical category for general is `"General News"`**, not `"general"`.
+- Your backend normalizes unknown values to `"General News"`.
+So this must be:
+`?category=General%20News`
+
+> ✅ This is now corrected below.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>General News – Latest Updates | Viral News</title>
+  <meta name="description" content="General news covering major updates, society, events and daily headlines on Viral News." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="canonical" href="https://viralnewsalert.com/category/general.html" />
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#081737">
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+
+<nav style="padding:12px;background:#081737;display:flex;flex-wrap:wrap;gap:12px;">
+  <a href="/" style="color:#fff;">Home</a>
+  <a href="/category/breaking.html" style="color:#fff;">Breaking</a>
+  <a href="/category/trending.html" style="color:#fff;">Trending</a>
+  <a href="/category/top-headlines.html" style="color:#fff;">Top Headlines</a>
+  <a href="/category/general.html" style="color:#fff;">General</a>
+  <a href="/category/world.html" style="color:#fff;">World</a>
+  <a href="/category/politics.html" style="color:#fff;">Politics</a>
+  <a href="/category/technology.html" style="color:#fff;">Technology</a>
   <a href="/category/sports.html" style="color:#fff;">Sports</a>
   <a href="/category/health-fitness.html" style="color:#fff;">Health & Fitness</a>
   <a href="/category/entertainment.html" style="color:#fff;">Entertainment</a>
@@ -52,7 +91,7 @@
 <script>
 async function loadCategory() {
   try {
-    const res = await fetch("https://viral-news-backend-3.onrender.com/articles/category/general");
+    const res = await fetch("https://viral-news-backend-3.onrender.com/articles/?category=General%20News");
     const articles = await res.json();
     const container = document.getElementById("category-articles");
 
