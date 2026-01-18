@@ -14,8 +14,9 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta name="theme-color" content="#081737">
 
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
-     crossorigin="anonymous"></script>
+  <script async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
+    crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -52,7 +53,9 @@
 <script>
 async function loadCategory() {
   try {
-    const res = await fetch("https://viral-news-backend-3.onrender.com/articles/category/sports");
+    const res = await fetch(
+      "https://viral-news-backend-3.onrender.com/articles/?category=Sports"
+    );
     const articles = await res.json();
     const container = document.getElementById("category-articles");
 
@@ -63,14 +66,21 @@ async function loadCategory() {
 
     container.innerHTML = articles.map(a => `
       <article style="border-bottom:1px solid #ddd;padding:14px 0;">
-        <h2><a href="/article.html?id=${a.id}">${a.title}</a></h2>
+        <h2>
+          <a href="/article.html?id=${a.id}">
+            ${a.title}
+          </a>
+        </h2>
         <p>${(a.content || "").replace(/<[^>]*>/g,"").slice(0,180)}…</p>
       </article>
     `).join("");
+
   } catch (e) {
-    document.getElementById("category-articles").innerHTML = "<p>Failed to load sports news.</p>";
+    document.getElementById("category-articles")
+      .innerHTML = "<p>Failed to load sports news.</p>";
   }
 }
+
 loadCategory();
 </script>
 
