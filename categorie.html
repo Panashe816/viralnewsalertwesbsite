@@ -1,33 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Redirecting… | Viral News</title>
-  <meta name="robots" content="noindex, follow">
+  <meta name="robots" content="noindex, follow" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <script>
     (function () {
       const params = new URLSearchParams(window.location.search);
 
       // old formats: ?name=technology OR ?c=technology
-      const category =
+      let raw =
         params.get("name") ||
         params.get("c") ||
         "general";
 
-      const target = `/category/${category}.html`;
+      raw = (raw || "").trim();
+      const low = raw.toLowerCase();
+
+      // Map many old category formats to the new static pages
+      let slug = "general";
+
+      // Specials
+      if (low.includes("breaking")) slug = "breaking";
+      else if (low.includes("trending")) slug = "trending";
+      else if (low.includes("top")) slug = "top-headlines";
+
+      // Main
+      else if (low.includes("world")) slug = "world";
+      else if (low.includes("politic")) slug = "politics";
+      else if (low.includes("tech")) slug = "technology";
+      else if (low.includes("sport")) slug = "sports";
+      else if (low.includes("health") || low.includes("fitness")) slug = "health-fitness";
+      else if (low.includes("entertain")) slug = "entertainment";
+      else slug = "general";
+
+      const target = `/category/${slug}.html`;
 
       // SEO-friendly redirect
       window.location.replace(target);
     })();
   </script>
 
-  <!-- Fallback for crawlers -->
+  <!-- Fallback for crawlers / no-JS -->
   <noscript>
-    <meta http-equiv="refresh" content="0; url=/category/general.html">
+    <meta http-equiv="refresh" content="0; url=/category/general.html" />
   </noscript>
 
-  <link rel="canonical" href="https://viralnewsalert.com/category/general.html">
+  <link rel="canonical" href="https://viralnewsalert.com/category/general.html" />
 </head>
 
 <body>
