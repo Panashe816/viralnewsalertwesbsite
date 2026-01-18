@@ -3,10 +3,26 @@
 <head>
 <meta charset="UTF-8" />
 <title>VIRAL NEWS</title>
+
 <meta name="description" content="Viral News – Latest headlines from all categories" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="canonical" href="https://viralnewsalert.com/" />
+
+<!-- Open Graph -->
+<meta property="og:title" content="Viral News" />
+<meta property="og:description" content="Latest headlines from all categories." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://viralnewsalert.com/" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Viral News" />
+<meta name="twitter:description" content="Latest headlines from all categories." />
+
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
      crossorigin="anonymous"></script>
+
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -36,7 +52,6 @@
     color: var(--text);
   }
 
-  /* ===== Top Header (Brand + Category Bar) ===== */
   header{
     background: var(--bg2);
     position: sticky;
@@ -135,18 +150,6 @@
     border: 1px solid rgba(255,255,255,.06);
   }
 
-  /* Back to Home */
-  .back-home{
-    display:inline-block;
-    margin: 10px 0 8px;
-    color: var(--accent);
-    text-decoration:none;
-    font-weight: 800;
-    font-size: 14px;
-  }
-  .back-home:hover{ text-decoration: underline; }
-
-  /* HERO */
   .hero-grid{
     display:grid;
     grid-template-columns: 1.35fr .65fr;
@@ -233,7 +236,6 @@
     color: var(--muted);
   }
 
-  /* Breaking strip */
   .strip{ display:grid; grid-template-columns: 1fr; gap: 10px; }
   .strip-item{
     display:flex;
@@ -256,7 +258,6 @@
     margin-top: 4px;
   }
 
-  /* Category blocks */
   .cat-grid{
     display:grid;
     grid-template-columns: 1fr 1fr;
@@ -320,7 +321,6 @@
     flex: 0 0 auto;
   }
 
-  /* Horizontal rail */
   .rail{
     display:flex;
     gap: 12px;
@@ -359,7 +359,6 @@
   .rail-card .title a:hover{ color: var(--accent); }
   .rail-card .meta{ margin-top: 8px; font-size: 12px; color: var(--muted); }
 
-  /* Entertainment text-only block */
   .text-only{
     display:flex;
     flex-direction:column;
@@ -380,7 +379,6 @@
   .text-only .row a:hover{ color: var(--accent); }
   .text-only .meta{ margin-top: 6px; }
 
-  /* More for you (infinite) */
   .more-wrap{ margin-top: 10px; }
   .more-list{
     display:flex;
@@ -428,6 +426,21 @@
     border-radius: var(--radius);
   }
 
+  footer{
+    margin-top: 40px;
+    padding: 24px 0 50px;
+    text-align:center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  footer a{
+    color: var(--accent);
+    text-decoration:none;
+    margin: 0 10px;
+    font-weight: 800;
+  }
+  footer a:hover{ text-decoration: underline; }
+
   @media (max-width: 980px){
     .hero-grid{ grid-template-columns: 1fr; }
     .hero-side{ flex-direction: row; flex-wrap: wrap; }
@@ -459,27 +472,48 @@
     <h1 class="brand">VIRAL NEWS</h1>
   </div>
 
-  <!-- Horizontal scroll category bar -->
+  <!-- ✅ IMPORTANT: Real internal links for SEO discovery -->
   <nav class="catbar" id="catbar">
-    <a class="catbtn active" href="#" data-cat="__home__">Home</a>
-    <a class="catbtn" href="#" data-cat="breaking">Breaking</a>
-    <a class="catbtn" href="#" data-cat="trending">Trending</a>
-    <a class="catbtn" href="#" data-cat="top headlines">Top Headlines</a>
-    <a class="catbtn" href="#" data-cat="General News">General News</a>
-    <a class="catbtn" href="#" data-cat="World News">World News</a>
-    <a class="catbtn" href="#" data-cat="Politics">Politics</a>
-    <a class="catbtn" href="#" data-cat="Technology">Technology</a>
-    <a class="catbtn" href="#" data-cat="Sports">Sports</a>
-    <a class="catbtn" href="#" data-cat="Health & Fitness">Health & Fitness</a>
-    <a class="catbtn" href="#" data-cat="Entertainment">Entertainment</a>
+    <a class="catbtn active" href="/">Home</a>
+    <a class="catbtn" href="/category/breaking.html">Breaking</a>
+    <a class="catbtn" href="/category/trending.html">Trending</a>
+    <a class="catbtn" href="/category/top-headlines.html">Top Headlines</a>
+    <a class="catbtn" href="/category/general.html">General News</a>
+    <a class="catbtn" href="/category/world.html">World News</a>
+    <a class="catbtn" href="/category/politics.html">Politics</a>
+    <a class="catbtn" href="/category/technology.html">Technology</a>
+    <a class="catbtn" href="/category/sports.html">Sports</a>
+    <a class="catbtn" href="/category/health-fitness.html">Health & Fitness</a>
+    <a class="catbtn" href="/category/entertainment.html">Entertainment</a>
   </nav>
 </header>
 
 <div id="news-container">Loading…</div>
 
+<footer>
+  <a href="/about-us.html">About Us</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/privacy-policy.html">Privacy Policy</a>
+  <a href="/sitemap.xml">Sitemap</a>
+</footer>
+
 <script>
 (function(){
   var API_BASE = "https://viral-news-backend-3.onrender.com";
+
+  // Map homepage category labels -> category page URLs
+  var CAT_URL = {
+    "breaking": "/category/breaking.html",
+    "trending": "/category/trending.html",
+    "top headlines": "/category/top-headlines.html",
+    "General News": "/category/general.html",
+    "World News": "/category/world.html",
+    "Politics": "/category/politics.html",
+    "Technology": "/category/technology.html",
+    "Sports": "/category/sports.html",
+    "Health & Fitness": "/category/health-fitness.html",
+    "Entertainment": "/category/entertainment.html"
+  };
 
   function escapeHtml(s){
     s = (s || "").toString();
@@ -512,8 +546,13 @@
   }
   function linkToArticle(a){ return "articles.html?id=" + encodeURIComponent(a.id); }
 
-  function sectionHeader(title, viewAllCategory){
-    var viewAll = viewAllCategory ? '<a class="viewall" href="#" data-viewall="' + escapeHtml(viewAllCategory) + '">View all</a>' : "";
+  function viewAllLink(categoryLabel){
+    var href = CAT_URL[categoryLabel] || "/category/general.html";
+    return '<a class="viewall" href="' + href + '">View all</a>';
+  }
+
+  function sectionHeader(title, viewAllCategoryLabel){
+    var viewAll = viewAllCategoryLabel ? viewAllLink(viewAllCategoryLabel) : "";
     return '' +
       '<div class="section-title">' +
         '<div class="bar"></div>' +
@@ -634,25 +673,15 @@
     }, { passive:true });
   }
 
-  function setActiveTab(cat){
-    document.querySelectorAll(".catbtn").forEach(function(btn){
-      btn.classList.remove("active");
-    });
-    var sel = document.querySelector('.catbtn[data-cat="' + cat.replace(/"/g,'\\"') + '"]');
-    if (sel) sel.classList.add("active");
-  }
-
-  function renderBBCStyleHome(){
-    setActiveTab("__home__");
-
+  function renderHome(){
     var container = document.getElementById("news-container");
     container.innerHTML = "";
 
     var categories = homepageData.categories || {};
     var all = homepageData.all || [];
 
-    // ----- HERO (Top Headlines) -----
-    var top = categories["top headlines"] || categories["Top Headlines"] || [];
+    // HERO
+    var top = categories["top headlines"] || [];
     var heroMain = pickFirstWithImage(top) || pickFirstWithImage(all);
 
     var heroSideCandidates = top.filter(function(x){ return heroMain ? x.id !== heroMain.id : true; });
@@ -714,7 +743,7 @@
     heroWrap.appendChild(heroGrid);
     container.appendChild(heroWrap);
 
-    // ----- Breaking strip -----
+    // Breaking strip
     var breaking = sortNewestFirst(categories["breaking"] || []);
     var breakingBlock = document.createElement("div");
     breakingBlock.innerHTML = sectionHeader("Breaking", "breaking");
@@ -744,7 +773,7 @@
     breakingBlock.appendChild(strip);
     container.appendChild(breakingBlock);
 
-    // ----- Trending rail -----
+    // Trending rail
     var trending = sortNewestFirst(categories["trending"] || []);
     var trendWrap = document.createElement("div");
     trendWrap.innerHTML = sectionHeader("Trending", "trending");
@@ -776,7 +805,7 @@
     }
     container.appendChild(trendWrap);
 
-    // ----- Category blocks (lead + list, MUST BE IMAGE ITEMS) -----
+    // Category blocks
     var blockCats = ["World News","Politics","General News","Technology","Sports"];
     var catGridWrap = document.createElement("div");
     catGridWrap.innerHTML = sectionHeader("Latest by Category");
@@ -785,7 +814,7 @@
 
     blockCats.forEach(function(catName){
       var items = sortNewestFirst(categories[catName] || []);
-      var withImagesTop5 = pickTopWithImages(items, 5); // only with images
+      var withImagesTop5 = pickTopWithImages(items, 5);
       var leadItem = withImagesTop5.length ? withImagesTop5[0] : null;
       var rest = withImagesTop5.length > 1 ? withImagesTop5.slice(1) : [];
 
@@ -844,7 +873,7 @@
     catGridWrap.appendChild(catGrid);
     container.appendChild(catGridWrap);
 
-    // ----- Health & Fitness rail (scrollable) -----
+    // Health rail
     var health = sortNewestFirst(categories["Health & Fitness"] || []);
     var healthWrap = document.createElement("div");
     healthWrap.innerHTML = sectionHeader("Health & Fitness", "Health & Fitness");
@@ -878,7 +907,7 @@
     }
     container.appendChild(healthWrap);
 
-    // ----- Entertainment (text-only) -----
+    // Entertainment (text)
     var ent = sortNewestFirst(categories["Entertainment"] || []);
     var entWrap = document.createElement("div");
     entWrap.innerHTML = sectionHeader("Entertainment", "Entertainment");
@@ -907,7 +936,7 @@
     entWrap.appendChild(textOnly);
     container.appendChild(entWrap);
 
-    // ----- MORE FOR YOU (infinite scroll, images first) -----
+    // More for you
     var shown = {};
     function markShown(arr){
       arr = arr || [];
@@ -952,80 +981,6 @@
 
     renderMoreBatch();
     installInfiniteScroll();
-
-    container.querySelectorAll("[data-viewall]").forEach(function(btn){
-      btn.addEventListener("click", function(e){
-        e.preventDefault();
-        var cat = btn.getAttribute("data-viewall");
-        showCategoryView(cat);
-        // highlight tab on view all
-        if (cat) setActiveTab(cat);
-      });
-    });
-  }
-
-  function showCategoryView(category){
-    setActiveTab(category);
-
-    var container = document.getElementById("news-container");
-    container.innerHTML = "";
-
-    var categories = homepageData.categories || {};
-    var items = sortNewestFirst(categories[category] || []);
-
-    var back = document.createElement("a");
-    back.href = "#";
-    back.className = "back-home";
-    back.textContent = "← Back to Home";
-    back.addEventListener("click", function(e){
-      e.preventDefault();
-      renderBBCStyleHome();
-    });
-
-    container.appendChild(back);
-
-    var header = document.createElement("div");
-    header.innerHTML = sectionHeader(category);
-    container.appendChild(header);
-
-    if (!items.length){
-      var empty = document.createElement("div");
-      empty.className = "error-box";
-      empty.textContent = "No articles in this category yet.";
-      container.appendChild(empty);
-      return;
-    }
-
-    var withImg = items.filter(hasImage);
-    var noImg = items.filter(function(x){ return !hasImage(x); });
-    items = sortNewestFirst(withImg).concat(sortNewestFirst(noImg));
-
-    var list = document.createElement("div");
-    list.className = "more-list";
-
-    items.forEach(function(a){
-      var img = pickImage(a);
-      var t = formatTime(safeTime(a));
-      var div = document.createElement("div");
-      div.className = "more-item";
-      div.innerHTML =
-        '<div class="more-thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
-        '<div>' +
-          '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
-          '<div class="more-meta">' + escapeHtml(t) + '</div>' +
-        '</div>';
-      list.appendChild(div);
-    });
-
-    container.appendChild(list);
-  }
-
-  function setActiveTab(cat){
-    document.querySelectorAll(".catbtn").forEach(function(btn){
-      btn.classList.remove("active");
-    });
-    var sel = document.querySelector('.catbtn[data-cat="' + cat.replace(/"/g,'\\"') + '"]');
-    if (sel) sel.classList.add("active");
   }
 
   function loadHomepage(){
@@ -1043,7 +998,7 @@
           showError("Bad JSON structure.");
           return;
         }
-        renderBBCStyleHome();
+        renderHome();
       })
       .catch(function(err){
         console.error(err);
@@ -1051,25 +1006,9 @@
       });
   }
 
-  // Category bar click wiring
-  document.querySelectorAll(".catbtn").forEach(function(btn){
-    btn.addEventListener("click", function(e){
-      e.preventDefault();
-      if (!homepageData) return;
-
-      var cat = btn.getAttribute("data-cat");
-      if (cat === "__home__") {
-        renderBBCStyleHome();
-      } else {
-        showCategoryView(cat);
-      }
-    });
-  });
-
   loadHomepage();
 })();
 </script>
 
 </body>
 </html>
-
