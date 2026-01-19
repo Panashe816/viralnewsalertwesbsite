@@ -14,13 +14,11 @@
 <meta property="og:description" content="Latest headlines from all categories." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://viralnewsalert.com/" />
-<meta property="og:image" content="https://viralnewsalert.com/android-chrome-512x512.png" />
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Viral News" />
 <meta name="twitter:description" content="Latest headlines from all categories." />
-<meta name="twitter:image" content="https://viralnewsalert.com/android-chrome-512x512.png" />
 
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -34,6 +32,7 @@
     --bg:#0a1d3f;
     --bg2:#081737;
     --panel:#0f264f;
+    --line:#334a7a;
     --text:#ffffff;
     --muted:#cfd8ea;
     --accent:#ffcc00;
@@ -470,8 +469,6 @@
     <h1 class="brand">VIRAL NEWS</h1>
   </div>
 
-  <!-- Keep current category pages for navigation (users),
-       but Google won't index them since we blocked /category/*.html in robots.txt -->
   <nav class="catbar" id="catbar">
     <a class="catbtn active" href="/">Home</a>
     <a class="catbtn" href="/category/breaking.html">Breaking</a>
@@ -498,13 +495,11 @@
 
 <script>
 (function(){
-  // API base
   var API_BASE = "https://viral-news-backend-3.onrender.com";
   var HOMEPAGE_URL = API_BASE + "/homepage";
 
-  // Frontend cache (SWR)
   var HOME_CACHE_KEY = "vn_homepage_cache_v1";
-  var HOME_CACHE_TTL = 60 * 1000; // 60 seconds
+  var HOME_CACHE_TTL = 60 * 1000;
 
   function escapeHtml(s){
     s = (s || "").toString();
@@ -551,7 +546,6 @@
     return img ? optimizeImg(img) : null;
   }
 
-  // ===== Option B link structure =====
   function slugify(s){
     s = (s || "").toString().toLowerCase();
     s = s.replace(/&/g, " and ");
@@ -560,37 +554,18 @@
     return s || "story";
   }
 
-  function categorySlug(cat){
-    return slugify(cat || "general");
-  }
-
-  function seoUrlFor(a){
-    var cat = categorySlug(a.category || "general");
+  function linkToArticle(a){
+    var cat = slugify(a.category || "general");
     var slug = slugify(a.title || "story");
-    return "/news/" + cat + "/" + slug + "-" + a.id + ".html";
+    return "/news/" + cat + "/" + slug + "-" + encodeURIComponent(a.id) + ".html";
   }
 
-  // (Optional) map homepage category labels -> category page URLs (still for users)
-  var CAT_URL = {
-    "breaking": "/category/breaking.html",
-    "trending": "/category/trending.html",
-    "top headlines": "/category/top-headlines.html",
-    "General News": "/category/general.html",
-    "World News": "/category/world.html",
-    "Politics": "/category/politics.html",
-    "Technology": "/category/technology.html",
-    "Sports": "/category/sports.html",
-    "Health & Fitness": "/category/health-fitness.html",
-    "Entertainment": "/category/entertainment.html"
-  };
-
-  function viewAllLink(categoryLabel){
-    var href = CAT_URL[categoryLabel] || "/category/general.html";
+  function viewAllLink(href){
     return '<a class="viewall" href="' + href + '">View all</a>';
   }
 
-  function sectionHeader(title, viewAllCategoryLabel){
-    var viewAll = viewAllCategoryLabel ? viewAllLink(viewAllCategoryLabel) : "";
+  function sectionHeader(title, viewAllHref){
+    var viewAll = viewAllHref ? viewAllLink(viewAllHref) : "";
     return '' +
       '<div class="section-title">' +
         '<div class="bar"></div>' +
@@ -692,7 +667,7 @@
 
   var homepageData = null;
 
-  // Infinite scroll state
+  // Infinite scroll
   var moreAll = [];
   var moreShown = 0;
   var MORE_BATCH = 12;
@@ -714,9 +689,9 @@
       var div = document.createElement("div");
       div.className = "more-item";
       div.innerHTML =
-        '<div class="more-thumb">' + (img ? '<img decoding="async" width="184" height="144" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div class="more-thumb">' + (img ? '<img loading="lazy" decoding="async" width="184" height="144" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
         '<div>' +
-          '<a href="' + seoUrlFor(a) + '">' + escapeHtml(a.title) + '</a>' +
+          '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
           '<div class="more-meta">' + escapeHtml(t) + '</div>' +
         '</div>';
 
@@ -756,11 +731,11 @@
     var categories = homepageData.categories || {};
     var all = homepageData.all || [];
 
-    // HERO
-    var top = categories["top headlines"] || [];
+    // HERO (Top Headlines)
+    var top = categories["top headlines"] || categories["Top Headlines"] || [];
     var heroMain = pickFirstWithImage(top) || pickFirstWithImage(all);
 
-    var heroSideCandidates = (top || []).filter(function(x){ return heroMain ? x.id !== heroMain.id : true; });
+    var heroSideCandidates = top.filter(function(x){ return heroMain ? x.id !== heroMain.id : true; });
     heroSideCandidates = sortNewestFirst(heroSideCandidates);
 
     var sideWithImg = heroSideCandidates.filter(hasImage);
@@ -768,7 +743,7 @@
     var heroSideItems = take(sideWithImg.concat(sideNoImg), 4);
 
     var heroWrap = document.createElement("div");
-    heroWrap.innerHTML = sectionHeader("Top Headlines", "top headlines");
+    heroWrap.innerHTML = sectionHeader("Top Headlines", "/category/top-headlines.html");
 
     var heroGrid = document.createElement("div");
     heroGrid.className = "hero-grid";
@@ -781,15 +756,13 @@
 
     // ✅ HERO image: eager + high priority (NOT lazy)
     mainCard.innerHTML =
-      '<div class="img">' +
-        (mainImg ? '<img loading="eager" fetchpriority="high" decoding="async" width="1200" height="675" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') +
-      '</div>' +
+      '<div class="img">' + (mainImg ? '<img loading="eager" fetchpriority="high" decoding="async" width="1200" height="675" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
       '<div class="body">' +
         '<div class="kicker">' +
           '<span class="chip">Top</span>' +
           '<span>' + escapeHtml(mainTime) + '</span>' +
         '</div>' +
-        '<h3 class="hero-title"><a href="' + (heroMain ? seoUrlFor(heroMain) : '#') + '">' + escapeHtml(heroMain ? heroMain.title : 'No headline yet') + '</a></h3>' +
+        '<h3 class="hero-title"><a href="' + (heroMain ? linkToArticle(heroMain) : '#') + '">' + escapeHtml(heroMain ? heroMain.title : 'No headline yet') + '</a></h3>' +
         '<p class="hero-desc">' + escapeHtml(heroMain && heroMain.summary ? stripHtml(heroMain.summary) : '') + '</p>' +
       '</div>';
 
@@ -808,9 +781,9 @@
         var div = document.createElement("div");
         div.className = "side-item";
         div.innerHTML =
-          '<div class="side-thumb">' + (img ? '<img decoding="async" width="172" height="128" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="side-thumb">' + (img ? '<img loading="lazy" decoding="async" width="172" height="128" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div>' +
-            '<p class="side-title"><a href="' + seoUrlFor(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+            '<p class="side-title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
           '</div>';
         sideCol.appendChild(div);
@@ -823,9 +796,9 @@
     container.appendChild(heroWrap);
 
     // Breaking strip
-    var breaking = sortNewestFirst(categories["breaking"] || []);
+    var breaking = sortNewestFirst(categories["breaking"] || categories["Breaking"] || []);
     var breakingBlock = document.createElement("div");
-    breakingBlock.innerHTML = sectionHeader("Breaking", "breaking");
+    breakingBlock.innerHTML = sectionHeader("Breaking", "/category/breaking.html");
 
     var strip = document.createElement("div");
     strip.className = "strip";
@@ -842,7 +815,7 @@
         row.className = "strip-item";
         row.innerHTML =
           '<div style="flex:1">' +
-            '<a href="' + seoUrlFor(a) + '">' + escapeHtml(a.title) + '</a>' +
+            '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
             '<div class="strip-meta">' + escapeHtml(formatTime(safeTime(a))) + '</div>' +
           '</div>';
         strip.appendChild(row);
@@ -853,9 +826,9 @@
     container.appendChild(breakingBlock);
 
     // Trending rail
-    var trending = sortNewestFirst(categories["trending"] || []);
+    var trending = sortNewestFirst(categories["trending"] || categories["Trending"] || []);
     var trendWrap = document.createElement("div");
-    trendWrap.innerHTML = sectionHeader("Trending", "trending");
+    trendWrap.innerHTML = sectionHeader("Trending", "/category/trending.html");
 
     var rail = document.createElement("div");
     rail.className = "rail";
@@ -873,9 +846,9 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img decoding="async" width="520" height="300" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" width="520" height="300" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div class="body">' +
-            '<p class="title"><a href="' + seoUrlFor(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+            '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
           '</div>';
         rail.appendChild(card);
@@ -897,11 +870,18 @@
       var leadItem = withImagesTop5.length ? withImagesTop5[0] : null;
       var rest = withImagesTop5.length > 1 ? withImagesTop5.slice(1) : [];
 
+      var viewAllHref = "/category/general.html";
+      if (catName === "World News") viewAllHref = "/category/world.html";
+      if (catName === "Politics") viewAllHref = "/category/politics.html";
+      if (catName === "General News") viewAllHref = "/category/general.html";
+      if (catName === "Technology") viewAllHref = "/category/technology.html";
+      if (catName === "Sports") viewAllHref = "/category/sports.html";
+
       var block = document.createElement("div");
       block.className = "cat-block";
 
       var sub = document.createElement("div");
-      sub.innerHTML = sectionHeader(catName, catName);
+      sub.innerHTML = sectionHeader(catName, viewAllHref);
       block.appendChild(sub);
 
       if (leadItem){
@@ -910,9 +890,9 @@
         var lead = document.createElement("div");
         lead.className = "lead";
         lead.innerHTML =
-          '<div class="thumb">' + (img ? '<img decoding="async" width="240" height="168" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" width="240" height="168" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
           '<div>' +
-            '<h3><a href="' + seoUrlFor(leadItem) + '">' + escapeHtml(leadItem.title) + '</a></h3>' +
+            '<h3><a href="' + linkToArticle(leadItem) + '">' + escapeHtml(leadItem.title) + '</a></h3>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
           '</div>';
         block.appendChild(lead);
@@ -933,8 +913,8 @@
           var row = document.createElement("div");
           row.className = "list-row";
           row.innerHTML =
-            '<div class="mini">' + (img2 ? '<img decoding="async" width="112" height="84" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
-            '<a href="' + seoUrlFor(a) + '">' + escapeHtml(a.title) + '</a>' +
+            '<div class="mini">' + (img2 ? '<img loading="lazy" decoding="async" width="112" height="84" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+            '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
             '<div class="time">' + escapeHtml(t2) + '</div>';
           list.appendChild(row);
         });
@@ -955,7 +935,7 @@
     // Health rail
     var health = sortNewestFirst(categories["Health & Fitness"] || []);
     var healthWrap = document.createElement("div");
-    healthWrap.innerHTML = sectionHeader("Health & Fitness", "Health & Fitness");
+    healthWrap.innerHTML = sectionHeader("Health & Fitness", "/category/health-fitness.html");
 
     var healthRail = document.createElement("div");
     healthRail.className = "rail";
@@ -975,9 +955,9 @@
         var card = document.createElement("div");
         card.className = "rail-card";
         card.innerHTML =
-          '<div class="thumb">' + (img ? '<img decoding="async" width="520" height="300" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" width="520" height="300" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
           '<div class="body">' +
-            '<p class="title"><a href="' + seoUrlFor(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+            '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
             '<div class="meta">' + escapeHtml(t) + '</div>' +
           '</div>';
         healthRail.appendChild(card);
@@ -989,7 +969,7 @@
     // Entertainment (text)
     var ent = sortNewestFirst(categories["Entertainment"] || []);
     var entWrap = document.createElement("div");
-    entWrap.innerHTML = sectionHeader("Entertainment", "Entertainment");
+    entWrap.innerHTML = sectionHeader("Entertainment", "/category/entertainment.html");
 
     var textOnly = document.createElement("div");
     textOnly.className = "text-only";
@@ -1006,7 +986,7 @@
         var row = document.createElement("div");
         row.className = "row";
         row.innerHTML =
-          '<a href="' + seoUrlFor(a) + '">' + escapeHtml(a.title) + '</a>' +
+          '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
           '<div class="meta">' + escapeHtml(t) + '</div>';
         textOnly.appendChild(row);
       });
@@ -1065,7 +1045,7 @@
   function loadHomepage(){
     var container = document.getElementById("news-container");
 
-    // 1) Instant show cache if available
+    // 1) show cache instantly
     var cached = readHomeCache();
     if (cached && isValidHomepage(cached)){
       homepageData = cached;
@@ -1074,7 +1054,7 @@
       container.innerHTML = "Loading…";
     }
 
-    // 2) Background refresh (SWR)
+    // 2) background refresh
     fetchJsonWithRetry(HOMEPAGE_URL, 20000, 0)
       .then(function(data){
         if (!isValidHomepage(data)){
@@ -1095,7 +1075,7 @@
 })();
 </script>
 
-<!-- Ads moved to bottom so content paints first -->
+<!-- Ads at bottom so content paints first -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
      crossorigin="anonymous"></script>
 
