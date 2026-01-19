@@ -9,46 +9,32 @@
     <priority>1.0</priority>
   </url>
 
-  <!-- Category hub pages (ONLY if they render real HTML content) -->
+  <!-- RSS feed -->
   <url>
-    <loc>https://viralnewsalert.com/category/world</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
+    <loc>https://viralnewsalert.com/feed.xml</loc>
+    <lastmod>2026-01-18</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.4</priority>
   </url>
 
-  <url>
-    <loc>https://viralnewsalert.com/category/politics</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://viralnewsalert.com/category/sports</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://viralnewsalert.com/category/technology</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Trust pages -->
+  <!-- Trust / policy pages -->
   <url>
     <loc>https://viralnewsalert.com/about-us.html</loc>
+    <lastmod>2026-01-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/contact.html</loc>
+    <lastmod>2026-01-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
     <loc>https://viralnewsalert.com/privacy-policy.html</loc>
+    <lastmod>2026-01-18</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
