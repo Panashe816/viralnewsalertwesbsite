@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Block duplicate / non-content pages
+Disallow: /index.html
+Disallow: /articles.html
+Disallow: /categorie.html
+Disallow: /categories/
+Disallow: /category/*.html
+Disallow: /*.json$
+
+# Sitemap
+Sitemap: https://viralnewsalert.com/sitemap.xml
