@@ -4,10 +4,14 @@
 <meta charset="UTF-8">
 <title>Article • Viral News</title>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
-     crossorigin="anonymous"></script>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- IMPORTANT:
+     articles.html is a "viewer/template" page. We do NOT want Google to index it
+     (it was causing Soft 404).
+     Real SEO pages will be /news/<category>/<slug>-<id>.html (we generate them next).
+-->
+<meta name="robots" content="noindex,follow">
 
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -15,6 +19,21 @@
 <link rel="icon" href="/favicon.ico">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="theme-color" content="#081737">
+
+<!-- Open Graph (will be updated dynamically by JS when article loads) -->
+<meta property="og:title" content="Article • Viral News">
+<meta property="og:description" content="Latest story on Viral News">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://viralnewsalert.com/">
+<meta property="og:image" content="">
+
+<!-- Twitter (dynamic) -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Article • Viral News">
+<meta name="twitter:description" content="Latest story on Viral News">
+<meta name="twitter:image" content="">
+
+<link rel="canonical" href="https://viralnewsalert.com/">
 
 <style>
 body {
@@ -113,7 +132,6 @@ h1 {
   padding-bottom: 8px;
 }
 
-/* We keep your UL but re-style items to match "More for you" cards */
 ul.headline-list {
   list-style: none;
   padding: 0;
@@ -195,7 +213,7 @@ li.headline-item {
 
 <header>
   <h1>VIRAL NEWS</h1>
-  <a href="index.html">← Home</a>
+  <a href="/">← Home</a>
 </header>
 
 <div class="container">
@@ -216,27 +234,42 @@ li.headline-item {
   // CONFIG
   // =========================
   const API_BASE = "https://viral-news-backend-3.onrender.com";
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
 
   const articleContainer = document.getElementById("article");
   const mostReadList = document.getElementById("most-read-list");
   const loading = document.getElementById("loading");
 
   // localStorage caches
-  const HOME_CACHE_KEY = "vn_homepage_cache_v1";              // (from your index.html)
-  const ARTICLE_CACHE_PREFIX = "vn_article_cache_v1_";        // per-article cache
-  const ARTICLE_CACHE_TTL = 12 * 60 * 60 * 1000;              // 12 hours
+  const HOME_CACHE_KEY = "vn_homepage_cache_v1";
+  const ARTICLE_CACHE_PREFIX = "vn_article_cache_v1_";
+  const ARTICLE_CACHE_TTL = 12 * 60 * 60 * 1000;   // 12 hours
   const MOSTREAD_CACHE_KEY = "vn_mostread_cache_v1";
-  const MOSTREAD_CACHE_TTL = 10 * 60 * 1000;                  // 10 minutes
+  const MOSTREAD_CACHE_TTL = 10 * 60 * 1000;       // 10 minutes
 
   let allArticles = [];
   let displayedCount = 0;
   const batchSize = 7;
 
   // =========================
-  // UTILS
+  // URL PARSING (Option B)
   // =========================
+  // Supports:
+  // 1) /articles.html?id=123
+  // 2) /news/<category>/<slug>-<id>.html  (generated pages later)
+  function getArticleIdFromUrl(){
+    // query param
+    const params = new URLSearchParams(window.location.search);
+    const qid = params.get("id");
+    if (qid) return qid;
+
+    // path form: .../something-123.html
+    const path = window.location.pathname || "";
+    const m = path.match(/-(\d+)\.html$/);
+    if (m && m[1]) return m[1];
+
+    return null;
+  }
+
   function escapeHtml(s) {
     s = (s || "").toString();
     return s
@@ -245,6 +278,10 @@ li.headline-item {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  function stripHtml(s){
+    return (s || "").toString().replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
   }
 
   // 14m / 3h / 2d
@@ -291,18 +328,15 @@ li.headline-item {
   function fetchWithTimeout(url, ms){
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error("Request timed out after " + ms + "ms")), ms);
-
-      // ✅ allow caching
       fetch(url, { cache: "default" })
         .then(res => { clearTimeout(timer); resolve(res); })
         .catch(err => { clearTimeout(timer); reject(err); });
     });
   }
 
-  // ✅ retry once (helps Render 503/504 + cold weirdness)
+  // retry once (helps cold Render)
   function fetchJsonWithRetry(url, timeoutMs, tries){
     tries = tries || 0;
-
     return fetchWithTimeout(url, timeoutMs).then(res => {
       if(!res.ok){
         if((res.status === 503 || res.status === 504) && tries < 1){
@@ -322,7 +356,30 @@ li.headline-item {
   }
 
   // =========================
-  // CONTENT HELPERS (your logic kept)
+  // SEO URL BUILDER (Option B)
+  // /news/<category>/<slug>-<id>.html
+  // We include "-<id>" at the end so the page can always locate article by ID.
+  // =========================
+  function slugify(s){
+    s = (s || "").toString().toLowerCase();
+    s = s.replace(/&/g, " and ");
+    s = s.replace(/[^a-z0-9]+/g, "-");
+    s = s.replace(/-+/g, "-").replace(/^-|-$/g, "");
+    return s || "story";
+  }
+
+  function categorySlug(cat){
+    return slugify(cat || "general");
+  }
+
+  function seoUrlFor(a){
+    const cat = categorySlug(a.category || "general");
+    const slug = slugify(a.title || "story");
+    return `/news/${cat}/${slug}-${a.id}.html`;
+  }
+
+  // =========================
+  // CONTENT HELPERS
   // =========================
   function extractFirstImgSrc(html) {
     if (!html) return "";
@@ -344,7 +401,6 @@ li.headline-item {
 
   function normalizeContent(raw) {
     if (!raw) return "";
-
     let s = String(raw);
 
     s = s.replace(/\n\s*---\s*\n/g, "\n<hr>\n");
@@ -363,8 +419,8 @@ li.headline-item {
     s = s.replace(/<hr\s*\/?>/gi, "\n<hr>\n");
 
     const parts = s.split(/\n\s*\n+/);
-
     const out = [];
+
     for (let i = 0; i < parts.length; i++) {
       let block = parts[i].trim();
       if (!block) continue;
@@ -386,6 +442,32 @@ li.headline-item {
   }
 
   // =========================
+  // SEO META UPDATE
+  // =========================
+  function setMeta(name, content){
+    const el = document.querySelector(`meta[name="${name}"]`);
+    if (el) el.setAttribute("content", content);
+  }
+  function setProp(property, content){
+    const el = document.querySelector(`meta[property="${property}"]`);
+    if (el) el.setAttribute("content", content);
+  }
+  function setCanonical(url){
+    const link = document.querySelector('link[rel="canonical"]');
+    if (link) link.setAttribute("href", url);
+  }
+  function upsertJsonLd(obj){
+    let el = document.getElementById("news-jsonld");
+    if (!el){
+      el = document.createElement("script");
+      el.type = "application/ld+json";
+      el.id = "news-jsonld";
+      document.head.appendChild(el);
+    }
+    el.textContent = JSON.stringify(obj);
+  }
+
+  // =========================
   // RENDER ARTICLE
   // =========================
   function renderArticle(a){
@@ -396,7 +478,7 @@ li.headline-item {
 
     let rawContent = a.content || "";
 
-    // Top image selection:
+    // Top image selection
     let topImg = "";
     if (contentHasImgNearTop(rawContent)) {
       topImg = extractFirstImgSrc(rawContent);
@@ -407,27 +489,68 @@ li.headline-item {
 
     const pretty = normalizeContent(rawContent);
 
+    // ✅ SEO URL (Option B)
+    const seoUrl = "https://viralnewsalert.com" + seoUrlFor(a);
+
+    // Update meta/canonical for share + SEO signals
+    setCanonical(seoUrl);
+    setProp("og:title", a.title);
+    setProp("og:description", (a.summary ? stripHtml(a.summary).slice(0, 180) : stripHtml(pretty).slice(0, 180)));
+    setProp("og:url", seoUrl);
+    if (topImg) setProp("og:image", topImg);
+
+    setMeta("twitter:title", a.title);
+    setMeta("twitter:description", (a.summary ? stripHtml(a.summary).slice(0, 180) : stripHtml(pretty).slice(0, 180)));
+    if (topImg) setMeta("twitter:image", topImg);
+
+    // NewsArticle JSON-LD (Google News eligibility helper)
+    const published = (a.published_at || a.created_at || "");
+    upsertJsonLd({
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": seoUrl
+      },
+      "headline": a.title || "",
+      "datePublished": published ? new Date(published).toISOString() : undefined,
+      "dateModified": published ? new Date(published).toISOString() : undefined,
+      "author": {
+        "@type": "Organization",
+        "name": "Viral News"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Viral News",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://viralnewsalert.com/favicon-32x32.png"
+        }
+      },
+      "image": topImg ? [topImg] : undefined
+    });
+
     articleContainer.innerHTML = `
       <h1>${escapeHtml(a.title)}</h1>
       <div class="meta">${escapeHtml(timeStr)}${cat}</div>
-      ${topImg ? `<img class="article-img" loading="lazy" decoding="async" src="${topImg}" alt="${escapeHtml(a.title)}">` : ""}
+
+      <!-- ✅ HERO IMAGE: NO lazy-loading -->
+      ${topImg ? `<img class="article-img" decoding="async" src="${topImg}" alt="${escapeHtml(a.title)}">` : ""}
+
       <div class="article-content">${pretty}</div>
     `;
   }
 
   // =========================
-  // ARTICLE LOAD (FAST PATH)
-  // 1) show from cache instantly if possible
-  // 2) fetch fresh in background
+  // ARTICLE LOAD
   // =========================
   function findArticleInHomepageCache(articleId){
-    const home = readCache(HOME_CACHE_KEY, 60 * 1000); // same TTL as homepage
+    const home = readCache(HOME_CACHE_KEY, 60 * 1000);
     if(!home || !home.all || !Array.isArray(home.all)) return null;
 
     const found = home.all.find(x => String(x.id) === String(articleId));
     if(!found) return null;
 
-    // homepage payload doesn't include full content, so only use it for a fast skeleton
     return {
       id: found.id,
       title: found.title,
@@ -435,29 +558,32 @@ li.headline-item {
       image_url: found.image_url || "",
       published_at: found.published_at || "",
       created_at: found.created_at || "",
-      content: found.summary ? `<p>${escapeHtml(found.summary)}</p>` : ""
+      summary: found.summary || "",
+      content: found.summary ? `<p>${escapeHtml(stripHtml(found.summary))}</p>` : ""
     };
   }
 
   async function loadArticle(){
+    const id = getArticleIdFromUrl();
+
     if (!id) {
       articleContainer.innerHTML = `<div class="error-box">Article not found (missing id).</div>`;
       return;
     }
 
-    // ✅ 1) Try full article cache
+    // 1) Try full cache
     const cachedFull = readCache(ARTICLE_CACHE_PREFIX + id, ARTICLE_CACHE_TTL);
     if (cachedFull && cachedFull.title) {
       renderArticle(cachedFull);
     } else {
-      // ✅ 2) Try homepage cache skeleton (instant feel)
+      // 2) Quick skeleton from homepage cache
       const quick = findArticleInHomepageCache(id);
       if (quick && quick.title) {
         renderArticle(quick);
       }
     }
 
-    // ✅ 3) Fetch fresh (with retry) and update cache + UI
+    // 3) Fetch fresh
     try {
       const a = await fetchJsonWithRetry(`${API_BASE}/articles/${id}`, 20000, 0);
 
@@ -478,13 +604,12 @@ li.headline-item {
       if (!(cachedFull && cachedFull.title)) {
         articleContainer.innerHTML = `<div class="error-box">Failed to load article.<br><span style="color:#cfd8ea;font-size:12px;">${escapeHtml(String(e && e.message ? e.message : e))}</span></div>`;
       }
-      // still try most read (maybe works even if article failed)
       fetchMostRead();
     }
   }
 
   // =========================
-  // MOST READ (FAST + CACHED)
+  // MOST READ
   // =========================
   function renderMostReadItem(a) {
     const li = document.createElement("li");
@@ -493,13 +618,16 @@ li.headline-item {
     const t = formatTime(safeTime(a));
     const img = hasImage(a) ? String(a.image_url).trim() : "";
 
+    // ✅ Option B links (SEO)
+    const href = seoUrlFor(a);
+
     li.innerHTML = `
       <div class="mr-thumb">
-        ${img ? `<img loading="lazy" decoding="async" src="${img}" alt="${escapeHtml(a.title)}">` : ``}
+        ${img ? `<img decoding="async" src="${img}" alt="${escapeHtml(a.title)}">` : ``}
       </div>
       <div>
         <div class="mr-title">
-          <a href="articles.html?id=${encodeURIComponent(a.id)}">${escapeHtml(a.title)}</a>
+          <a href="${href}">${escapeHtml(a.title)}</a>
         </div>
         <div class="mr-meta">${escapeHtml(t)}</div>
       </div>
@@ -523,7 +651,6 @@ li.headline-item {
     let appended = 0;
     slice.forEach(a => {
       if (!a || !a.title) return;
-      if (String(a.id) === String(id)) return;
       mostReadList.appendChild(renderMostReadItem(a));
       appended++;
     });
@@ -547,7 +674,6 @@ li.headline-item {
     }
 
     try {
-      // ✅ much faster than "no-store"
       const data = await fetchJsonWithRetry(`${API_BASE}/articles/?limit=500`, 20000, 0);
 
       if (!Array.isArray(data)) {
@@ -556,8 +682,9 @@ li.headline-item {
       }
 
       let list = data.slice();
-
       list.sort((a, b) => new Date(safeTime(b)) - new Date(safeTime(a)));
+
+      // prefer images first
       const withImg = list.filter(hasImage);
       const noImg = list.filter(a => !hasImage(a));
       list = withImg.concat(noImg);
@@ -586,6 +713,10 @@ li.headline-item {
   loadArticle();
 })();
 </script>
+
+<!-- Ads (optional) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
+     crossorigin="anonymous"></script>
 
 </body>
 </html>
