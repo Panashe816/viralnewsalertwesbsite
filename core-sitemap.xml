@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://viralnewsalert.com/</loc>
+    <lastmod>2026-01-19</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://viralnewsalert.com/feed.xml</loc>
+    <lastmod>2026-01-19</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://viralnewsalert.com/about-us.html</loc>
+    <lastmod>2026-01-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://viralnewsalert.com/contact.html</loc>
+    <lastmod>2026-01-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://viralnewsalert.com/privacy-policy.html</loc>
+    <lastmod>2026-01-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+</urlset>
