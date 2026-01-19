@@ -1,43 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Homepage -->
-  <url>
-    <loc>https://viralnewsalert.com/</loc>
-    <lastmod>2026-01-18</lastmod>
-    <changefreq>hourly</changefreq>
-    <priority>1.0</priority>
-  </url>
+  <!-- Main site pages -->
+  <sitemap>
+    <loc>https://viralnewsalert.com/core-sitemap.xml</loc>
+    <lastmod>2026-01-19</lastmod>
+  </sitemap>
 
-  <!-- RSS feed -->
-  <url>
-    <loc>https://viralnewsalert.com/feed.xml</loc>
-    <lastmod>2026-01-18</lastmod>
-    <changefreq>hourly</changefreq>
-    <priority>0.4</priority>
-  </url>
+  <!-- Article pages generated into /news/ -->
+  <sitemap>
+    <loc>https://viralnewsalert.com/news-sitemap.xml</loc>
+    <lastmod>2026-01-19</lastmod>
+  </sitemap>
 
-  <!-- Trust / policy pages -->
-  <url>
-    <loc>https://viralnewsalert.com/about-us.html</loc>
-    <lastmod>2026-01-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
-    <loc>https://viralnewsalert.com/contact.html</loc>
-    <lastmod>2026-01-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <url>
-    <loc>https://viralnewsalert.com/privacy-policy.html</loc>
-    <lastmod>2026-01-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-</urlset>
-
+</sitemapindex>
