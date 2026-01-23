@@ -776,6 +776,14 @@
     /* ✅ ONLY CHANGE: categories become 1 column on mobile */
     .cat-grid{ grid-template-columns: 1fr; }
 
+    /* ✅ FIX #1 (mobile only): remove hero summary */
+    .hero-desc{ display:none; }
+
+    /* ✅ FIX #2 (mobile only): prevent headline text overlapping thumbnail
+       (your grid col is 70px, so thumbnail must also fit) */
+    .side-thumb{ width:70px; height:52px; }
+    .side-item{ grid-template-columns: 70px 1fr; }
+
     /* Hide desktop actions on mobile */
     .header-actions{ display:none; }
 
@@ -1854,3 +1862,4 @@
 
 </body>
 </html>
+
