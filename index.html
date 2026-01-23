@@ -1160,6 +1160,73 @@
     var categories = homepageData.categories || {};
     var all = homepageData.all || [];
 
+    function renderHeroLike(title, items, viewAllHref, chipLabel, sideCount){
+      items = sortNewestFirst(items || []);
+      if (!items.length) return null;
+
+      var main = pickFirstWithImage(items);
+      if (!main) return null;
+
+      var candidates = items.filter(function(x){ return main ? x.id !== main.id : true; });
+      candidates = sortNewestFirst(candidates);
+
+      var withImg = candidates.filter(hasImage);
+      var noImg = candidates.filter(function(x){ return !hasImage(x); });
+
+      var sideItems = take(withImg.concat(noImg), sideCount);
+
+      var wrap = document.createElement("div");
+      wrap.innerHTML = sectionHeader(title, viewAllHref);
+
+      var grid = document.createElement("div");
+      grid.className = "hero-grid";
+
+      var mainCard = document.createElement("div");
+      mainCard.className = "card hero-main";
+
+      var mainImg = pickImage(main);
+      var mainTime = formatTime(safeTime(main));
+
+      mainCard.innerHTML =
+        '<div class="img">' + (mainImg ? '<img loading="eager" fetchpriority="high" decoding="async" width="1200" height="675" src="' + mainImg + '" alt="' + escapeHtml(main.title) + '">' : '') + '</div>' +
+        '<div class="body">' +
+          '<div class="kicker">' +
+            '<span class="chip">' + escapeHtml(chipLabel || title) + '</span>' +
+            '<span>' + escapeHtml(mainTime) + '</span>' +
+          '</div>' +
+          '<h3 class="hero-title"><a href="' + linkToArticle(main) + '">' + escapeHtml(main.title) + '</a></h3>' +
+        '</div>';
+
+      var sideCol = document.createElement("div");
+      sideCol.className = "hero-side";
+
+      if (!sideItems.length){
+        var empty = document.createElement("div");
+        empty.className = "side-item";
+        empty.innerHTML = '<div class="side-thumb"></div><div><p class="side-title">No more headlines yet.</p></div>';
+        sideCol.appendChild(empty);
+      } else {
+        sideItems.forEach(function(a){
+          var img = pickImage(a);
+          var t = formatTime(safeTime(a));
+          var div = document.createElement("div");
+          div.className = "side-item";
+          div.innerHTML =
+            '<div class="side-thumb">' + (img ? '<img loading="lazy" decoding="async" width="172" height="128" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+            '<div>' +
+              '<p class="side-title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+              '<div class="meta">' + escapeHtml(t) + '</div>' +
+            '</div>';
+          sideCol.appendChild(div);
+        });
+      }
+
+      grid.appendChild(mainCard);
+      grid.appendChild(sideCol);
+      wrap.appendChild(grid);
+      return wrap;
+    }
+
     // HERO (Top Headlines)
     var top = categories["top headlines"] || categories["Top Headlines"] || [];
     var heroMain = pickFirstWithImage(top) || pickFirstWithImage(all);
@@ -1227,6 +1294,17 @@
     heroWrap.appendChild(heroGrid);
     container.appendChild(heroWrap);
 
+    // ✅ Mobile-only: add hero sections for Politics + Technology
+    if (isMobile()){
+      var polItems = categories["Politics"] || categories["politics"] || [];
+      var polHero = renderHeroLike("Politics", polItems, "/category/politics.html", "Politics", 4);
+      if (polHero) container.appendChild(polHero);
+
+      var techItems = categories["Technology"] || categories["technology"] || [];
+      var techHero = renderHeroLike("Technology", techItems, "/category/technology.html", "Tech", 4);
+      if (techHero) container.appendChild(techHero);
+    }
+
     // Breaking strip
     var breaking = sortNewestFirst(categories["breaking"] || categories["Breaking"] || []);
     var breakingBlock = document.createElement("div");
@@ -1289,8 +1367,21 @@
     }
     container.appendChild(trendWrap);
 
+    // ✅ Desktop/Laptop: Sports as hero block (image + headline + 6 on right)
+    if (!isMobile()){
+      var sportsItemsHero = categories["Sports"] || categories["sports"] || [];
+      var sportsHero = renderHeroLike("Sports", sportsItemsHero, "/category/sports.html", "Sports", 6);
+      if (sportsHero) container.appendChild(sportsHero);
+    }
+
     // Category blocks
     var blockCats = ["World News","Politics","General News","Technology","Sports"];
+    if (isMobile()){
+      blockCats = ["World News","General News","Sports"];
+    } else {
+      blockCats = ["World News","Politics","General News","Technology"];
+    }
+
     var catGridWrap = document.createElement("div");
     catGridWrap.innerHTML = sectionHeader("Latest by Category");
     var catGrid = document.createElement("div");
@@ -1444,6 +1535,16 @@
       var items2 = pickTopWithImages(categories[cat] || [], 5);
       markShown(items2);
     });
+
+    if (isMobile()){
+      var polItems2 = categories["Politics"] || categories["politics"] || [];
+      markShown(take(sortNewestFirst(polItems2), 10));
+      var techItems2 = categories["Technology"] || categories["technology"] || [];
+      markShown(take(sortNewestFirst(techItems2), 10));
+    } else {
+      var sportsItems2 = categories["Sports"] || categories["sports"] || [];
+      markShown(take(sortNewestFirst(sportsItems2), 10));
+    }
 
     markShown(healthItems);
     markShown(entItems);
@@ -1862,4 +1963,3 @@
 
 </body>
 </html>
-
