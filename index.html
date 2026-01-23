@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,7 +72,75 @@
     font-weight: 800;
   }
 
-  /* ✅ AUTH UI (top-right) */
+  /* ✅ Left hamburger */
+  .hamburger{
+    position:absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 42px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.05);
+    color:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 6px 16px rgba(0,0,0,.18);
+  }
+  .hamburger:hover{ border-color: rgba(255,204,0,.35); color: var(--accent); }
+  .hamburger:active{ transform: translateY(-50%) scale(.98); }
+  .hamburger .bars{
+    width: 18px;
+    height: 14px;
+    position: relative;
+  }
+  .hamburger .bars span{
+    position:absolute;
+    left:0;
+    right:0;
+    height:2px;
+    background: currentColor;
+    border-radius: 999px;
+    opacity:.95;
+  }
+  .hamburger .bars span:nth-child(1){ top:0; }
+  .hamburger .bars span:nth-child(2){ top:6px; }
+  .hamburger .bars span:nth-child(3){ top:12px; }
+
+  /* ✅ Dropdown menu (About/Contact/Privacy ONLY) */
+  .menu{
+    position:absolute;
+    left: 10px;
+    top: calc(100% + 10px);
+    width: 220px;
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    display:none;
+    z-index: 2000;
+  }
+  .menu a{
+    display:flex;
+    align-items:center;
+    padding: 12px 12px;
+    color:#fff;
+    text-decoration:none;
+    font-weight: 900;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  .menu a:last-child{ border-bottom:none; }
+  .menu a:hover{
+    background: rgba(255,204,0,.10);
+    color: var(--accent);
+  }
+
+  /* ✅ Top-right auth buttons */
   .auth-area{
     position:absolute;
     right: 14px;
@@ -515,7 +584,9 @@
     border-radius: var(--radius);
   }
 
+  /* ✅ Footer exists but is hidden on homepage (menu replaces it) */
   footer{
+    display:none;
     margin-top: 40px;
     padding: 24px 0 50px;
     text-align:center;
@@ -538,23 +609,8 @@
   @media (max-width: 760px){
     #news-container{ padding: 0 12px; }
     .brand{ font-size: 20px; }
-
-    /* Keep auth buttons visible on small screens */
     .auth-area{ right: 10px; }
     .auth-btn{ padding: 7px 10px; font-size: 12px; }
-
-    .cat-grid{ grid-template-columns: 1fr; }
-    .lead{ grid-template-columns: 92px 1fr; }
-    .lead .thumb{ width:92px; height:70px; }
-    .hero-title{ font-size: 20px; }
-    .more-item{ grid-template-columns: 80px 1fr; }
-    .more-thumb{ width:80px; height:62px; }
-  }
-  @media (max-width: 420px){
-    .side-item{ grid-template-columns: 64px 1fr; }
-    .side-thumb{ width:64px; height:52px; }
-    .rail-card{ min-width: 220px; max-width: 220px; }
-    .rail-card .thumb{ height: 130px; }
   }
 </style>
 </head>
@@ -563,6 +619,19 @@
 
 <header>
   <div class="top-row">
+    <!-- ✅ Hamburger + dropdown -->
+    <button class="hamburger" id="hamburger" type="button" aria-label="Menu" aria-haspopup="true" aria-expanded="false">
+      <div class="bars" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+    </button>
+
+    <div class="menu" id="menu">
+      <a href="/about-us.html">About Us</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/privacy-policy.html">Privacy Policy</a>
+    </div>
+
     <h1 class="brand">VIRAL NEWS</h1>
 
     <!-- ✅ Top-right auth buttons -->
@@ -605,6 +674,7 @@
 
 <div id="news-container">Loading…</div>
 
+<!-- Hidden footer (prevents flash + sitemap never shown) -->
 <footer>
   <a href="/about-us.html">About Us</a>
   <a href="/contact.html">Contact</a>
@@ -1242,7 +1312,6 @@
     // Sign in button: send user to your login page (change this to your real login url)
     if (btnSignin){
       btnSignin.addEventListener("click", function(){
-        // ✅ Change this to wherever your login page lives
         window.location.href = "/login.html";
       });
     }
@@ -1278,6 +1347,49 @@
     refreshAuthUI();
   }
 
+  // ✅ Hamburger dropdown logic
+  function setupMenu(){
+    var burger = document.getElementById("hamburger");
+    var menu = document.getElementById("menu");
+
+    function closeMenu(){
+      if (!menu || !burger) return;
+      menu.style.display = "none";
+      burger.setAttribute("aria-expanded", "false");
+    }
+    function toggleMenu(){
+      if (!menu || !burger) return;
+      var open = (menu.style.display === "block");
+      if (open){
+        closeMenu();
+      } else {
+        menu.style.display = "block";
+        burger.setAttribute("aria-expanded", "true");
+      }
+    }
+
+    if (burger) burger.addEventListener("click", function(e){
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    // Close when clicking anywhere else
+    document.addEventListener("click", function(){
+      closeMenu();
+    });
+
+    // Prevent click inside menu from closing before navigation
+    if (menu) menu.addEventListener("click", function(e){
+      e.stopPropagation();
+    });
+
+    // Close on ESC
+    window.addEventListener("keydown", function(e){
+      if (e.key === "Escape") closeMenu();
+    });
+  }
+
+  setupMenu();
   setupAuthUI();
   loadHomepage();
 })();
@@ -1289,3 +1401,4 @@
 
 </body>
 </html>
+```
