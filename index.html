@@ -610,6 +610,9 @@
     .brand{ font-size: 20px; }
     .auth-area{ right: 10px; }
     .auth-btn{ padding: 7px 10px; font-size: 12px; }
+
+    /* ✅ ONLY CHANGE: categories become 1 column on mobile */
+    .cat-grid{ grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -916,6 +919,11 @@
     }, { passive:true });
   }
 
+  function isMobile(){
+    // Match your CSS breakpoint for "mobile"
+    return window.matchMedia && window.matchMedia("(max-width: 760px)").matches;
+  }
+
   function renderHome(){
     var container = document.getElementById("news-container");
     container.innerHTML = "";
@@ -932,7 +940,10 @@
 
     var sideWithImg = heroSideCandidates.filter(hasImage);
     var sideNoImg = heroSideCandidates.filter(function(x){ return !hasImage(x); });
-    var heroSideItems = take(sideWithImg.concat(sideNoImg), 4);
+
+    // ✅ ONLY CHANGE: Desktop/Laptop show 6 items, mobile keeps 4
+    var heroSideCount = isMobile() ? 4 : 6;
+    var heroSideItems = take(sideWithImg.concat(sideNoImg), heroSideCount);
 
     var heroWrap = document.createElement("div");
     heroWrap.innerHTML = sectionHeader("Top Headlines", "/category/top-headlines.html");
@@ -1399,4 +1410,4 @@
      crossorigin="anonymous"></script>
 
 </body>
-</html>  
+</html>
