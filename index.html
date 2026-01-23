@@ -417,7 +417,7 @@
 
   .cat-grid{
     display:grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 14px;
   }
   .cat-block{ display:flex; flex-direction:column; gap: 10px; }
@@ -822,4 +822,581 @@
       }, ms);
 
       fetch(url, { cache: "default" })
-        .then(function(res){ clear
+        .then(function(res){ clearTimeout(timer); resolve(res); })
+        .catch(function(err){ clearTimeout(timer); reject(err); });
+    });
+  }
+
+  function fetchJsonWithRetry(url, timeoutMs, retries){
+    retries = retries || 0;
+
+    return fetchWithTimeout(url, timeoutMs).then(function(res){
+      if (!res.ok){
+        if ((res.status === 503 || res.status === 504) && retries < 1){
+          return new Promise(function(r){ setTimeout(r, 1200); })
+            .then(function(){ return fetchJsonWithRetry(url, timeoutMs, retries + 1); });
+        }
+        throw new Error("HTTP " + res.status);
+      }
+      return res.json();
+    }).catch(function(err){
+      if (retries < 1){
+        return new Promise(function(r){ setTimeout(r, 1200); })
+          .then(function(){ return fetchJsonWithRetry(url, timeoutMs, retries + 1); });
+      }
+      throw err;
+    });
+  }
+
+  function showError(msg){
+    var c = document.getElementById("news-container");
+    c.innerHTML = '<div class="error-box">Failed to load homepage.<br><span style="color:var(--muted);font-size:12px;">' + escapeHtml(msg) + '</span></div>';
+  }
+
+  function isValidHomepage(data){
+    return !!(data && data.categories && data.all);
+  }
+
+  var homepageData = null;
+
+  // Infinite scroll
+  var moreAll = [];
+  var moreShown = 0;
+  var MORE_BATCH = 12;
+  var moreListEl = null;
+  var moreLoadingEl = null;
+  var loadingMore = false;
+  var infiniteInstalled = false;
+
+  function renderMoreBatch(){
+    if (!moreListEl || loadingMore) return;
+    loadingMore = true;
+
+    var end = Math.min(moreAll.length, moreShown + MORE_BATCH);
+    for (var i=moreShown;i<end;i++){
+      var a = moreAll[i];
+      var img = pickImage(a);
+      var t = formatTime(safeTime(a));
+
+      var div = document.createElement("div");
+      div.className = "more-item";
+      div.innerHTML =
+        '<div class="more-thumb">' + (img ? '<img loading="lazy" decoding="async" width="184" height="144" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div>' +
+          '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+          '<div class="more-meta">' + escapeHtml(t) + '</div>' +
+        '</div>';
+
+      moreListEl.appendChild(div);
+    }
+
+    moreShown = end;
+
+    if (moreShown >= moreAll.length){
+      moreLoadingEl.textContent = "No more articles.";
+    } else {
+      moreLoadingEl.textContent = "Scroll for more…";
+    }
+
+    loadingMore = false;
+  }
+
+  function installInfiniteScroll(){
+    if (infiniteInstalled) return;
+    infiniteInstalled = true;
+
+    window.addEventListener("scroll", function(){
+      if (!moreListEl) return;
+      if (moreShown >= moreAll.length) return;
+
+      var rect = moreListEl.getBoundingClientRect();
+      if (rect.bottom <= window.innerHeight + 300){
+        renderMoreBatch();
+      }
+    }, { passive:true });
+  }
+
+  function renderHome(){
+    var container = document.getElementById("news-container");
+    container.innerHTML = "";
+
+    var categories = homepageData.categories || {};
+    var all = homepageData.all || [];
+
+    // HERO (Top Headlines)
+    var top = categories["top headlines"] || categories["Top Headlines"] || [];
+    var heroMain = pickFirstWithImage(top) || pickFirstWithImage(all);
+
+    var heroSideCandidates = top.filter(function(x){ return heroMain ? x.id !== heroMain.id : true; });
+    heroSideCandidates = sortNewestFirst(heroSideCandidates);
+
+    var sideWithImg = heroSideCandidates.filter(hasImage);
+    var sideNoImg = heroSideCandidates.filter(function(x){ return !hasImage(x); });
+    var heroSideItems = take(sideWithImg.concat(sideNoImg), 4);
+
+    var heroWrap = document.createElement("div");
+    heroWrap.innerHTML = sectionHeader("Top Headlines", "/category/top-headlines.html");
+
+    var heroGrid = document.createElement("div");
+    heroGrid.className = "hero-grid";
+
+    var mainCard = document.createElement("div");
+    mainCard.className = "card hero-main";
+
+    var mainImg = heroMain ? pickImage(heroMain) : null;
+    var mainTime = heroMain ? formatTime(safeTime(heroMain)) : "";
+
+    // ✅ HERO image: eager + high priority (NOT lazy)
+    mainCard.innerHTML =
+      '<div class="img">' + (mainImg ? '<img loading="eager" fetchpriority="high" decoding="async" width="1200" height="675" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
+      '<div class="body">' +
+        '<div class="kicker">' +
+          '<span class="chip">Top</span>' +
+          '<span>' + escapeHtml(mainTime) + '</span>' +
+        '</div>' +
+        '<h3 class="hero-title"><a href="' + (heroMain ? linkToArticle(heroMain) : '#') + '">' + escapeHtml(heroMain ? heroMain.title : 'No headline yet') + '</a></h3>' +
+        '<p class="hero-desc">' + escapeHtml(heroMain && heroMain.summary ? stripHtml(heroMain.summary) : '') + '</p>' +
+      '</div>';
+
+    var sideCol = document.createElement("div");
+    sideCol.className = "hero-side";
+
+    if (!heroSideItems.length){
+      var empty = document.createElement("div");
+      empty.className = "side-item";
+      empty.innerHTML = '<div class="side-thumb"></div><div><p class="side-title">No more headlines yet.</p></div>';
+      sideCol.appendChild(empty);
+    } else {
+      heroSideItems.forEach(function(a){
+        var img = pickImage(a);
+        var t = formatTime(safeTime(a));
+        var div = document.createElement("div");
+        div.className = "side-item";
+        div.innerHTML =
+          '<div class="side-thumb">' + (img ? '<img loading="lazy" decoding="async" width="172" height="128" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div>' +
+            '<p class="side-title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+            '<div class="meta">' + escapeHtml(t) + '</div>' +
+          '</div>';
+        sideCol.appendChild(div);
+      });
+    }
+
+    heroGrid.appendChild(mainCard);
+    heroGrid.appendChild(sideCol);
+    heroWrap.appendChild(heroGrid);
+    container.appendChild(heroWrap);
+
+    // Breaking strip
+    var breaking = sortNewestFirst(categories["breaking"] || categories["Breaking"] || []);
+    var breakingBlock = document.createElement("div");
+    breakingBlock.innerHTML = sectionHeader("Breaking", "/category/breaking.html");
+
+    var strip = document.createElement("div");
+    strip.className = "strip";
+
+    var breakingItems = take(breaking, 6);
+    if (!breakingItems.length){
+      var bEmpty = document.createElement("div");
+      bEmpty.className = "strip-item";
+      bEmpty.innerHTML = "<div>(no items yet)</div>";
+      strip.appendChild(bEmpty);
+    } else {
+      breakingItems.forEach(function(a){
+        var row = document.createElement("div");
+        row.className = "strip-item";
+        row.innerHTML =
+          '<div style="flex:1">' +
+            '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+            '<div class="strip-meta">' + escapeHtml(formatTime(safeTime(a))) + '</div>' +
+          '</div>';
+        strip.appendChild(row);
+      });
+    }
+
+    breakingBlock.appendChild(strip);
+    container.appendChild(breakingBlock);
+
+    // Trending rail
+    var trending = sortNewestFirst(categories["trending"] || categories["Trending"] || []);
+    var trendWrap = document.createElement("div");
+    trendWrap.innerHTML = sectionHeader("Trending", "/category/trending.html");
+
+    var rail = document.createElement("div");
+    rail.className = "rail";
+
+    var trendItems = take(trending, 12);
+    if (!trendItems.length){
+      var tEmpty = document.createElement("div");
+      tEmpty.className = "error-box";
+      tEmpty.textContent = "(no items yet)";
+      trendWrap.appendChild(tEmpty);
+    } else {
+      trendItems.forEach(function(a){
+        var img = pickImage(a);
+        var t = formatTime(safeTime(a));
+        var card = document.createElement("div");
+        card.className = "rail-card";
+        card.innerHTML =
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" width="520" height="300" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="body">' +
+            '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+            '<div class="meta">' + escapeHtml(t) + '</div>' +
+          '</div>';
+        rail.appendChild(card);
+      });
+      trendWrap.appendChild(rail);
+    }
+    container.appendChild(trendWrap);
+
+    // Category blocks
+    var blockCats = ["World News","Politics","General News","Technology","Sports"];
+    var catGridWrap = document.createElement("div");
+    catGridWrap.innerHTML = sectionHeader("Latest by Category");
+    var catGrid = document.createElement("div");
+    catGrid.className = "cat-grid";
+
+    blockCats.forEach(function(catName){
+      var items = sortNewestFirst(categories[catName] || []);
+      var withImagesTop5 = pickTopWithImages(items, 5);
+      var leadItem = withImagesTop5.length ? withImagesTop5[0] : null;
+      var rest = withImagesTop5.length > 1 ? withImagesTop5.slice(1) : [];
+
+      var viewAllHref = "/category/general.html";
+      if (catName === "World News") viewAllHref = "/category/world.html";
+      if (catName === "Politics") viewAllHref = "/category/politics.html";
+      if (catName === "General News") viewAllHref = "/category/general.html";
+      if (catName === "Technology") viewAllHref = "/category/technology.html";
+      if (catName === "Sports") viewAllHref = "/category/sports.html";
+
+      var block = document.createElement("div");
+      block.className = "cat-block";
+
+      var sub = document.createElement("div");
+      sub.innerHTML = sectionHeader(catName, viewAllHref);
+      block.appendChild(sub);
+
+      if (leadItem){
+        var img = pickImage(leadItem);
+        var t = formatTime(safeTime(leadItem));
+        var lead = document.createElement("div");
+        lead.className = "lead";
+        lead.innerHTML =
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" width="240" height="168" src="' + img + '" alt="' + escapeHtml(leadItem.title) + '">' : '') + '</div>' +
+          '<div>' +
+            '<h3><a href="' + linkToArticle(leadItem) + '">' + escapeHtml(leadItem.title) + '</a></h3>' +
+            '<div class="meta">' + escapeHtml(t) + '</div>' +
+          '</div>';
+        block.appendChild(lead);
+      } else {
+        var emptyLead = document.createElement("div");
+        emptyLead.className = "lead";
+        emptyLead.innerHTML = "<div>(no image items yet)</div>";
+        block.appendChild(emptyLead);
+      }
+
+      var list = document.createElement("div");
+      list.className = "list";
+
+      if (rest.length){
+        rest.forEach(function(a){
+          var img2 = pickImage(a);
+          var t2 = formatTime(safeTime(a));
+          var row = document.createElement("div");
+          row.className = "list-row";
+          row.innerHTML =
+            '<div class="mini">' + (img2 ? '<img loading="lazy" decoding="async" width="112" height="84" src="' + img2 + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+            '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+            '<div class="time">' + escapeHtml(t2) + '</div>';
+          list.appendChild(row);
+        });
+      } else {
+        var noMore = document.createElement("div");
+        noMore.className = "list-row";
+        noMore.innerHTML = "<div>(no more image items)</div>";
+        list.appendChild(noMore);
+      }
+
+      block.appendChild(list);
+      catGrid.appendChild(block);
+    });
+
+    catGridWrap.appendChild(catGrid);
+    container.appendChild(catGridWrap);
+
+    // Health rail
+    var health = sortNewestFirst(categories["Health & Fitness"] || []);
+    var healthWrap = document.createElement("div");
+    healthWrap.innerHTML = sectionHeader("Health & Fitness", "/category/health-fitness.html");
+
+    var healthRail = document.createElement("div");
+    healthRail.className = "rail";
+
+    var healthPrefer = health.filter(hasImage).concat(health.filter(function(x){ return !hasImage(x); }));
+    var healthItems = take(healthPrefer, 12);
+
+    if (!healthItems.length){
+      var hEmpty = document.createElement("div");
+      hEmpty.className = "error-box";
+      hEmpty.textContent = "(no items yet)";
+      healthWrap.appendChild(hEmpty);
+    } else {
+      healthItems.forEach(function(a){
+        var img = pickImage(a);
+        var t = formatTime(safeTime(a));
+        var card = document.createElement("div");
+        card.className = "rail-card";
+        card.innerHTML =
+          '<div class="thumb">' + (img ? '<img loading="lazy" decoding="async" width="520" height="300" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+          '<div class="body">' +
+            '<p class="title"><a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a></p>' +
+            '<div class="meta">' + escapeHtml(t) + '</div>' +
+          '</div>';
+        healthRail.appendChild(card);
+      });
+      healthWrap.appendChild(healthRail);
+    }
+    container.appendChild(healthWrap);
+
+    // Entertainment (text)
+    var ent = sortNewestFirst(categories["Entertainment"] || []);
+    var entWrap = document.createElement("div");
+    entWrap.innerHTML = sectionHeader("Entertainment", "/category/entertainment.html");
+
+    var textOnly = document.createElement("div");
+    textOnly.className = "text-only";
+
+    var entItems = take(ent, 6);
+    if (!entItems.length){
+      var eEmpty = document.createElement("div");
+      eEmpty.className = "row";
+      eEmpty.textContent = "(no items yet)";
+      textOnly.appendChild(eEmpty);
+    } else {
+      entItems.forEach(function(a){
+        var t = formatTime(safeTime(a));
+        var row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML =
+          '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+          '<div class="meta">' + escapeHtml(t) + '</div>';
+        textOnly.appendChild(row);
+      });
+    }
+
+    entWrap.appendChild(textOnly);
+    container.appendChild(entWrap);
+
+    // More for you
+    var shown = {};
+    function markShown(arr){
+      arr = arr || [];
+      for (var i=0;i<arr.length;i++){
+        if (arr[i] && arr[i].id) shown[arr[i].id] = true;
+      }
+    }
+    if (heroMain && heroMain.id) shown[heroMain.id] = true;
+    markShown(heroSideItems);
+    markShown(breakingItems);
+    markShown(trendItems);
+
+    blockCats.forEach(function(cat){
+      var items2 = pickTopWithImages(categories[cat] || [], 5);
+      markShown(items2);
+    });
+
+    markShown(healthItems);
+    markShown(entItems);
+
+    var candidates = (all || []).filter(function(a){ return a && a.id && !shown[a.id]; });
+
+    var withImg = candidates.filter(hasImage);
+    var noImg = candidates.filter(function(x){ return !hasImage(x); });
+    moreAll = sortNewestFirst(withImg).concat(sortNewestFirst(noImg));
+
+    var moreWrap = document.createElement("div");
+    moreWrap.className = "more-wrap";
+    moreWrap.innerHTML = sectionHeader("More for you");
+
+    moreListEl = document.createElement("div");
+    moreListEl.className = "more-list";
+
+    moreLoadingEl = document.createElement("div");
+    moreLoadingEl.className = "load-hint";
+    moreLoadingEl.textContent = "Scroll for more…";
+
+    moreShown = 0;
+    moreWrap.appendChild(moreListEl);
+    moreWrap.appendChild(moreLoadingEl);
+    container.appendChild(moreWrap);
+
+    renderMoreBatch();
+    installInfiniteScroll();
+  }
+
+  function loadHomepage(){
+    var container = document.getElementById("news-container");
+
+    // 1) show cache instantly
+    var cached = readHomeCache();
+    if (cached && isValidHomepage(cached)){
+      homepageData = cached;
+      renderHome();
+    } else {
+      container.innerHTML = "Loading…";
+    }
+
+    // 2) background refresh
+    fetchJsonWithRetry(HOMEPAGE_URL, 20000, 0)
+      .then(function(data){
+        if (!isValidHomepage(data)){
+          if (!cached) showError("Bad JSON structure.");
+          return;
+        }
+        homepageData = data;
+        writeHomeCache(data);
+        renderHome();
+      })
+      .catch(function(err){
+        console.error(err);
+        if (!cached) showError(String(err && err.message ? err.message : err));
+      });
+  }
+
+  // ✅ Minimal auth UI behavior (ONLY Sign in + My Account + email + logout)
+  function getToken(){
+    try { return localStorage.getItem(ACCESS_KEY) || ""; } catch(e){ return ""; }
+  }
+  function isLoggedIn(){
+    return !!getToken();
+  }
+  function setLoggedOut(){
+    try{
+      localStorage.removeItem(ACCESS_KEY);
+      localStorage.removeItem(USER_EMAIL_KEY);
+    }catch(e){}
+    refreshAuthUI();
+  }
+  function refreshAuthUI(){
+    var btnSignin = document.getElementById("btn-signin");
+    var btnAccount = document.getElementById("btn-account");
+    var emailEl = document.getElementById("account-email");
+
+    var logged = isLoggedIn();
+    if (btnSignin) btnSignin.style.display = logged ? "none" : "inline-flex";
+    if (btnAccount) btnAccount.style.display = logged ? "inline-flex" : "none";
+
+    var email = "";
+    try { email = localStorage.getItem(USER_EMAIL_KEY) || ""; } catch(e){}
+    if (!email) email = "(email not set yet)";
+    if (emailEl) emailEl.textContent = email;
+  }
+
+  function openAccountModal(){
+    var overlay = document.getElementById("account-modal");
+    if (overlay) overlay.style.display = "flex";
+  }
+  function closeAccountModal(){
+    var overlay = document.getElementById("account-modal");
+    if (overlay) overlay.style.display = "none";
+  }
+
+  function setupAuthUI(){
+    var btnSignin = document.getElementById("btn-signin");
+    var btnAccount = document.getElementById("btn-account");
+    var btnLogout = document.getElementById("btn-logout");
+    var btnClose = document.getElementById("account-close");
+    var overlay = document.getElementById("account-modal");
+
+    // Sign in button: send user to your login page (change this to your real login url)
+    if (btnSignin){
+      btnSignin.addEventListener("click", function(){
+        window.location.href = "/login.html";
+      });
+    }
+
+    if (btnAccount){
+      btnAccount.addEventListener("click", function(){
+        refreshAuthUI();
+        openAccountModal();
+      });
+    }
+
+    if (btnLogout){
+      btnLogout.addEventListener("click", function(){
+        setLoggedOut();
+        closeAccountModal();
+      });
+    }
+
+    if (btnClose) btnClose.addEventListener("click", closeAccountModal);
+
+    // close when clicking outside modal
+    if (overlay){
+      overlay.addEventListener("click", function(e){
+        if (e.target === overlay) closeAccountModal();
+      });
+    }
+
+    // close on ESC
+    window.addEventListener("keydown", function(e){
+      if (e.key === "Escape") closeAccountModal();
+    });
+
+    refreshAuthUI();
+  }
+
+  // ✅ Hamburger dropdown logic
+  function setupMenu(){
+    var burger = document.getElementById("hamburger");
+    var menu = document.getElementById("menu");
+
+    function closeMenu(){
+      if (!menu || !burger) return;
+      menu.style.display = "none";
+      burger.setAttribute("aria-expanded", "false");
+    }
+    function toggleMenu(){
+      if (!menu || !burger) return;
+      var open = (menu.style.display === "block");
+      if (open){
+        closeMenu();
+      } else {
+        menu.style.display = "block";
+        burger.setAttribute("aria-expanded", "true");
+      }
+    }
+
+    if (burger) burger.addEventListener("click", function(e){
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    // Close when clicking anywhere else
+    document.addEventListener("click", function(){
+      closeMenu();
+    });
+
+    // Prevent click inside menu from closing before navigation
+    if (menu) menu.addEventListener("click", function(e){
+      e.stopPropagation();
+    });
+
+    // Close on ESC
+    window.addEventListener("keydown", function(e){
+      if (e.key === "Escape") closeMenu();
+    });
+  }
+
+  setupMenu();
+  setupAuthUI();
+  loadHomepage();
+})();
+</script>
+
+<!-- Ads at bottom so content paints first -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
+     crossorigin="anonymous"></script>
+
+</body>
+</html>  
