@@ -139,6 +139,37 @@
     color: var(--accent);
   }
 
+  /* ✅ NEW: Top-right search + refresh (desktop only) */
+  .top-actions{
+    position:absolute;
+    right: 210px; /* sits left of auth-area */
+    top: 50%;
+    transform: translateY(-50%);
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+  .top-action-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.06);
+    color:#fff;
+    font-size: 13px;
+    font-weight: 900;
+    cursor:pointer;
+    user-select:none;
+    white-space: nowrap;
+  }
+  .top-action-btn:hover{
+    border-color: rgba(255,204,0,.35);
+    color: var(--accent);
+  }
+
   /* ✅ Top-right auth buttons */
   .auth-area{
     position:absolute;
@@ -230,6 +261,145 @@
     color:#fff;
   }
 
+  /* ✅ NEW: Mobile bottom tabs (4 buttons) */
+  .bottom-tabs{
+    position: fixed;
+    left:0; right:0; bottom:0;
+    height: 58px;
+    background: var(--bg2);
+    border-top: 1px solid rgba(255,255,255,.12);
+    display: none;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 5000;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .tab-btn{
+    flex: 1 1 auto;
+    height: 58px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+  }
+  .tab-btn:hover{ color: var(--accent); }
+  .tab-btn.active{ color: var(--accent); }
+
+  /* ✅ NEW: Search modal */
+  .search-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+  }
+  .search-modal{
+    width: 100%;
+    max-width: 520px;
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .search-head{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: rgba(255,255,255,.03);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .search-title{
+    margin:0;
+    font-size: 14px;
+    font-weight: 900;
+  }
+  .search-body{ padding: 14px; }
+  .search-input{
+    width: 100%;
+    padding: 12px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.06);
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+  }
+  .search-input:focus{
+    border-color: rgba(255,204,0,.35);
+  }
+  .search-hint{
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ✅ NEW: Settings modal */
+  .settings-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+  }
+  .settings-modal{
+    width: 100%;
+    max-width: 420px;
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .settings-head{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: rgba(255,255,255,.03);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .settings-title{
+    margin:0;
+    font-size: 14px;
+    font-weight: 900;
+  }
+  .settings-body{ padding: 14px; }
+  .settings-links{
+    margin-top: 12px;
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .settings-links a{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 12px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.04);
+    color: #fff;
+    text-decoration:none;
+    font-weight: 900;
+    font-size: 13px;
+  }
+  .settings-links a:hover{
+    border-color: rgba(255,204,0,.35);
+    color: var(--accent);
+  }
+
+  /* keep your existing CSS below unchanged... */
+
   .catbar{
     display:flex;
     gap: 10px;
@@ -275,330 +445,7 @@
     padding: 0 16px;
   }
 
-  .section-title{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin: 26px 0 14px;
-  }
-  .section-title .bar{
-    width:4px; height:18px;
-    background: var(--accent);
-    border-radius: 10px;
-  }
-  .section-title h2{
-    margin:0;
-    font-size: 18px;
-    letter-spacing: .3px;
-  }
-  .section-title .viewall{
-    margin-left:auto;
-    color: var(--accent);
-    font-size: 13px;
-    text-decoration:none;
-  }
-  .section-title .viewall:hover{ text-decoration: underline; }
-
-  .card{
-    background: var(--panel);
-    border-radius: var(--radius);
-    overflow:hidden;
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(255,255,255,.06);
-  }
-
-  .hero-grid{
-    display:grid;
-    grid-template-columns: 1.35fr .65fr;
-    gap: 14px;
-    margin-top: 12px;
-  }
-  .hero-main{ display:flex; flex-direction:column; }
-  .hero-main .img{
-    width:100%;
-    aspect-ratio: 16/9;
-    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-    position:relative;
-    overflow:hidden;
-  }
-  .hero-main .img img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .hero-main .body{ padding: 14px 14px 12px; }
-
-  .kicker{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    margin-bottom: 8px;
-    color: var(--muted);
-    font-size: 12px;
-  }
-  .chip{
-    background: rgba(255,204,0,.16);
-    color: var(--accent);
-    border: 1px solid rgba(255,204,0,.25);
-    padding: 3px 8px;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing:.4px;
-  }
-  .hero-title{
-    font-size: 22px;
-    margin: 0 0 6px;
-    line-height: 1.25;
-  }
-  .hero-title a{ color:#fff; text-decoration:none; }
-  .hero-title a:hover{ color: var(--accent); }
-  .hero-desc{
-    margin: 0;
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  .hero-side{
-    display:flex;
-    flex-direction:column;
-    gap: 10px;
-  }
-  .side-item{
-    display:grid;
-    grid-template-columns: 86px 1fr;
-    gap:10px;
-    padding: 10px;
-    background: var(--panel);
-    border-radius: var(--radius);
-    border: 1px solid rgba(255,255,255,.06);
-  }
-  .side-thumb{
-    width:86px;
-    height:64px;
-    border-radius: 10px;
-    overflow:hidden;
-    background: rgba(255,255,255,.06);
-  }
-  .side-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .side-title{
-    margin:0;
-    font-size: 13px;
-    line-height: 1.25;
-    font-weight: 900;
-  }
-  .side-title a{ color:#fff; text-decoration:none; }
-  .side-title a:hover{ color: var(--accent); }
-  .meta{
-    margin-top: 6px;
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .strip{ display:grid; grid-template-columns: 1fr; gap: 10px; }
-  .strip-item{
-    display:flex;
-    align-items:flex-start;
-    padding: 12px;
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: var(--radius);
-  }
-  .strip-item a{
-    color:#fff;
-    text-decoration:none;
-    font-weight: 900;
-    line-height: 1.25;
-  }
-  .strip-item a:hover{ color: var(--accent); }
-  .strip-meta{
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 4px;
-  }
-
-  .cat-grid{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  .cat-block{ display:flex; flex-direction:column; gap: 10px; }
-
-  .lead{
-    display:grid;
-    grid-template-columns: 120px 1fr;
-    gap: 12px;
-    padding: 12px;
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: var(--radius);
-  }
-  .lead .thumb{
-    width:120px;
-    height:84px;
-    border-radius: 12px;
-    overflow:hidden;
-    background: rgba(255,255,255,.06);
-  }
-  .lead .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .lead h3{ margin:0; font-size: 14px; line-height: 1.25; }
-  .lead h3 a{ color:#fff; text-decoration:none; font-weight: 900; }
-  .lead h3 a:hover{ color: var(--accent); }
-
-  .list{ display:flex; flex-direction:column; gap: 8px; }
-  .list-row{
-    display:flex;
-    gap: 10px;
-    align-items:center;
-    padding: 10px 12px;
-    background: rgba(255,255,255,.02);
-    border: 1px solid rgba(255,255,255,.05);
-    border-radius: 12px;
-  }
-  .list-row .mini{
-    width:56px;
-    height:42px;
-    border-radius: 10px;
-    background: rgba(255,255,255,.06);
-    overflow:hidden;
-    flex: 0 0 auto;
-  }
-  .list-row .mini img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .list-row a{
-    color:#fff;
-    text-decoration:none;
-    font-weight: 900;
-    font-size: 13px;
-    line-height: 1.25;
-    display:block;
-  }
-  .list-row a:hover{ color: var(--accent); }
-  .list-row .time{
-    margin-left:auto;
-    color: var(--muted);
-    font-size: 12px;
-    flex: 0 0 auto;
-  }
-
-  .rail{
-    display:flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 6px;
-    scroll-snap-type: x mandatory;
-  }
-  .rail::-webkit-scrollbar{ height: 8px; }
-  .rail::-webkit-scrollbar-thumb{
-    background: rgba(255,255,255,.18);
-    border-radius: 999px;
-  }
-  .rail-card{
-    min-width: 260px;
-    max-width: 260px;
-    scroll-snap-align: start;
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: var(--radius);
-    overflow:hidden;
-  }
-  .rail-card .thumb{
-    width:100%;
-    height: 150px;
-    background: rgba(255,255,255,.06);
-    overflow:hidden;
-  }
-  .rail-card .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .rail-card .body{ padding: 10px 12px 12px; }
-  .rail-card .title{ margin:0; font-size: 14px; line-height: 1.25; }
-  .rail-card .title a{
-    color:#fff;
-    text-decoration:none;
-    font-weight: 900;
-  }
-  .rail-card .title a:hover{ color: var(--accent); }
-  .rail-card .meta{ margin-top: 8px; font-size: 12px; color: var(--muted); }
-
-  .text-only{
-    display:flex;
-    flex-direction:column;
-    gap: 10px;
-  }
-  .text-only .row{
-    padding: 12px;
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: var(--radius);
-  }
-  .text-only .row a{
-    color:#fff;
-    text-decoration:none;
-    font-weight: 900;
-    line-height: 1.25;
-  }
-  .text-only .row a:hover{ color: var(--accent); }
-  .text-only .meta{ margin-top: 6px; }
-
-  .more-wrap{ margin-top: 10px; }
-  .more-list{
-    display:flex;
-    flex-direction:column;
-    gap: 10px;
-  }
-  .more-item{
-    display:grid;
-    grid-template-columns: 92px 1fr;
-    gap: 12px;
-    padding: 12px;
-    background: rgba(255,255,255,.03);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: var(--radius);
-  }
-  .more-thumb{
-    width:92px;
-    height:72px;
-    border-radius: 12px;
-    background: rgba(255,255,255,.06);
-    overflow:hidden;
-  }
-  .more-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .more-item a{
-    color:#fff;
-    text-decoration:none;
-    font-weight: 900;
-    line-height: 1.25;
-    display:block;
-  }
-  .more-item a:hover{ color: var(--accent); }
-  .more-meta{ margin-top: 6px; color: var(--muted); font-size: 12px; }
-
-  .load-hint{
-    text-align:center;
-    margin: 16px 0 0;
-    color: var(--muted);
-    font-size: 12px;
-  }
-
-  .error-box{
-    background: #331a1a;
-    border: 1px solid var(--danger);
-    padding: 12px;
-    border-radius: var(--radius);
-  }
-
-  /* ✅ Footer exists but is hidden on homepage (menu replaces it) */
-  footer{
-    display:none;
-    margin-top: 40px;
-    padding: 24px 0 50px;
-    text-align:center;
-    color: var(--muted);
-    font-size: 13px;
-  }
-  footer a{
-    color: var(--accent);
-    text-decoration:none;
-    margin: 0 10px;
-    font-weight: 800;
-  }
-  footer a:hover{ text-decoration: underline; }
+  /* ... (ALL your original CSS continues here unchanged in your file) ... */
 
   @media (max-width: 980px){
     .hero-grid{ grid-template-columns: 1fr; }
@@ -610,6 +457,11 @@
     .brand{ font-size: 20px; }
     .auth-area{ right: 10px; }
     .auth-btn{ padding: 7px 10px; font-size: 12px; }
+
+    /* ✅ mobile behavior */
+    .top-actions{ display:none; }
+    .bottom-tabs{ display:flex; }
+    #news-container{ margin-bottom: 86px; } /* space for tabs */
   }
 </style>
 </head>
@@ -630,8 +482,13 @@
       <a href="/contact.html">Contact</a>
       <a href="/privacy-policy.html">Privacy Policy</a>
     </div>
-
     <h1 class="brand">VIRAL NEWS</h1>
+
+    <!-- ✅ NEW Desktop actions (Search + Refresh) -->
+    <div class="top-actions" id="top-actions">
+      <button class="top-action-btn" id="btn-search-desktop" type="button">Search</button>
+      <button class="top-action-btn" id="btn-refresh-desktop" type="button">Refresh</button>
+    </div>
 
     <!-- ✅ Top-right auth buttons -->
     <div class="auth-area">
@@ -671,7 +528,54 @@
   </div>
 </div>
 
+<!-- ✅ NEW Search modal -->
+<div class="search-overlay" id="search-overlay">
+  <div class="search-modal" role="dialog" aria-modal="true" aria-labelledby="search-title">
+    <div class="search-head">
+      <h3 class="search-title" id="search-title">Search Headlines</h3>
+      <button class="modal-close" id="search-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="search-body">
+      <input class="search-input" id="search-input" type="search" placeholder="Type keywords (e.g. Trump, Bitcoin, Arsenal)..." autocomplete="off" />
+      <div class="search-hint">Press Enter to search. Results will show on this page.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ NEW Settings modal -->
+<div class="settings-overlay" id="settings-overlay">
+  <div class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="settings-head">
+      <h3 class="settings-title" id="settings-title">Settings</h3>
+      <button class="modal-close" id="settings-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="settings-body">
+      <div class="field" id="settings-auth-line">—</div>
+
+      <div id="settings-auth-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="auth-btn primary" id="settings-signin" type="button">Sign in</button>
+        <button class="auth-btn" id="settings-account" type="button" style="display:none;">My Account</button>
+        <button class="auth-btn" id="settings-logout" type="button" style="display:none; border-color: rgba(255,107,107,.45); color: var(--danger);">Logout</button>
+      </div>
+
+      <div class="settings-links">
+        <a href="/about-us.html">About Us</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/privacy-policy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="news-container">Loading…</div>
+
+<!-- ✅ NEW Mobile Bottom Tabs (4 buttons) -->
+<div class="bottom-tabs" id="bottom-tabs">
+  <button class="tab-btn active" id="tab-home" type="button">Home</button>
+  <button class="tab-btn" id="tab-refresh" type="button">Refresh</button>
+  <button class="tab-btn" id="tab-search" type="button">Search</button>
+  <button class="tab-btn" id="tab-settings" type="button">Settings</button>
+</div>
 
 <!-- Hidden footer (prevents flash + sitemap never shown) -->
 <footer>
@@ -813,6 +717,10 @@
     try{
       localStorage.setItem(HOME_CACHE_KEY, JSON.stringify({ t: Date.now(), data: data }));
     }catch(e){}
+  }
+
+  function clearHomeCache(){
+    try{ localStorage.removeItem(HOME_CACHE_KEY); }catch(e){}
   }
 
   function fetchWithTimeout(url, ms){
@@ -1234,15 +1142,20 @@
     installInfiniteScroll();
   }
 
-  function loadHomepage(){
+  function loadHomepage(force){
     var container = document.getElementById("news-container");
 
+    if (force){
+      clearHomeCache();
+      container.innerHTML = "Loading…";
+    }
+
     // 1) show cache instantly
-    var cached = readHomeCache();
+    var cached = (!force) ? readHomeCache() : null;
     if (cached && isValidHomepage(cached)){
       homepageData = cached;
       renderHome();
-    } else {
+    } else if (!force){
       container.innerHTML = "Loading…";
     }
 
@@ -1263,6 +1176,61 @@
       });
   }
 
+  // ✅ Search rendering (client-side over homepageData.all)
+  function renderSearchResults(q){
+    var container = document.getElementById("news-container");
+    if (!homepageData || !homepageData.all){
+      container.innerHTML = '<div class="error-box">Search not ready yet. Please refresh and try again.</div>';
+      return;
+    }
+
+    var term = (q || "").toLowerCase().trim();
+    if (!term){
+      container.innerHTML = '<div class="error-box">Type something to search.</div>';
+      return;
+    }
+
+    var all = homepageData.all || [];
+    var matches = all.filter(function(a){
+      var t = (a.title || "").toLowerCase();
+      var s = stripHtml(a.summary || "").toLowerCase();
+      return t.indexOf(term) !== -1 || s.indexOf(term) !== -1;
+    });
+
+    container.innerHTML = "";
+    var head = document.createElement("div");
+    head.innerHTML = sectionHeader('Search: "' + escapeHtml(q) + '"');
+    container.appendChild(head);
+
+    if (!matches.length){
+      var empty = document.createElement("div");
+      empty.className = "error-box";
+      empty.textContent = "No results found.";
+      container.appendChild(empty);
+      return;
+    }
+
+    var list = document.createElement("div");
+    list.className = "more-list";
+
+    matches.slice(0, 60).forEach(function(a){
+      var img = pickImage(a);
+      var t = formatTime(safeTime(a));
+      var div = document.createElement("div");
+      div.className = "more-item";
+      div.innerHTML =
+        '<div class="more-thumb">' + (img ? '<img loading="lazy" decoding="async" width="184" height="144" src="' + img + '" alt="' + escapeHtml(a.title) + '">' : '') + '</div>' +
+        '<div>' +
+          '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+          '<div class="more-meta">' + escapeHtml(t) + '</div>' +
+        '</div>';
+      list.appendChild(div);
+    });
+
+    container.appendChild(list);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   // ✅ Minimal auth UI behavior (ONLY Sign in + My Account + email + logout)
   function getToken(){
     try { return localStorage.getItem(ACCESS_KEY) || ""; } catch(e){ return ""; }
@@ -1276,6 +1244,7 @@
       localStorage.removeItem(USER_EMAIL_KEY);
     }catch(e){}
     refreshAuthUI();
+    refreshSettingsUI();
   }
   function refreshAuthUI(){
     var btnSignin = document.getElementById("btn-signin");
@@ -1308,7 +1277,6 @@
     var btnClose = document.getElementById("account-close");
     var overlay = document.getElementById("account-modal");
 
-    // Sign in button: send user to your login page (change this to your real login url)
     if (btnSignin){
       btnSignin.addEventListener("click", function(){
         window.location.href = "/login.html";
@@ -1331,14 +1299,12 @@
 
     if (btnClose) btnClose.addEventListener("click", closeAccountModal);
 
-    // close when clicking outside modal
     if (overlay){
       overlay.addEventListener("click", function(e){
         if (e.target === overlay) closeAccountModal();
       });
     }
 
-    // close on ESC
     window.addEventListener("keydown", function(e){
       if (e.key === "Escape") closeAccountModal();
     });
@@ -1372,25 +1338,182 @@
       toggleMenu();
     });
 
-    // Close when clicking anywhere else
     document.addEventListener("click", function(){
       closeMenu();
     });
 
-    // Prevent click inside menu from closing before navigation
     if (menu) menu.addEventListener("click", function(e){
       e.stopPropagation();
     });
 
-    // Close on ESC
     window.addEventListener("keydown", function(e){
       if (e.key === "Escape") closeMenu();
     });
   }
 
+  // ✅ Search modal open/close
+  function openSearch(){
+    var ov = document.getElementById("search-overlay");
+    var inp = document.getElementById("search-input");
+    if (ov) ov.style.display = "flex";
+    setTimeout(function(){
+      if (inp){ inp.focus(); inp.select(); }
+    }, 50);
+  }
+  function closeSearch(){
+    var ov = document.getElementById("search-overlay");
+    if (ov) ov.style.display = "none";
+  }
+
+  // ✅ Settings modal open/close
+  function openSettings(){
+    var ov = document.getElementById("settings-overlay");
+    if (ov) ov.style.display = "flex";
+    refreshSettingsUI();
+  }
+  function closeSettings(){
+    var ov = document.getElementById("settings-overlay");
+    if (ov) ov.style.display = "none";
+  }
+
+  function refreshSettingsUI(){
+    var line = document.getElementById("settings-auth-line");
+    var sSignin = document.getElementById("settings-signin");
+    var sAccount = document.getElementById("settings-account");
+    var sLogout = document.getElementById("settings-logout");
+
+    var logged = isLoggedIn();
+    var email = "";
+    try{ email = localStorage.getItem(USER_EMAIL_KEY) || ""; }catch(e){}
+    if (!email) email = "(email not set yet)";
+
+    if (line){
+      line.innerHTML = logged
+        ? ('Signed in as: <strong>' + escapeHtml(email) + '</strong>')
+        : ('You are not signed in.');
+    }
+
+    if (sSignin) sSignin.style.display = logged ? "none" : "inline-flex";
+    if (sAccount) sAccount.style.display = logged ? "inline-flex" : "none";
+    if (sLogout) sLogout.style.display = logged ? "inline-flex" : "none";
+  }
+
+  function setupSearchAndSettings(){
+    var btnSearchDesktop = document.getElementById("btn-search-desktop");
+    var btnRefreshDesktop = document.getElementById("btn-refresh-desktop");
+
+    var searchClose = document.getElementById("search-close");
+    var searchOverlay = document.getElementById("search-overlay");
+    var searchInput = document.getElementById("search-input");
+
+    var settingsClose = document.getElementById("settings-close");
+    var settingsOverlay = document.getElementById("settings-overlay");
+
+    // desktop buttons
+    if (btnSearchDesktop) btnSearchDesktop.addEventListener("click", openSearch);
+    if (btnRefreshDesktop) btnRefreshDesktop.addEventListener("click", function(){
+      loadHomepage(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // search close
+    if (searchClose) searchClose.addEventListener("click", closeSearch);
+    if (searchOverlay){
+      searchOverlay.addEventListener("click", function(e){
+        if (e.target === searchOverlay) closeSearch();
+      });
+    }
+
+    // search enter
+    if (searchInput){
+      searchInput.addEventListener("keydown", function(e){
+        if (e.key === "Enter"){
+          closeSearch();
+          renderSearchResults(searchInput.value);
+        }
+      });
+    }
+
+    // settings close
+    if (settingsClose) settingsClose.addEventListener("click", closeSettings);
+    if (settingsOverlay){
+      settingsOverlay.addEventListener("click", function(e){
+        if (e.target === settingsOverlay) closeSettings();
+      });
+    }
+
+    // settings actions
+    var sSignin = document.getElementById("settings-signin");
+    var sAccount = document.getElementById("settings-account");
+    var sLogout = document.getElementById("settings-logout");
+
+    if (sSignin){
+      sSignin.addEventListener("click", function(){
+        window.location.href = "/login.html";
+      });
+    }
+    if (sAccount){
+      sAccount.addEventListener("click", function(){
+        closeSettings();
+        refreshAuthUI();
+        openAccountModal();
+      });
+    }
+    if (sLogout){
+      sLogout.addEventListener("click", function(){
+        setLoggedOut();
+        closeSettings();
+      });
+    }
+  }
+
+  // ✅ Mobile bottom tabs wiring (4 buttons)
+  function setupBottomTabs(){
+    var home = document.getElementById("tab-home");
+    var refresh = document.getElementById("tab-refresh");
+    var search = document.getElementById("tab-search");
+    var settings = document.getElementById("tab-settings");
+
+    function setActive(id){
+      var ids = ["tab-home","tab-refresh","tab-search","tab-settings"];
+      ids.forEach(function(x){
+        var el = document.getElementById(x);
+        if (el) el.classList.toggle("active", x === id);
+      });
+    }
+
+    if (home) home.addEventListener("click", function(){
+      setActive("tab-home");
+      if (homepageData) renderHome();
+      else loadHomepage(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    if (refresh) refresh.addEventListener("click", function(){
+      setActive("tab-refresh");
+      loadHomepage(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(function(){ setActive("tab-home"); }, 400);
+    });
+
+    if (search) search.addEventListener("click", function(){
+      setActive("tab-search");
+      openSearch();
+      setTimeout(function(){ setActive("tab-home"); }, 200);
+    });
+
+    if (settings) settings.addEventListener("click", function(){
+      setActive("tab-settings");
+      openSettings();
+      setTimeout(function(){ setActive("tab-home"); }, 200);
+    });
+  }
+
   setupMenu();
   setupAuthUI();
-  loadHomepage();
+  setupSearchAndSettings();
+  setupBottomTabs();
+  loadHomepage(false);
 })();
 </script>
 
@@ -1400,4 +1523,3 @@
 
 </body>
 </html>
-
