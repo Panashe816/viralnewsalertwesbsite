@@ -62,12 +62,104 @@
     align-items:center;
     justify-content:center;
     padding: 12px 18px 10px;
+    position: relative;
   }
   .brand{
     margin:0;
     font-size: 22px;
     letter-spacing: .7px;
     font-weight: 800;
+  }
+
+  /* ✅ AUTH UI (top-right) */
+  .auth-area{
+    position:absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+  .auth-btn{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.06);
+    color:#fff;
+    text-decoration:none;
+    font-size: 13px;
+    font-weight: 900;
+    cursor:pointer;
+    user-select:none;
+    white-space: nowrap;
+  }
+  .auth-btn:hover{
+    border-color: rgba(255,204,0,.35);
+    color: var(--accent);
+  }
+  .auth-btn.primary{
+    background: rgba(255,204,0,.14);
+    border-color: rgba(255,204,0,.28);
+    color: var(--accent);
+  }
+
+  /* ✅ Account modal */
+  .modal-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    z-index: 9999;
+  }
+  .modal{
+    width: 100%;
+    max-width: 420px;
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .modal-head{
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: rgba(255,255,255,.03);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .modal-title{
+    margin:0;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: .3px;
+  }
+  .modal-close{
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 6px;
+  }
+  .modal-body{
+    padding: 14px;
+  }
+  .field{
+    margin-bottom: 10px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .field strong{
+    color:#fff;
   }
 
   .catbar{
@@ -446,6 +538,11 @@
   @media (max-width: 760px){
     #news-container{ padding: 0 12px; }
     .brand{ font-size: 20px; }
+
+    /* Keep auth buttons visible on small screens */
+    .auth-area{ right: 10px; }
+    .auth-btn{ padding: 7px 10px; font-size: 12px; }
+
     .cat-grid{ grid-template-columns: 1fr; }
     .lead{ grid-template-columns: 92px 1fr; }
     .lead .thumb{ width:92px; height:70px; }
@@ -467,6 +564,12 @@
 <header>
   <div class="top-row">
     <h1 class="brand">VIRAL NEWS</h1>
+
+    <!-- ✅ Top-right auth buttons -->
+    <div class="auth-area">
+      <button class="auth-btn primary" id="btn-signin" type="button">Sign in</button>
+      <button class="auth-btn" id="btn-account" type="button" style="display:none;">My Account</button>
+    </div>
   </div>
 
   <nav class="catbar" id="catbar">
@@ -484,6 +587,22 @@
   </nav>
 </header>
 
+<!-- ✅ My Account modal (email + logout) -->
+<div class="modal-overlay" id="account-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="account-title">
+    <div class="modal-head">
+      <h3 class="modal-title" id="account-title">My Account</h3>
+      <button class="modal-close" id="account-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">Signed in as: <strong id="account-email">—</strong></div>
+      <button class="auth-btn" id="btn-logout" type="button" style="border-color: rgba(255,107,107,.45); color: var(--danger);">
+        Logout
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="news-container">Loading…</div>
 
 <footer>
@@ -500,6 +619,10 @@
 
   var HOME_CACHE_KEY = "vn_homepage_cache_v1";
   var HOME_CACHE_TTL = 60 * 1000;
+
+  // ✅ Auth storage keys
+  var ACCESS_KEY = "access_token";
+  var USER_EMAIL_KEY = "user_email";
 
   function escapeHtml(s){
     s = (s || "").toString();
@@ -1071,6 +1194,91 @@
       });
   }
 
+  // ✅ Minimal auth UI behavior (ONLY Sign in + My Account + email + logout)
+  function getToken(){
+    try { return localStorage.getItem(ACCESS_KEY) || ""; } catch(e){ return ""; }
+  }
+  function isLoggedIn(){
+    return !!getToken();
+  }
+  function setLoggedOut(){
+    try{
+      localStorage.removeItem(ACCESS_KEY);
+      localStorage.removeItem(USER_EMAIL_KEY);
+    }catch(e){}
+    refreshAuthUI();
+  }
+  function refreshAuthUI(){
+    var btnSignin = document.getElementById("btn-signin");
+    var btnAccount = document.getElementById("btn-account");
+    var emailEl = document.getElementById("account-email");
+
+    var logged = isLoggedIn();
+    if (btnSignin) btnSignin.style.display = logged ? "none" : "inline-flex";
+    if (btnAccount) btnAccount.style.display = logged ? "inline-flex" : "none";
+
+    var email = "";
+    try { email = localStorage.getItem(USER_EMAIL_KEY) || ""; } catch(e){}
+    if (!email) email = "(email not set yet)";
+    if (emailEl) emailEl.textContent = email;
+  }
+
+  function openAccountModal(){
+    var overlay = document.getElementById("account-modal");
+    if (overlay) overlay.style.display = "flex";
+  }
+  function closeAccountModal(){
+    var overlay = document.getElementById("account-modal");
+    if (overlay) overlay.style.display = "none";
+  }
+
+  function setupAuthUI(){
+    var btnSignin = document.getElementById("btn-signin");
+    var btnAccount = document.getElementById("btn-account");
+    var btnLogout = document.getElementById("btn-logout");
+    var btnClose = document.getElementById("account-close");
+    var overlay = document.getElementById("account-modal");
+
+    // Sign in button: send user to your login page (change this to your real login url)
+    if (btnSignin){
+      btnSignin.addEventListener("click", function(){
+        // ✅ Change this to wherever your login page lives
+        window.location.href = "/login.html";
+      });
+    }
+
+    if (btnAccount){
+      btnAccount.addEventListener("click", function(){
+        refreshAuthUI();
+        openAccountModal();
+      });
+    }
+
+    if (btnLogout){
+      btnLogout.addEventListener("click", function(){
+        setLoggedOut();
+        closeAccountModal();
+      });
+    }
+
+    if (btnClose) btnClose.addEventListener("click", closeAccountModal);
+
+    // close when clicking outside modal
+    if (overlay){
+      overlay.addEventListener("click", function(e){
+        if (e.target === overlay) closeAccountModal();
+      });
+    }
+
+    // close on ESC
+    window.addEventListener("keydown", function(e){
+      if (e.key === "Escape") closeAccountModal();
+    });
+
+    refreshAuthUI();
+  }
+
+  setupAuthUI();
   loadHomepage();
 })();
 </script>
