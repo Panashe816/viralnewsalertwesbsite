@@ -600,6 +600,168 @@
   }
   footer a:hover{ text-decoration: underline; }
 
+
+  /* ================================
+     DESKTOP: Header Search & Refresh
+     ================================ */
+  .header-actions{
+    position:absolute;
+    right: 140px;
+    top: 50%;
+    transform: translateY(-50%);
+    display:flex;
+    gap: 10px;
+  }
+  .header-action-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.06);
+    color:#fff;
+    font-size: 13px;
+    font-weight: 800;
+    cursor:pointer;
+    user-select:none;
+    white-space: nowrap;
+  }
+  .header-action-btn:hover{
+    border-color: rgba(255,204,0,.35);
+    color: var(--accent);
+  }
+
+  /* ================================
+     MOBILE: Bottom Tab Bar
+     ================================ */
+  .mobile-tabbar{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--bg2);
+    border-top: 1px solid rgba(255,255,255,.1);
+    display: none;
+    z-index: 3000;
+  }
+  .mobile-tabbar .tabs{
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .mobile-tab{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    cursor:pointer;
+    user-select:none;
+  }
+  .mobile-tab.active,
+  .mobile-tab:hover{
+    color: var(--accent);
+  }
+
+  /* ================================
+     MOBILE: Bottom Sheet (Search / Settings)
+     ================================ */
+  .bottom-sheet-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display:none;
+    align-items:flex-end;
+    z-index: 4000;
+  }
+  .bottom-sheet{
+    width:100%;
+    background: var(--panel);
+    border-radius: 18px 18px 0 0;
+    padding: 14px;
+    box-shadow: var(--shadow);
+  }
+  .sheet-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom: 10px;
+  }
+  .sheet-title{
+    font-size: 14px;
+    font-weight: 900;
+  }
+  .sheet-close{
+    border:none;
+    background: transparent;
+    color:#fff;
+    font-size: 22px;
+    cursor:pointer;
+    line-height: 1;
+    padding: 0 6px;
+  }
+
+  /* Mobile search UI */
+  .mobile-search-input{
+    width:100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.05);
+    color:#fff;
+    font-size: 14px;
+    outline: none;
+  }
+  .mobile-search-results{
+    margin-top: 10px;
+    display:flex;
+    flex-direction:column;
+    gap: 8px;
+    max-height: 46vh;
+    overflow:auto;
+    padding-right: 2px;
+  }
+  .mobile-search-results .row{
+    padding: 12px;
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--radius);
+  }
+  .mobile-search-results .row a{
+    color:#fff;
+    text-decoration:none;
+    font-weight: 900;
+    line-height: 1.25;
+  }
+  .mobile-search-results .row a:hover{ color: var(--accent); }
+
+  /* Mobile settings UI */
+  .mobile-settings{
+    display:flex;
+    flex-direction:column;
+    gap: 8px;
+  }
+  .mobile-settings .auth-btn{
+    width: 100%;
+    justify-content:center;
+  }
+  .mobile-settings a{
+    display:block;
+    padding: 12px;
+    border-radius: 12px;
+    color:#fff;
+    text-decoration:none;
+    font-weight: 900;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.03);
+  }
+  .mobile-settings a:hover{ color: var(--accent); }
+
   @media (max-width: 980px){
     .hero-grid{ grid-template-columns: 1fr; }
     .hero-side{ flex-direction: row; flex-wrap: wrap; }
@@ -613,6 +775,13 @@
 
     /* ✅ ONLY CHANGE: categories become 1 column on mobile */
     .cat-grid{ grid-template-columns: 1fr; }
+
+    /* Hide desktop actions on mobile */
+    .header-actions{ display:none; }
+
+    /* Show bottom tab bar on mobile */
+    .mobile-tabbar{ display:block; }
+    body{ padding-bottom: 70px; }
   }
 </style>
 </head>
@@ -635,6 +804,12 @@
     </div>
 
     <h1 class="brand">VIRAL NEWS</h1>
+
+    <!-- ✅ DESKTOP header actions (Search + Refresh) -->
+    <div class="header-actions" id="header-actions">
+      <button class="header-action-btn" id="btn-desktop-search" type="button">Search</button>
+      <button class="header-action-btn" id="btn-desktop-refresh" type="button">Refresh</button>
+    </div>
 
     <!-- ✅ Top-right auth buttons -->
     <div class="auth-area">
@@ -675,6 +850,52 @@
 </div>
 
 <div id="news-container">Loading…</div>
+
+<!-- ✅ MOBILE bottom tab bar -->
+<div class="mobile-tabbar" id="mobile-tabbar">
+  <div class="tabs">
+    <div class="mobile-tab active" id="tab-home" role="button" aria-label="Home">
+      <div>Home</div>
+    </div>
+    <div class="mobile-tab" id="tab-refresh" role="button" aria-label="Refresh">
+      <div>Refresh</div>
+    </div>
+    <div class="mobile-tab" id="tab-search" role="button" aria-label="Search">
+      <div>Search</div>
+    </div>
+    <div class="mobile-tab" id="tab-settings" role="button" aria-label="Settings">
+      <div>Settings</div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ MOBILE bottom sheet overlay (Search / Settings) -->
+<div class="bottom-sheet-overlay" id="sheet-overlay" aria-hidden="true">
+  <div class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <div class="sheet-header">
+      <div class="sheet-title" id="sheet-title">Menu</div>
+      <button class="sheet-close" id="sheet-close" aria-label="Close">&times;</button>
+    </div>
+
+    <!-- Search panel -->
+    <div id="sheet-search" style="display:none;">
+      <input class="mobile-search-input" id="mobile-search-input" type="search" placeholder="Search headlines..." autocomplete="off" />
+      <div class="mobile-search-results" id="mobile-search-results"></div>
+    </div>
+
+    <!-- Settings panel -->
+    <div id="sheet-settings" style="display:none;">
+      <div class="mobile-settings">
+        <button class="auth-btn primary" id="btn-sheet-signin" type="button">Sign in</button>
+        <button class="auth-btn" id="btn-sheet-account" type="button" style="display:none;">My Account</button>
+
+        <a href="/about-us.html">About Us</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/privacy-policy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Hidden footer (prevents flash + sitemap never shown) -->
 <footer>
@@ -1274,6 +1495,93 @@
       });
   }
 
+  // ✅ Desktop refresh: clear cache + reload
+  function hardRefresh(){
+    try{ localStorage.removeItem(HOME_CACHE_KEY); }catch(e){}
+    homepageData = null;
+    loadHomepage();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ✅ Search (works on both desktop + mobile sheet)
+  function doSearch(query){
+    query = (query || "").toString().trim().toLowerCase();
+    var resultsEl = document.getElementById("mobile-search-results");
+    if (!resultsEl) return;
+
+    if (!homepageData || !homepageData.all){
+      resultsEl.innerHTML = '<div class="row">No data yet. Try refresh.</div>';
+      return;
+    }
+
+    if (!query){
+      resultsEl.innerHTML = '<div class="row">Type to search headlines.</div>';
+      return;
+    }
+
+    var all = homepageData.all || [];
+    var hits = [];
+    for (var i=0;i<all.length;i++){
+      var a = all[i];
+      var title = (a && a.title) ? String(a.title).toLowerCase() : "";
+      if (title.indexOf(query) !== -1) hits.push(a);
+      if (hits.length >= 30) break;
+    }
+
+    if (!hits.length){
+      resultsEl.innerHTML = '<div class="row">No results.</div>';
+      return;
+    }
+
+    var html = "";
+    hits.forEach(function(a){
+      html += '<div class="row">' +
+        '<a href="' + linkToArticle(a) + '">' + escapeHtml(a.title) + '</a>' +
+        '<div class="meta">' + escapeHtml(formatTime(safeTime(a))) + '</div>' +
+      '</div>';
+    });
+    resultsEl.innerHTML = html;
+  }
+
+  // ✅ Bottom sheet helpers (mobile)
+  function openSheet(mode){
+    var overlay = document.getElementById("sheet-overlay");
+    var title = document.getElementById("sheet-title");
+    var searchBox = document.getElementById("sheet-search");
+    var settingsBox = document.getElementById("sheet-settings");
+
+    if (!overlay || !title || !searchBox || !settingsBox) return;
+
+    if (mode === "search"){
+      title.textContent = "Search";
+      searchBox.style.display = "block";
+      settingsBox.style.display = "none";
+
+      // reset search UI
+      var input = document.getElementById("mobile-search-input");
+      var results = document.getElementById("mobile-search-results");
+      if (results) results.innerHTML = '<div class="row">Type to search headlines.</div>';
+      if (input){
+        input.value = "";
+        setTimeout(function(){ input.focus(); }, 50);
+      }
+    } else {
+      title.textContent = "Settings";
+      searchBox.style.display = "none";
+      settingsBox.style.display = "block";
+    }
+
+    overlay.style.display = "flex";
+    overlay.setAttribute("aria-hidden", "false");
+  }
+
+  function closeSheet(){
+    var overlay = document.getElementById("sheet-overlay");
+    if (!overlay) return;
+    overlay.style.display = "none";
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
   // ✅ Minimal auth UI behavior (ONLY Sign in + My Account + email + logout)
   function getToken(){
     try { return localStorage.getItem(ACCESS_KEY) || ""; } catch(e){ return ""; }
@@ -1293,9 +1601,16 @@
     var btnAccount = document.getElementById("btn-account");
     var emailEl = document.getElementById("account-email");
 
+    // also sheet buttons
+    var sheetSignin = document.getElementById("btn-sheet-signin");
+    var sheetAccount = document.getElementById("btn-sheet-account");
+
     var logged = isLoggedIn();
     if (btnSignin) btnSignin.style.display = logged ? "none" : "inline-flex";
     if (btnAccount) btnAccount.style.display = logged ? "inline-flex" : "none";
+
+    if (sheetSignin) sheetSignin.style.display = logged ? "none" : "inline-flex";
+    if (sheetAccount) sheetAccount.style.display = logged ? "inline-flex" : "none";
 
     var email = "";
     try { email = localStorage.getItem(USER_EMAIL_KEY) || ""; } catch(e){}
@@ -1319,9 +1634,18 @@
     var btnClose = document.getElementById("account-close");
     var overlay = document.getElementById("account-modal");
 
-    // Sign in button: send user to your login page (change this to your real login url)
+    // sheet auth
+    var sheetSignin = document.getElementById("btn-sheet-signin");
+    var sheetAccount = document.getElementById("btn-sheet-account");
+
+    // Sign in button: send user to your login page
     if (btnSignin){
       btnSignin.addEventListener("click", function(){
+        window.location.href = "/login.html";
+      });
+    }
+    if (sheetSignin){
+      sheetSignin.addEventListener("click", function(){
         window.location.href = "/login.html";
       });
     }
@@ -1329,6 +1653,13 @@
     if (btnAccount){
       btnAccount.addEventListener("click", function(){
         refreshAuthUI();
+        openAccountModal();
+      });
+    }
+    if (sheetAccount){
+      sheetAccount.addEventListener("click", function(){
+        refreshAuthUI();
+        closeSheet();
         openAccountModal();
       });
     }
@@ -1399,8 +1730,120 @@
     });
   }
 
+  // ✅ Desktop buttons (Search + Refresh)
+  function setupDesktopActions(){
+    var btnSearch = document.getElementById("btn-desktop-search");
+    var btnRefresh = document.getElementById("btn-desktop-refresh");
+
+    if (btnRefresh){
+      btnRefresh.addEventListener("click", function(){
+        hardRefresh();
+      });
+    }
+
+    if (btnSearch){
+      btnSearch.addEventListener("click", function(){
+        // simple prompt search on desktop
+        var q = window.prompt("Search headlines:");
+        if (q === null) return;
+        q = String(q || "").trim();
+        if (!q) return;
+        // open the first matching result in same tab if exists
+        if (!homepageData || !homepageData.all) return;
+        var all = homepageData.all || [];
+        var ql = q.toLowerCase();
+        for (var i=0;i<all.length;i++){
+          var a = all[i];
+          var title = (a && a.title) ? String(a.title).toLowerCase() : "";
+          if (title.indexOf(ql) !== -1){
+            window.location.href = linkToArticle(a);
+            return;
+          }
+        }
+        window.alert("No results.");
+      });
+    }
+  }
+
+  // ✅ Mobile tabs + bottom sheet
+  function setupMobileTabs(){
+    var tabHome = document.getElementById("tab-home");
+    var tabRefresh = document.getElementById("tab-refresh");
+    var tabSearch = document.getElementById("tab-search");
+    var tabSettings = document.getElementById("tab-settings");
+
+    function setActive(tabEl){
+      [tabHome, tabRefresh, tabSearch, tabSettings].forEach(function(t){
+        if (!t) return;
+        t.classList.remove("active");
+      });
+      if (tabEl) tabEl.classList.add("active");
+    }
+
+    if (tabHome){
+      tabHome.addEventListener("click", function(){
+        setActive(tabHome);
+        closeSheet();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+
+    if (tabRefresh){
+      tabRefresh.addEventListener("click", function(){
+        setActive(tabRefresh);
+        closeSheet();
+        hardRefresh();
+      });
+    }
+
+    if (tabSearch){
+      tabSearch.addEventListener("click", function(){
+        setActive(tabSearch);
+        openSheet("search");
+      });
+    }
+
+    if (tabSettings){
+      tabSettings.addEventListener("click", function(){
+        setActive(tabSettings);
+        refreshAuthUI();
+        openSheet("settings");
+      });
+    }
+
+    // sheet close
+    var sheetClose = document.getElementById("sheet-close");
+    var sheetOverlay = document.getElementById("sheet-overlay");
+    if (sheetClose) sheetClose.addEventListener("click", closeSheet);
+    if (sheetOverlay){
+      sheetOverlay.addEventListener("click", function(e){
+        if (e.target === sheetOverlay) closeSheet();
+      });
+    }
+
+    // mobile search input typing
+    var input = document.getElementById("mobile-search-input");
+    if (input){
+      input.addEventListener("input", function(){
+        doSearch(input.value);
+      });
+      input.addEventListener("keydown", function(e){
+        if (e.key === "Enter"){
+          doSearch(input.value);
+        }
+      });
+    }
+
+    // close on ESC
+    window.addEventListener("keydown", function(e){
+      if (e.key === "Escape") closeSheet();
+    });
+  }
+
   setupMenu();
   setupAuthUI();
+  setupDesktopActions();
+  setupMobileTabs();
   loadHomepage();
 })();
 </script>
