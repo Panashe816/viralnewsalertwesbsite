@@ -1,143 +1,159 @@
 // auth/auth.js
 (function () {
-  // ✅ CHANGE THIS to your Render backend base URL (no trailing slash)
-  // Example: https://viral-news-auth-api.onrender.com
-  var API_BASE = "https://viral-news-backend-3.onrender.com";
+  // ✅ Firebase config (your values)
+  var firebaseConfig = {
+    apiKey: "AIzaSyCfvGI-PnFdkpCqB6zG5R7ZSv0pUicNNyg",
+    authDomain: "news-app-sign-in.firebaseapp.com",
+    projectId: "news-app-sign-in",
+    storageBucket: "news-app-sign-in.firebasestorage.app",
+    messagingSenderId: "1088200901644",
+    appId: "1:1088200901644:web:317f8b8c52429256739a29",
+    measurementId: "G-RT8LPH8Q5F"
+  };
 
-  var ACCESS_KEY = "vn_access_token";
-  var REFRESH_KEY = "vn_refresh_token";
-
-  function setTokens(access, refresh) {
-    if (access) localStorage.setItem(ACCESS_KEY, access);
-    if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+  // ✅ Support GitHub Pages project path like your index.html does
+  function basePath() {
+    var p = window.location.pathname || "";
+    return (p.indexOf("/viralnewsalertwebsite/") !== -1) ? "/viralnewsalertwebsite" : "";
   }
 
-  function getAccessToken() {
-    return localStorage.getItem(ACCESS_KEY) || "";
-  }
-
-  function getRefreshToken() {
-    return localStorage.getItem(REFRESH_KEY) || "";
-  }
-
-  function clearTokens() {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-  }
-
-  async function api(path, opts) {
-    opts = opts || {};
-    opts.headers = opts.headers || {};
-
-    var token = getAccessToken();
-    if (token) opts.headers["Authorization"] = "Bearer " + token;
-
-    var res = await fetch(API_BASE + path, opts);
-
-    // If access token expired, try refresh once
-    if (res.status === 401 && getRefreshToken()) {
-      var refreshed = await refreshAccessToken();
-      if (refreshed) {
-        opts.headers["Authorization"] = "Bearer " + getAccessToken();
-        res = await fetch(API_BASE + path, opts);
-      }
+  function ensureFirebase() {
+    if (!window.firebase || !window.firebase.initializeApp) {
+      throw new Error(
+        "Firebase SDK not loaded. Make sure firebase-app-compat.js and firebase-auth-compat.js are included before auth.js"
+      );
     }
-    return res;
   }
+
+  ensureFirebase();
+
+  // ✅ Initialize Firebase once
+  try {
+    if (!firebase.apps || !firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  } catch (e) {
+    // ignore "already exists" edge cases
+  }
+
+  var auth = firebase.auth();
+
+  // Compatibility stubs (your old code used these)
+  function getAccessToken() { return ""; }
+  function getRefreshToken() { return ""; }
+  function clearTokens() { return true; }
 
   async function signup(email, password, name) {
-    var res = await fetch(API_BASE + "/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email, password: password, name: name }),
-    });
+    email = (email || "").trim();
+    password = (password || "").trim();
+    name = (name || "").trim();
 
-    if (!res.ok) {
-      var txt = await safeText(res);
-      throw new Error("Signup failed: " + txt);
-    }
+    if (!email || !password) throw new Error("Please enter email and password.");
+    if (!name) throw new Error("Please enter your name.");
 
-    // Some APIs return user only; some return tokens too.
-    // We'll login after signup to always get tokens.
-    return await res.json();
+    var cred = await auth.createUserWithEmailAndPassword(email, password);
+
+    try {
+      if (cred && cred.user && name) {
+        await cred.user.updateProfile({ displayName: name });
+      }
+    } catch (e) {}
+
+    return { email: cred.user ? cred.user.email : email };
   }
 
   async function login(email, password) {
-    var res = await fetch(API_BASE + "/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email, password: password }),
-    });
+    email = (email || "").trim();
+    password = (password || "").trim();
 
-    if (!res.ok) {
-      var txt = await safeText(res);
-      throw new Error("Login failed: " + txt);
-    }
+    if (!email || !password) throw new Error("Please enter email and password.");
 
-    var data = await res.json();
-    if (data && data.access_token) {
-      setTokens(data.access_token, data.refresh_token || "");
-    }
-    return data;
-  }
-
-  async function refreshAccessToken() {
-    var refresh = getRefreshToken();
-    if (!refresh) return false;
-
-    var res = await fetch(API_BASE + "/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refresh }),
-    });
-
-    if (!res.ok) {
-      clearTokens();
-      return false;
-    }
-
-    var data = await res.json();
-    if (data && data.access_token) {
-      setTokens(data.access_token, data.refresh_token || refresh);
-      return true;
-    }
-    return false;
+    var cred = await auth.signInWithEmailAndPassword(email, password);
+    return { email: cred.user ? cred.user.email : email };
   }
 
   async function me() {
-    var res = await api("/auth/me", { method: "GET" });
-    if (!res.ok) return null;
-    return await res.json();
+    var user = auth.currentUser;
+    if (user && user.email) return { email: user.email };
+
+    // wait briefly (Auth might still be restoring session)
+    return await new Promise(function (resolve) {
+      var done = false;
+      var t = setTimeout(function () {
+        if (done) return;
+        done = true;
+        resolve(null);
+      }, 1200);
+
+      auth.onAuthStateChanged(function (u) {
+        if (done) return;
+        done = true;
+        clearTimeout(t);
+        resolve(u && u.email ? { email: u.email } : null);
+      });
+    });
   }
 
   async function logout() {
-    // optional backend logout endpoint; if you have it, call it
-    try {
-      await api("/auth/logout", { method: "POST" });
-    } catch (e) {}
-    clearTokens();
+    await auth.signOut();
     return true;
   }
 
-  async function safeText(res) {
+  async function google() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+
+    // Popup first (best for desktop)
     try {
-      var t = await res.text();
-      return t || ("HTTP " + res.status);
-    } catch (e) {
-      return "HTTP " + res.status;
+      var result = await auth.signInWithPopup(provider);
+      return { email: result && result.user ? result.user.email : "" };
+    } catch (err) {
+      // Fallback to redirect (better for mobile / blocked popups)
+      try {
+        sessionStorage.setItem("vn_google_redirect", "1");
+      } catch (e) {}
+      await auth.signInWithRedirect(provider);
+      return null; // redirect will happen
     }
   }
 
-  // Expose globally
+  async function handleRedirectResult() {
+    // Only try if we previously started a redirect
+    var flag = "";
+    try { flag = sessionStorage.getItem("vn_google_redirect") || ""; } catch (e) {}
+
+    if (!flag) return null;
+
+    try {
+      var res = await auth.getRedirectResult();
+      try { sessionStorage.removeItem("vn_google_redirect"); } catch (e) {}
+
+      if (res && res.user && res.user.email) {
+        return { email: res.user.email };
+      }
+      return null;
+    } catch (e) {
+      try { sessionStorage.removeItem("vn_google_redirect"); } catch (x) {}
+      throw e;
+    }
+  }
+
+  // Expose globally (same name your pages already use)
   window.VNAuth = {
-    API_BASE: API_BASE,
+    basePath: basePath,
     signup: signup,
     login: login,
     me: me,
     logout: logout,
-    refreshAccessToken: refreshAccessToken,
+
+    // Google auth helpers
+    google: google,
+    handleRedirectResult: handleRedirectResult,
+
+    // compatibility with your old shape
+    API_BASE: "",
+    refreshAccessToken: async function(){ return false; },
     getAccessToken: getAccessToken,
     getRefreshToken: getRefreshToken,
-    clearTokens: clearTokens,
+    clearTokens: clearTokens
   };
 })();
