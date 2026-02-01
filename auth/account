@@ -116,12 +116,18 @@
   <div class="error" id="errorBox"></div>
 </div>
 
+<!-- ✅ Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
 <script src="./auth.js"></script>
 <script>
 (function(){
   var emailEl = document.getElementById("email");
   var logoutBtn = document.getElementById("logoutBtn");
   var errorBox = document.getElementById("errorBox");
+
+  function bp(){ return (window.VNAuth && window.VNAuth.basePath) ? window.VNAuth.basePath() : ""; }
 
   function showError(msg){
     errorBox.textContent = msg;
@@ -132,7 +138,7 @@
     var u = await window.VNAuth.me();
     if (!u || !u.email){
       // Not logged in
-      window.location.href = "/auth/login.html";
+      window.location.href = bp() + "/auth/login.html";
       return;
     }
     emailEl.textContent = u.email;
@@ -141,7 +147,7 @@
   logoutBtn.addEventListener("click", async function(){
     try{
       await window.VNAuth.logout();
-      window.location.href = "/auth/login.html";
+      window.location.href = bp() + "/auth/login.html";
     }catch(err){
       showError(String(err && err.message ? err.message : err));
     }
