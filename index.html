@@ -978,11 +978,10 @@
     return s || "story";
   }
 
-  // ✅ FIX: Homepage must open the real viewer page (articles.html?id=123)
-  // Works on both custom domain + GitHub Pages project path.
+  // ✅ FIX: correct GitHub Pages project path
   function basePath(){
     var p = window.location.pathname || "";
-    return (p.indexOf("/viralnewsalertwesbsite/") !== -1) ? "/viralnewsalertwesbsite" : "";
+    return (p.indexOf("/viralnewsalertwebsite/") !== -1) ? "/viralnewsalertwebsite" : "";
   }
 
   function linkToArticle(a){
@@ -1154,7 +1153,6 @@
   }
 
   function isMobile(){
-    // Match your CSS breakpoint for "mobile"
     return window.matchMedia && window.matchMedia("(max-width: 760px)").matches;
   }
 
@@ -1232,7 +1230,6 @@
       return wrap;
     }
 
-    // HERO (Top Headlines)
     var top = categories["top headlines"] || categories["Top Headlines"] || [];
     var heroMain = pickFirstWithImage(top) || pickFirstWithImage(all);
 
@@ -1242,7 +1239,6 @@
     var sideWithImg = heroSideCandidates.filter(hasImage);
     var sideNoImg = heroSideCandidates.filter(function(x){ return !hasImage(x); });
 
-    // ✅ ONLY CHANGE: Desktop/Laptop show 6 items, mobile keeps 4
     var heroSideCount = isMobile() ? 4 : 6;
     var heroSideItems = take(sideWithImg.concat(sideNoImg), heroSideCount);
 
@@ -1258,7 +1254,6 @@
     var mainImg = heroMain ? pickImage(heroMain) : null;
     var mainTime = heroMain ? formatTime(safeTime(heroMain)) : "";
 
-    // ✅ HERO image: eager + high priority (NOT lazy)
     mainCard.innerHTML =
       '<div class="img">' + (mainImg ? '<img loading="eager" fetchpriority="high" decoding="async" width="1200" height="675" src="' + mainImg + '" alt="' + escapeHtml(heroMain.title) + '">' : '') + '</div>' +
       '<div class="body">' +
@@ -1299,7 +1294,6 @@
     heroWrap.appendChild(heroGrid);
     container.appendChild(heroWrap);
 
-    // ✅ Mobile-only: add hero sections for Politics + Technology
     if (isMobile()){
       var polItems = categories["Politics"] || categories["politics"] || [];
       var polHero = renderHeroLike("Politics", polItems, "/category/politics.html", "Politics", 4);
@@ -1310,7 +1304,6 @@
       if (techHero) container.appendChild(techHero);
     }
 
-    // Breaking strip
     var breaking = sortNewestFirst(categories["breaking"] || categories["Breaking"] || []);
     var breakingBlock = document.createElement("div");
     breakingBlock.innerHTML = sectionHeader("Breaking", "/category/breaking.html");
@@ -1340,7 +1333,6 @@
     breakingBlock.appendChild(strip);
     container.appendChild(breakingBlock);
 
-    // Trending rail
     var trending = sortNewestFirst(categories["trending"] || categories["Trending"] || []);
     var trendWrap = document.createElement("div");
     trendWrap.innerHTML = sectionHeader("Trending", "/category/trending.html");
@@ -1372,14 +1364,12 @@
     }
     container.appendChild(trendWrap);
 
-    // ✅ Desktop/Laptop: Sports as hero block (image + headline + 6 on right)
     if (!isMobile()){
       var sportsItemsHero = categories["Sports"] || categories["sports"] || [];
       var sportsHero = renderHeroLike("Sports", sportsItemsHero, "/category/sports.html", "Sports", 6);
       if (sportsHero) container.appendChild(sportsHero);
     }
 
-    // Category blocks
     var blockCats = ["World News","Politics","General News","Technology","Sports"];
     if (isMobile()){
       blockCats = ["World News","General News","Sports"];
@@ -1460,7 +1450,6 @@
     catGridWrap.appendChild(catGrid);
     container.appendChild(catGridWrap);
 
-    // Health rail
     var health = sortNewestFirst(categories["Health & Fitness"] || []);
     var healthWrap = document.createElement("div");
     healthWrap.innerHTML = sectionHeader("Health & Fitness", "/category/health-fitness.html");
@@ -1494,7 +1483,6 @@
     }
     container.appendChild(healthWrap);
 
-    // Entertainment (text)
     var ent = sortNewestFirst(categories["Entertainment"] || []);
     var entWrap = document.createElement("div");
     entWrap.innerHTML = sectionHeader("Entertainment", "/category/entertainment.html");
@@ -1523,7 +1511,6 @@
     entWrap.appendChild(textOnly);
     container.appendChild(entWrap);
 
-    // More for you
     var shown = {};
     function markShown(arr){
       arr = arr || [];
@@ -1583,7 +1570,6 @@
   function loadHomepage(){
     var container = document.getElementById("news-container");
 
-    // 1) show cache instantly
     var cached = readHomeCache();
     if (cached && isValidHomepage(cached)){
       homepageData = cached;
@@ -1592,7 +1578,6 @@
       container.innerHTML = "Loading…";
     }
 
-    // 2) background refresh
     fetchJsonWithRetry(HOMEPAGE_URL, 20000, 0)
       .then(function(data){
         if (!isValidHomepage(data)){
@@ -1609,7 +1594,6 @@
       });
   }
 
-  // ✅ Desktop refresh: clear cache + reload
   function hardRefresh(){
     try{ localStorage.removeItem(HOME_CACHE_KEY); }catch(e){}
     homepageData = null;
@@ -1617,7 +1601,6 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // ✅ Search (works on both desktop + mobile sheet)
   function doSearch(query){
     query = (query || "").toString().trim().toLowerCase();
     var resultsEl = document.getElementById("mobile-search-results");
@@ -1657,7 +1640,6 @@
     resultsEl.innerHTML = html;
   }
 
-  // ✅ Bottom sheet helpers (mobile)
   function openSheet(mode){
     var overlay = document.getElementById("sheet-overlay");
     var title = document.getElementById("sheet-title");
@@ -1671,7 +1653,6 @@
       searchBox.style.display = "block";
       settingsBox.style.display = "none";
 
-      // reset search UI
       var input = document.getElementById("mobile-search-input");
       var results = document.getElementById("mobile-search-results");
       if (results) results.innerHTML = '<div class="row">Type to search headlines.</div>';
@@ -1696,7 +1677,6 @@
     overlay.setAttribute("aria-hidden", "true");
   }
 
-  // ✅ Minimal auth UI behavior (ONLY Sign in + My Account + email + logout)
   function getToken(){
     try { return localStorage.getItem(ACCESS_KEY) || ""; } catch(e){ return ""; }
   }
@@ -1715,7 +1695,6 @@
     var btnAccount = document.getElementById("btn-account");
     var emailEl = document.getElementById("account-email");
 
-    // also sheet buttons
     var sheetSignin = document.getElementById("btn-sheet-signin");
     var sheetAccount = document.getElementById("btn-sheet-account");
 
@@ -1748,19 +1727,18 @@
     var btnClose = document.getElementById("account-close");
     var overlay = document.getElementById("account-modal");
 
-    // sheet auth
     var sheetSignin = document.getElementById("btn-sheet-signin");
     var sheetAccount = document.getElementById("btn-sheet-account");
 
-    // Sign in button: send user to your login page
+    // ✅ FIX: send user to the real login page in /auth/
     if (btnSignin){
       btnSignin.addEventListener("click", function(){
-        window.location.href = "/login.html";
+        window.location.href = basePath() + "/auth/login.html";
       });
     }
     if (sheetSignin){
       sheetSignin.addEventListener("click", function(){
-        window.location.href = "/login.html";
+        window.location.href = basePath() + "/auth/login.html";
       });
     }
 
@@ -1787,14 +1765,12 @@
 
     if (btnClose) btnClose.addEventListener("click", closeAccountModal);
 
-    // close when clicking outside modal
     if (overlay){
       overlay.addEventListener("click", function(e){
         if (e.target === overlay) closeAccountModal();
       });
     }
 
-    // close on ESC
     window.addEventListener("keydown", function(e){
       if (e.key === "Escape") closeAccountModal();
     });
@@ -1802,7 +1778,6 @@
     refreshAuthUI();
   }
 
-  // ✅ Hamburger dropdown logic
   function setupMenu(){
     var burger = document.getElementById("hamburger");
     var menu = document.getElementById("menu");
@@ -1828,23 +1803,19 @@
       toggleMenu();
     });
 
-    // Close when clicking anywhere else
     document.addEventListener("click", function(){
       closeMenu();
     });
 
-    // Prevent click inside menu from closing before navigation
     if (menu) menu.addEventListener("click", function(e){
       e.stopPropagation();
     });
 
-    // Close on ESC
     window.addEventListener("keydown", function(e){
       if (e.key === "Escape") closeMenu();
     });
   }
 
-  // ✅ Desktop buttons (Search + Refresh)
   function setupDesktopActions(){
     var btnSearch = document.getElementById("btn-desktop-search");
     var btnRefresh = document.getElementById("btn-desktop-refresh");
@@ -1857,12 +1828,10 @@
 
     if (btnSearch){
       btnSearch.addEventListener("click", function(){
-        // simple prompt search on desktop
         var q = window.prompt("Search headlines:");
         if (q === null) return;
         q = String(q || "").trim();
         if (!q) return;
-        // open the first matching result in same tab if exists
         if (!homepageData || !homepageData.all) return;
         var all = homepageData.all || [];
         var ql = q.toLowerCase();
@@ -1879,7 +1848,6 @@
     }
   }
 
-  // ✅ Mobile tabs + bottom sheet
   function setupMobileTabs(){
     var tabHome = document.getElementById("tab-home");
     var tabRefresh = document.getElementById("tab-refresh");
@@ -1925,7 +1893,6 @@
       });
     }
 
-    // sheet close
     var sheetClose = document.getElementById("sheet-close");
     var sheetOverlay = document.getElementById("sheet-overlay");
     if (sheetClose) sheetClose.addEventListener("click", closeSheet);
@@ -1935,7 +1902,6 @@
       });
     }
 
-    // mobile search input typing
     var input = document.getElementById("mobile-search-input");
     if (input){
       input.addEventListener("input", function(){
@@ -1948,7 +1914,6 @@
       });
     }
 
-    // close on ESC
     window.addEventListener("keydown", function(e){
       if (e.key === "Escape") closeSheet();
     });
@@ -1962,7 +1927,6 @@
 })();
 </script>
 
-<!-- Ads at bottom so content paints first -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5368831813847678"
      crossorigin="anonymous"></script>
 
