@@ -1,1 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Sign in • Viral News</title>
+
+<style>
+  :root{
+    --bg:#0a1d3f;
+    --bg2:#081737;
+    --panel:#0f264f;
+    --line:#334a7a;
+    --text:#ffffff;
+    --muted:#cfd8ea;
+    --accent:#ffcc00;
+    --danger:#ff6b6b;
+    --radius: 12px;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+  }
+  .card{
+    width: min(420px, 100%);
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom: 10px;
+  }
+  .brand{
+    font-weight: 900;
+    letter-spacing:.7px;
+  }
+  .home-link{
+    color: var(--accent);
+    text-decoration:none;
+    font-weight: 800;
+    font-size: 13px;
+  }
+  h1{
+    margin: 10px 0 8px;
+    font-size: 20px;
+  }
+  .tabs{
+    display:flex;
+    gap: 10px;
+    margin: 12px 0 12px;
+  }
+  .tab{
+    flex:1;
+    padding: 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04);
+    color:#fff;
+    font-weight: 900;
+    cursor:pointer;
+  }
+  .tab.active{
+    background: rgba(255,204,0,.16);
+    border-color: rgba(255,204,0,.30);
+    color: var(--accent);
+  }
+  .field{
+    margin-bottom: 10px;
+  }
+  label{
+    display:block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 800;
+  }
+  input{
+    width:100%;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04);
+    color:#fff;
+    outline:none;
+  }
+  input:focus{
+    border-color: rgba(255,204,0,.35);
+  }
+  .btn{
+    width:100%;
+    margin-top: 8px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--accent);
+    color:#071227;
+    font-weight: 900;
+    cursor:pointer;
+  }
+  .btn:disabled{ opacity:.6; cursor:not-allowed; }
+  .btn2{
+    width:100%;
+    margin-top: 10px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.04);
+    color:#fff;
+    font-weight: 900;
+    cursor:pointer;
+  }
+  .hint{
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .error{
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background: #331a1a;
+    border: 1px solid var(--danger);
+    color:#ffd6d6;
+    font-size: 12px;
+    display:none;
+    white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="top">
+    <div class="brand">VIRAL NEWS</div>
+    <a class="home-link" href="/">← Back</a>
+  </div>
+
+  <h1 id="title">Sign in</h1>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-login" type="button">Sign in</button>
+    <button class="tab" id="tab-signup" type="button">Sign up</button>
+  </div>
+
+  <form id="form">
+    <div class="field" id="name-wrap" style="display:none;">
+      <label for="name">Name</label>
+      <input id="name" type="text" placeholder="Your name" autocomplete="name" />
+    </div>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+    </div>
+
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+    </div>
+
+    <button class="btn" id="submit" type="submit">Sign in</button>
+  </form>
+
+  <button class="btn2" id="googleBtn" type="button">Continue with Google</button>
+
+  <div class="hint">
+    If you already signed in before, you’ll go to <b>My Account</b>.
+  </div>
+
+  <div class="error" id="errorBox"></div>
+</div>
+
+<script src="./auth.js"></script>
+<script>
+(function(){
+  var mode = "login";
+  var tabLogin = document.getElementById("tab-login");
+  var tabSignup = document.getElementById("tab-signup");
+  var title = document.getElementById("title");
+  var nameWrap = document.getElementById("name-wrap");
+  var nameEl = document.getElementById("name");
+  var emailEl = document.getElementById("email");
+  var passEl = document.getElementById("password");
+  var submitBtn = document.getElementById("submit");
+  var form = document.getElementById("form");
+  var errorBox = document.getElementById("errorBox");
+  var googleBtn = document.getElementById("googleBtn");
+
+  function setMode(m){
+    mode = m;
+    errorBox.style.display = "none";
+    if (m === "login"){
+      tabLogin.classList.add("active");
+      tabSignup.classList.remove("active");
+      title.textContent = "Sign in";
+      submitBtn.textContent = "Sign in";
+      nameWrap.style.display = "none";
+      passEl.autocomplete = "current-password";
+    } else {
+      tabSignup.classList.add("active");
+      tabLogin.classList.remove("active");
+      title.textContent = "Sign up";
+      submitBtn.textContent = "Create account";
+      nameWrap.style.display = "block";
+      passEl.autocomplete = "new-password";
+    }
+  }
+
+  tabLogin.addEventListener("click", function(){ setMode("login"); });
+  tabSignup.addEventListener("click", function(){ setMode("signup"); });
+
+  function showError(msg){
+    errorBox.textContent = msg;
+    errorBox.style.display = "block";
+  }
+
+  async function redirectIfAlreadyLoggedIn(){
+    var u = await window.VNAuth.me();
+    if (u && u.email){
+      window.location.href = "/auth/account.html";
+    }
+  }
+
+  form.addEventListener("submit", async function(e){
+    e.preventDefault();
+    errorBox.style.display = "none";
+    submitBtn.disabled = true;
+
+    try{
+      var email = (emailEl.value || "").trim();
+      var password = (passEl.value || "").trim();
+      var name = (nameEl.value || "").trim();
+
+      if (!email || !password) throw new Error("Please enter email and password.");
+
+      if (mode === "signup"){
+        if (!name) throw new Error("Please enter your name.");
+        await window.VNAuth.signup(email, password, name);
+        await window.VNAuth.login(email, password);
+      } else {
+        await window.VNAuth.login(email, password);
+      }
+
+      window.location.href = "/auth/account.html";
+    }catch(err){
+      showError(String(err && err.message ? err.message : err));
+    }finally{
+      submitBtn.disabled = false;
+    }
+  });
+
+  // ✅ Google button (placeholder)
+  googleBtn.addEventListener("click", function(){
+    // This depends on your backend endpoints:
+    // Usually you redirect to something like:
+    // window.location.href = VNAuth.API_BASE + "/auth/google/login";
+    // For now, show message so you can confirm the button works.
+    alert("Google Sign-In: backend endpoint not linked yet.");
+  });
+
+  // On load: if already logged in, go to account
+  redirectIfAlreadyLoggedIn();
+})();
+</script>
+</body>
+</html>
 
