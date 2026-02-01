@@ -289,6 +289,10 @@ li.headline-item {
     return (s || "").toString().replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
   }
 
+  function escapeRegExp(s){
+    return (s || "").toString().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
   // 14m / 3h / 2d
   function formatTime(published_at) {
     const pubDate = new Date(published_at);
@@ -403,6 +407,47 @@ li.headline-item {
     return head.indexOf("<img") !== -1;
   }
 
+  // ✅ FIX: remove junk markers + injected blocks that break layout
+  function cleanRawContent(raw, titleText){
+    let s = String(raw || "");
+
+    // 1) Remove code-fence / junk markers like ```html, ```, """html (common AI output)
+    s = s.replace(/^\s*```+\s*html\s*/i, "");
+    s = s.replace(/^\s*```+\s*/i, "");
+    s = s.replace(/^\s*"""\s*html\s*/i, "");
+    s = s.replace(/^\s*"""\s*/i, "");
+    s = s.replace(/\n\s*```+\s*$/g, "\n");
+    s = s.replace(/\n\s*"""\s*$/g, "\n");
+    s = s.replace(/^\s*["'`]{2,}\s*html\s*/i, ""); // catches "" html / `` html etc at top
+    s = s.replace(/^\s*["'`]{2,}\s*/i, "");
+
+    // 2) Remove broken "Photos" placeholders (shows image icon + 'Photos')
+    // - <img src="Photos" ...> or alt="Photos"
+    // - markdown-like remnants if they exist
+    s = s.replace(/!\[\s*photos\s*\]\([^)]*\)/ig, "");
+    s = s.replace(/<img\b[^>]*\balt\s*=\s*["']\s*photos\s*["'][^>]*>/ig, "");
+    s = s.replace(/<img\b[^>]*\bsrc\s*=\s*["']\s*photos\s*["'][^>]*>/ig, "");
+    s = s.replace(/<img\b[^>]*\bsrc\s*=\s*["']\s*photos\/?[^"']*["'][^>]*>/ig, "");
+
+    // 3) Remove injected "hero card" blocks inside content (the dark-blue block in your screenshot)
+    // We ONLY do this if it appears near the top and contains a label like "Breaking:" + the article title.
+    const head = s.slice(0, 6000);
+    const t = stripHtml(titleText || "");
+    const tShort = t ? t.slice(0, 90) : "";
+    const titleNeedle = tShort ? new RegExp(escapeRegExp(tShort), "i") : null;
+
+    if (/(breaking|trending|top headlines|world|politics|technology|sports)\s*:/i.test(head) && titleNeedle && titleNeedle.test(head)) {
+      // remove the first big container that includes the label + title
+      const reBlock = /<(div|section|article)\b[^>]*>[\s\S]*?(breaking|trending|top headlines|world|politics|technology|sports)\s*:[\s\S]*?<\/(div|section|article)>/i;
+      const m = head.match(reBlock);
+      if (m && m[0] && m[0].length > 120) {
+        s = s.replace(m[0], "");
+      }
+    }
+
+    return s.trim();
+  }
+
   function normalizeContent(raw) {
     if (!raw) return "";
     let s = String(raw);
@@ -482,6 +527,9 @@ li.headline-item {
 
     let rawContent = a.content || "";
 
+    // ✅ FIX: remove junk markers + injected blocks before image extraction
+    rawContent = cleanRawContent(rawContent, a.title);
+
     // Top image selection
     let topImg = "";
     if (contentHasImgNearTop(rawContent)) {
@@ -490,6 +538,9 @@ li.headline-item {
     } else if (a.image_url && String(a.image_url).trim()) {
       topImg = String(a.image_url).trim();
     }
+
+    // ✅ Also clean again after removing first img (some sources put Photos placeholder after the first img)
+    rawContent = cleanRawContent(rawContent, a.title);
 
     const pretty = normalizeContent(rawContent);
 
