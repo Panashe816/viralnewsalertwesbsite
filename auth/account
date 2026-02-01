@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>My Account • Viral News</title>
+
+<style>
+  :root{
+    --bg:#0a1d3f;
+    --bg2:#081737;
+    --panel:#0f264f;
+    --text:#ffffff;
+    --muted:#cfd8ea;
+    --accent:#ffcc00;
+    --danger:#ff6b6b;
+    --radius: 12px;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+  }
+  .card{
+    width: min(420px, 100%);
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom: 10px;
+  }
+  .brand{
+    font-weight: 900;
+    letter-spacing:.7px;
+  }
+  .home-link{
+    color: var(--accent);
+    text-decoration:none;
+    font-weight: 800;
+    font-size: 13px;
+  }
+  h1{
+    margin: 10px 0 8px;
+    font-size: 20px;
+  }
+  .row{
+    margin-top: 10px;
+    padding: 12px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 12px;
+  }
+  .label{
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .value{
+    font-weight: 900;
+    word-break: break-word;
+  }
+  .btn{
+    width:100%;
+    margin-top: 12px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: none;
+    background: var(--danger);
+    color:#2b0c0c;
+    font-weight: 900;
+    cursor:pointer;
+  }
+  .error{
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background: #331a1a;
+    border: 1px solid var(--danger);
+    color:#ffd6d6;
+    font-size: 12px;
+    display:none;
+    white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="top">
+    <div class="brand">VIRAL NEWS</div>
+    <a class="home-link" href="/">← Back</a>
+  </div>
+
+  <h1>My Account</h1>
+
+  <div class="row">
+    <div class="label">Email</div>
+    <div class="value" id="email">Loading…</div>
+  </div>
+
+  <button class="btn" id="logoutBtn" type="button">Logout</button>
+
+  <div class="error" id="errorBox"></div>
+</div>
+
+<script src="./auth.js"></script>
+<script>
+(function(){
+  var emailEl = document.getElementById("email");
+  var logoutBtn = document.getElementById("logoutBtn");
+  var errorBox = document.getElementById("errorBox");
+
+  function showError(msg){
+    errorBox.textContent = msg;
+    errorBox.style.display = "block";
+  }
+
+  async function loadMe(){
+    var u = await window.VNAuth.me();
+    if (!u || !u.email){
+      // Not logged in
+      window.location.href = "/auth/login.html";
+      return;
+    }
+    emailEl.textContent = u.email;
+  }
+
+  logoutBtn.addEventListener("click", async function(){
+    try{
+      await window.VNAuth.logout();
+      window.location.href = "/auth/login.html";
+    }catch(err){
+      showError(String(err && err.message ? err.message : err));
+    }
+  });
+
+  loadMe().catch(function(e){
+    showError(String(e && e.message ? e.message : e));
+  });
+})();
+</script>
+
+</body>
+</html>
