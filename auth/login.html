@@ -183,6 +183,10 @@
   <div class="error" id="errorBox"></div>
 </div>
 
+<!-- ✅ Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+
 <script src="./auth.js"></script>
 <script>
 (function(){
@@ -198,6 +202,8 @@
   var form = document.getElementById("form");
   var errorBox = document.getElementById("errorBox");
   var googleBtn = document.getElementById("googleBtn");
+
+  function bp(){ return (window.VNAuth && window.VNAuth.basePath) ? window.VNAuth.basePath() : ""; }
 
   function setMode(m){
     mode = m;
@@ -230,7 +236,18 @@
   async function redirectIfAlreadyLoggedIn(){
     var u = await window.VNAuth.me();
     if (u && u.email){
-      window.location.href = "/auth/account.html";
+      window.location.href = bp() + "/auth/account.html";
+    }
+  }
+
+  async function handleGoogleRedirectIfAny(){
+    try{
+      var u = await window.VNAuth.handleRedirectResult();
+      if (u && u.email){
+        window.location.href = bp() + "/auth/account.html";
+      }
+    }catch(e){
+      showError(String(e && e.message ? e.message : e));
     }
   }
 
@@ -249,12 +266,13 @@
       if (mode === "signup"){
         if (!name) throw new Error("Please enter your name.");
         await window.VNAuth.signup(email, password, name);
-        await window.VNAuth.login(email, password);
+        // Firebase automatically logs in after signup, but keeping flow stable:
+        await window.VNAuth.login(email, password).catch(function(){});
       } else {
         await window.VNAuth.login(email, password);
       }
 
-      window.location.href = "/auth/account.html";
+      window.location.href = bp() + "/auth/account.html";
     }catch(err){
       showError(String(err && err.message ? err.message : err));
     }finally{
@@ -262,19 +280,30 @@
     }
   });
 
-  // ✅ Google button (placeholder)
-  googleBtn.addEventListener("click", function(){
-    // This depends on your backend endpoints:
-    // Usually you redirect to something like:
-    // window.location.href = VNAuth.API_BASE + "/auth/google/login";
-    // For now, show message so you can confirm the button works.
-    alert("Google Sign-In: backend endpoint not linked yet.");
+  googleBtn.addEventListener("click", async function(){
+    errorBox.style.display = "none";
+    googleBtn.disabled = true;
+
+    try{
+      var u = await window.VNAuth.google();
+      // If popup worked, u will exist. If redirect fallback triggered, page will redirect.
+      if (u && u.email){
+        window.location.href = bp() + "/auth/account.html";
+      }
+    }catch(err){
+      showError(String(err && err.message ? err.message : err));
+    }finally{
+      googleBtn.disabled = false;
+    }
   });
 
-  // On load: if already logged in, go to account
-  redirectIfAlreadyLoggedIn();
+  // On load: handle redirect result first, then check current session
+  handleGoogleRedirectIfAny().then(function(){
+    return redirectIfAlreadyLoggedIn();
+  }).catch(function(e){
+    showError(String(e && e.message ? e.message : e));
+  });
 })();
 </script>
 </body>
 </html>
-
