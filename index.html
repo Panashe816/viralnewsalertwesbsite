@@ -978,10 +978,15 @@
     return s || "story";
   }
 
+  // ✅ FIX: Homepage must open the real viewer page (articles.html?id=123)
+  // Works on both custom domain + GitHub Pages project path.
+  function basePath(){
+    var p = window.location.pathname || "";
+    return (p.indexOf("/viralnewsalertwesbsite/") !== -1) ? "/viralnewsalertwesbsite" : "";
+  }
+
   function linkToArticle(a){
-    var cat = slugify(a.category || "general");
-    var slug = slugify(a.title || "story");
-    return "/news/" + cat + "/" + slug + "-" + encodeURIComponent(a.id) + ".html";
+    return basePath() + "/articles.html?id=" + encodeURIComponent(a.id);
   }
 
   function viewAllLink(href){
