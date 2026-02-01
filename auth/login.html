@@ -145,7 +145,7 @@
 <div class="card">
   <div class="top">
     <div class="brand">VIRAL NEWS</div>
-    <a class="home-link" href="/">← Back</a>
+    <a class="home-link" id="backLink" href="/">← Back</a>
   </div>
 
   <h1 id="title">Sign in</h1>
@@ -183,13 +183,19 @@
   <div class="error" id="errorBox"></div>
 </div>
 
-<!-- ✅ Firebase (compat) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-
 <script src="./auth.js"></script>
 <script>
 (function(){
+  // ✅ Make auth pages work on custom domain AND GitHub project path
+  function basePath(){
+    var p = window.location.pathname || "";
+    return (p.indexOf("/viralnewsalertwebsite/") !== -1) ? "/viralnewsalertwebsite" : "";
+  }
+
+  // Fix "Back" link
+  var backLink = document.getElementById("backLink");
+  if (backLink) backLink.href = basePath() + "/";
+
   var mode = "login";
   var tabLogin = document.getElementById("tab-login");
   var tabSignup = document.getElementById("tab-signup");
@@ -202,8 +208,6 @@
   var form = document.getElementById("form");
   var errorBox = document.getElementById("errorBox");
   var googleBtn = document.getElementById("googleBtn");
-
-  function bp(){ return (window.VNAuth && window.VNAuth.basePath) ? window.VNAuth.basePath() : ""; }
 
   function setMode(m){
     mode = m;
@@ -233,21 +237,17 @@
     errorBox.style.display = "block";
   }
 
+  function accountUrl(){
+    return basePath() + "/auth/account.html";
+  }
+  function loginUrl(){
+    return basePath() + "/auth/login.html";
+  }
+
   async function redirectIfAlreadyLoggedIn(){
     var u = await window.VNAuth.me();
     if (u && u.email){
-      window.location.href = bp() + "/auth/account.html";
-    }
-  }
-
-  async function handleGoogleRedirectIfAny(){
-    try{
-      var u = await window.VNAuth.handleRedirectResult();
-      if (u && u.email){
-        window.location.href = bp() + "/auth/account.html";
-      }
-    }catch(e){
-      showError(String(e && e.message ? e.message : e));
+      window.location.href = accountUrl();
     }
   }
 
@@ -266,13 +266,12 @@
       if (mode === "signup"){
         if (!name) throw new Error("Please enter your name.");
         await window.VNAuth.signup(email, password, name);
-        // Firebase automatically logs in after signup, but keeping flow stable:
-        await window.VNAuth.login(email, password).catch(function(){});
+        await window.VNAuth.login(email, password);
       } else {
         await window.VNAuth.login(email, password);
       }
 
-      window.location.href = bp() + "/auth/account.html";
+      window.location.href = accountUrl();
     }catch(err){
       showError(String(err && err.message ? err.message : err));
     }finally{
@@ -280,29 +279,11 @@
     }
   });
 
-  googleBtn.addEventListener("click", async function(){
-    errorBox.style.display = "none";
-    googleBtn.disabled = true;
-
-    try{
-      var u = await window.VNAuth.google();
-      // If popup worked, u will exist. If redirect fallback triggered, page will redirect.
-      if (u && u.email){
-        window.location.href = bp() + "/auth/account.html";
-      }
-    }catch(err){
-      showError(String(err && err.message ? err.message : err));
-    }finally{
-      googleBtn.disabled = false;
-    }
+  googleBtn.addEventListener("click", function(){
+    alert("Google Sign-In: backend endpoint not linked yet.");
   });
 
-  // On load: handle redirect result first, then check current session
-  handleGoogleRedirectIfAny().then(function(){
-    return redirectIfAlreadyLoggedIn();
-  }).catch(function(e){
-    showError(String(e && e.message ? e.message : e));
-  });
+  redirectIfAlreadyLoggedIn();
 })();
 </script>
 </body>
