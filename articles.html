@@ -213,7 +213,7 @@ li.headline-item {
 
 <header>
   <h1>VIRAL NEWS</h1>
-  <a href="/">← Home</a>
+  <a href="./index.html">← Home</a>
 </header>
 
 <div class="container">
@@ -234,6 +234,11 @@ li.headline-item {
   // CONFIG
   // =========================
   const API_BASE = "https://viral-news-backend-3.onrender.com";
+
+  // GitHub Pages project base path (e.g. /viralnewsalertwesbsite)
+  const BASE_PATH = window.location.pathname.includes("/viralnewsalertwesbsite/")
+    ? "/viralnewsalertwesbsite"
+    : "";
 
   const articleContainer = document.getElementById("article");
   const mostReadList = document.getElementById("most-read-list");
@@ -373,9 +378,8 @@ li.headline-item {
   }
 
   function seoUrlFor(a){
-    const cat = categorySlug(a.category || "general");
-    const slug = slugify(a.title || "story");
-    return `/news/${cat}/${slug}-${a.id}.html`;
+    // ✅ Always route to the viewer page (works on GitHub Pages)
+    return `${BASE_PATH}/articles.html?id=${encodeURIComponent(a.id)}`;
   }
 
   // =========================
