@@ -1,16 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Main site pages -->
-  <sitemap>
-    <loc>https://viralnewsalert.com/core-sitemap.xml</loc>
-    <lastmod>2026-01-19</lastmod>
-  </sitemap>
+  <url>
+    <loc>https://viralnewsalert.com/</loc>
+  </url>
 
-  <!-- Article pages generated into /news/ -->
-  <sitemap>
-    <loc>https://viralnewsalert.com/news-sitemap.xml</loc>
-    <lastmod>2026-01-19</lastmod>
-  </sitemap>
+  <url>
+    <loc>https://viralnewsalert.com/category/top-headlines.html</loc>
+  </url>
+  <url>
+    <loc>https://viralnewsalert.com/category/breaking.html</loc>
+  </url>
+  <url>
+    <loc>https://viralnewsalert.com/category/trending.html</loc>
+  </url>
+  <url>
+    <loc>https://viralnewsalert.com/category/general.html</loc>
+  </url>
+  <url>
+    <loc>https://viralnewsalert.com/category/world.html</loc>
+  </url>
+  <url>
+    <loc>https://viralnewsalert.com/category/politics.html</loc>
+  </url>
+  <url>
+    <loc>https://viralnewsalert.com/category/technology.html</loc>
+  </url>
+  <url>
+    <loc>https://viralnewsalert.com/category/sports.html</loc>
+  </url>
+  <url>
+    <loc>https://viralnewsalert.com/category/health-fitness.html</loc>
+  </url>
+  <url>
+    <loc>https://viralnewsalert.com/category/entertainment.html</loc>
+  </url>
 
-</sitemapindex>
+</urlset>
