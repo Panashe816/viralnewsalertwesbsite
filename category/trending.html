@@ -54,7 +54,7 @@
 async function loadCategory() {
   try {
     const res = await fetch(
-      "https://viral-news-backend-3.onrender.com/articles/?category=trending"
+      "https://viral-news-backend-2.onrender.com/articles/?category=trending"
     );
     const articles = await res.json();
     const container = document.getElementById("category-articles");
