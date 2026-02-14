@@ -52,7 +52,7 @@
 <script>
 async function loadCategory() {
   try {
-    const res = await fetch("https://viral-news-backend-3.onrender.com/articles/?category=breaking");
+    const res = await fetch("https://viral-news-backend-2.onrender.com/articles/?category=breaking");
     const articles = await res.json();
     const container = document.getElementById("category-articles");
 
