@@ -228,6 +228,9 @@ li.headline-item {
 
 </div>
 
+<!-- ✅ Ads toolbox (you already created this file at js/ads.js) -->
+<script src="js/ads.js"></script>
+
 <script>
 (function(){
   // =========================
@@ -594,6 +597,33 @@ li.headline-item {
 
       <div class="article-content">${pretty}</div>
     `;
+
+    // =========================
+    // ✅ ADS FIX: insert native ads AFTER content is rendered
+    // Ad #1 after paragraph 1
+    // Ad #2 after paragraph 5
+    // =========================
+    if (window.Ads && typeof window.Ads.runWhenReady === "function") {
+      window.Ads.runWhenReady({
+        loading: false,
+        error: false,
+        minItems: 1,
+        minItemsRequired: 1,
+        placements: () => {
+          window.Ads.insertAdAfterParagraph({
+            articleBodySelector: ".article-content",
+            paragraphNumber: 1,
+            minParagraphsRequired: 6
+          });
+
+          window.Ads.insertAdAfterParagraph({
+            articleBodySelector: ".article-content",
+            paragraphNumber: 5,
+            minParagraphsRequired: 6
+          });
+        }
+      });
+    }
   }
 
   // =========================
@@ -775,4 +805,3 @@ li.headline-item {
 
 </body>
 </html>
-
