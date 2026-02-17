@@ -194,6 +194,9 @@
   </section>
 </main>
 
+<!-- ✅ Ads helper (native placements) -->
+<script src="/js/ads.js"></script>
+
 <script>
 (function () {
   const API_BASE = "https://viral-news-backend-2.onrender.com";
@@ -268,6 +271,30 @@
           </article>
         `;
       }).join("");
+
+      // =========================
+      // ✅ ADS: Category native placement (AFTER content is rendered)
+      // Insert 1 ad after the 4th headline row
+      // =========================
+      try {
+        if (window.Ads && typeof window.Ads.runWhenReady === "function") {
+          requestAnimationFrame(function () {
+            window.Ads.runWhenReady({
+              loading: false,
+              error: false,
+              minItems: top.length,
+              minItemsRequired: 6,
+              placements: function () {
+                window.Ads.insertAdAfterNthCard({
+                  containerSelector: "#category-articles",
+                  cardSelector: ".headline-row",
+                  n: 4
+                });
+              }
+            });
+          });
+        }
+      } catch(e) {}
 
     } catch (e) {
       console.error(e);
