@@ -791,6 +791,8 @@
     .mobile-tabbar{ display:block; }
     body{ padding-bottom: 70px; }
   }
+<script src="js/ads.js"></script>
+
 </style>
 </head>
 
@@ -1560,6 +1562,42 @@
 
     renderMoreBatch();
     installInfiniteScroll();
+
+    // =========================
+    // ✅ ADS: Homepage native placements (AFTER content is rendered)
+    // 1) More for you: after item #4
+    // 2) Trending rail: after card #3
+    // =========================
+    try {
+      if (window.Ads && typeof window.Ads.runWhenReady === "function") {
+        // Use requestAnimationFrame so DOM is fully painted first
+        requestAnimationFrame(function () {
+          var total = (homepageData && homepageData.all && homepageData.all.length) ? homepageData.all.length : 0;
+
+          window.Ads.runWhenReady({
+            loading: false,
+            error: false,
+            minItems: total,
+            minItemsRequired: 3,
+            placements: function () {
+              // A) More for you: after the 4th item
+              window.Ads.insertAdAfterNthCard({
+                containerSelector: ".more-list",
+                cardSelector: ".more-item",
+                n: 4
+              });
+
+              // B) Trending: after the 3rd rail card (first .rail is Trending on your page order)
+              window.Ads.insertAdAfterNthCard({
+                containerSelector: ".rail",
+                cardSelector: ".rail-card",
+                n: 3
+              });
+            }
+          });
+        });
+      }
+    } catch (e) {}
   }
 
   function loadHomepage(){
@@ -1927,4 +1965,5 @@
 
 </body>
 </html>
+
 
