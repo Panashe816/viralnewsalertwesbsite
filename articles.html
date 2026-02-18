@@ -1,59 +1,49 @@
-<script>
-// Get query parameters
-const params = new URLSearchParams(window.location.search);
-const id = params.get('id');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Article • Viral News</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,follow">
+</head>
 
-// If no id, stop everything and show clean 404
-if (!id) {
-    document.body.innerHTML = `
-        <div style="font-family: Arial, sans-serif; text-align:center; padding:80px; background:#f4f4f4;">
-            <h1 style="font-size:48px; margin-bottom:20px;">404 Not Found</h1>
-            <p style="font-size:18px; margin-bottom:30px;">
-                The article you are looking for does not exist.
-            </p>
-            <a href="/" style="
-                display:inline-block;
-                padding:10px 20px;
-                background:#081737;
-                color:white;
-                text-decoration:none;
-                border-radius:5px;
-                font-weight:bold;">
-                ← Go Back Home
-            </a>
-        </div>
-    `;
-
-    // STOP all further JavaScript execution
-    throw new Error("No article ID provided - stopping script execution.");
-}
 <body>
 
 <script>
-// 404 Handling MUST be the very first thing inside <body>
-const params = new URLSearchParams(window.location.search);
-const id = params.get('id');
+// Early 404 check BEFORE anything else runs
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
 
-if (!id) {
-    document.body.innerHTML = `
-        <div style="font-family: Arial, sans-serif; text-align:center; padding:80px;">
-            <h1 style="font-size:48px;">404 Not Found</h1>
-            <p>The article you are looking for does not exist.</p>
-            <a href="/" style="color:#081737; font-weight:bold;">
-                ← Go Back Home
-            </a>
-        </div>
-    `;
-
-    // Stop all other scripts from running
-    throw new Error("No article ID provided - stopping execution.");
-}
+    if (!id) {
+        document.write(`
+            <html>
+            <head>
+                <title>404 Not Found</title>
+                <meta name="robots" content="noindex">
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        text-align: center;
+                        padding: 80px;
+                    }
+                    h1 { font-size: 48px; }
+                    a { color: #081737; font-weight: bold; text-decoration: none; }
+                </style>
+            </head>
+            <body>
+                <h1>404 Not Found</h1>
+                <p>The article you are looking for does not exist.</p>
+                <a href="/">← Go Back Home</a>
+            </body>
+            </html>
+        `);
+        document.close();
+        throw new Error("Stop execution - No ID");
+    }
+})();
 </script>
 
-<!-- YOUR NORMAL PAGE CONTENT CONTINUES BELOW -->
-</script>
-
-<!-- Existing body content starts here -->
 <h1>Loading…</h1>
 <!-- rest of articles.html content continues below -->
 
@@ -827,6 +817,7 @@ li.headline-item {
 
 </body>
 </html>
+
 
 
 
