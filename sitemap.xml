@@ -6,4 +6,12 @@
         <loc>https://viralnewsalert.com/sitemap-static.xml</loc>
     </sitemap>
 
+    <sitemap>
+        <loc>https://viral-news-backend-2.onrender.com/sitemap-articles.xml</loc>
+    </sitemap>
+
+    <sitemap>
+        <loc>https://viral-news-backend-2.onrender.com/news-sitemap.xml</loc>
+    </sitemap>
+
 </sitemapindex>
